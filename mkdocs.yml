@@ -1,0 +1,64 @@
+dev_addr: localhost:7000
+site_name: Proces-automatisering af GNSS-beregninger
+site_description:
+site_author: Joachim Mortensen
+
+nav:
+- Forside: index.md
+
+theme:
+  name: material
+
+  language: da
+  features:
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.sections
+  - navigation.expand
+  - toc.integrate
+  - navigation.top
+
+  palette:
+    primary: light green
+    accent: light green
+
+plugins:
+- search
+
+markdown_extensions:
+- admonition
+- admonition
+- attr_list
+- footnotes
+- toc:
+    permalink: true
+
+- pymdownx.arithmatex:
+    generic: true
+
+- pymdownx.betterem:
+    smart_enable: all
+
+# Make admonitions collapsable with ??? instead of !!!
+- pymdownx.details
+
+- pymdownx.emoji:
+    emoji_index: !!python/name:materialx.emoji.twemoji
+    emoji_generator: !!python/name:materialx.emoji.to_svg
+
+- pymdownx.highlight
+- pymdownx.inlinehilite
+
+- pymdownx.keys
+
+- pymdownx.superfences:
+    custom_fences:
+    - name: mermaid
+      class: mermaid
+      format: !!python/name:pymdownx.superfences.fence_code_format
+- pymdownx.tabbed:
+    alternate_style: true
+- pymdownx.tasklist:
+    custom_checkbox: true
+- pymdownx.tilde
+- pymdownx.snippets

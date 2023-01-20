@@ -1,0 +1,10 @@
+name: ab-dev
+channels:
+- conda-forge
+dependencies:
+- python=3.11
+- pytest
+- coverage
+- mypy
+
+- mkdocs-material
