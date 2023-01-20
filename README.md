@@ -1,2 +1,1 @@
-# AutoBernese
-Automatisering i forbindelse med GNSS-beregning i Bernese
+# [Proces-automatisering af GNSS-beregninger](https://github.com/SDFIDK/AutoBernese)
