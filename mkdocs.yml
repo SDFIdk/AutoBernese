@@ -1,29 +1,50 @@
 dev_addr: localhost:7000
-site_name: Proces-automatisering af GNSS-beregninger
+site_name: GNSS-Process Automation with Bernese GNSS Software
 site_description:
 site_author: Joachim Mortensen
 
+repo_name: AutoBernese
+repo_url: https://github.com/SDFIdk/AutoBernese
+
 nav:
-- Forside: index.md
+- Home: index.md
+- Bernese setup: bernese-setup.md
+- System overview: system-overview.md
+- Developer: developer.md
+# - Background:
+#   - GNSS processing: gnss-processing.md
+#   - Processing tools: processing-tools.md
+# - Setup:
+#   - Prerequisites: prerequisites.md
+#   - Installation: installation.md
+# - External tools:
+#   - FIRE: fire.md
+# - Developer:
+#   - Documentation: documentation.md # Herunder structurizr og mkdocs
+#   - Code: code.md
 
 theme:
   name: material
 
-  language: da
+  language: en
   features:
-  - navigation.tabs
-  - navigation.tabs.sticky
+  # - navigation.tabs
+  # - navigation.tabs.sticky
   - navigation.sections
   - navigation.expand
-  - toc.integrate
+  # - toc.integrate
   - navigation.top
 
-  palette:
-    primary: light green
-    accent: light green
+#   palette:
+#     primary: light green
+#     accent: light green
+
+extra_css:
+- stylesheets/extra.css
 
 plugins:
 - search
+- glightbox
 
 markdown_extensions:
 - admonition

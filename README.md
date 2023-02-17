@@ -1,1 +1,3 @@
-# [Proces-automatisering af GNSS-beregninger](https://github.com/SDFIDK/AutoBernese)
+# [GNSS-Process Automation with Bernese GNSS Software](https://github.com/SDFIdk/AutoBernese)
+
+-- By the SDFI geodetic software developers
