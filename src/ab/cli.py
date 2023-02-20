@@ -22,13 +22,24 @@ from rich import print
 
 from ab import (
     bsw,
+    configuration,
     data,
     organiser,
 )
 
 
 @click.group
-def main() -> None: ...
+def main() -> None:
+    ...
+
+
+@main.command
+def config(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+    """
+    Show configuration
+
+    """
+    print(configuration.load(*args, **kwargs))
 
 
 @main.command
