@@ -3,6 +3,10 @@ Module for downloading source data
 
 """
 from datetime import date, timedelta
+from ftplib import FTP, FTP_TLS
+from pathlib import Path
+
+import requests
 
 
 def calc_gps_week(tocalc: date) -> int:
@@ -11,10 +15,6 @@ def calc_gps_week(tocalc: date) -> int:
     epoch_monday = gps_epoch - timedelta(gps_epoch.weekday())
     today_monday = tocalc - timedelta(tocalc.weekday())
     return int((today_monday - epoch_monday).days / 7)
-
-import requests
-from ftplib import FTP, FTP_TLS
-from pathlib import Path
 
 
 def download_http(domain: str, remotepath: Path, localpath: Path) -> None:
