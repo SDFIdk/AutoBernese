@@ -6,12 +6,17 @@ workspace "GNSS processing with AutoBernese" {
 
         enterprise "Agency for Data Supply and Infrastructure" {
             user = person "Geodesist"
+            # cron = person "System user | CRON job"
 
             auto_bernese = softwareSystem "AutoBernese" {
                 cli = container "CLI application" {}
                 download_api = container "Download API" {
                     downloader = component "Downloader" "Downloads specified files from external data sources." "FTP/HTTP"
                     download_controller = component "Download controller" "Specifies source files and local destinations."
+                }
+                sitelog_to_sta = container "Sitelog to station file" {
+                    gensta = component "Legacy converter" "Converts sitelog to station file." "Perl"
+                    gensta_runner = component "gensta runner" "Creates subprocess with a call to the Perl program"
                 }
                 qaqc = container "Kvalitetssikring [QA] og kvalitetskontrol [QC]" {}
                 organiser = container "Input organiser" {}
@@ -41,12 +46,14 @@ workspace "GNSS processing with AutoBernese" {
 
         user -> cli "Create campaign, activate campaign"
         user -> cli "Get data from external sources"
+        user -> cli "Create STA file from updated sitelog"
         user -> cli "Run PCF file for campaign"
         user -> cli "Export end products"
         user -> cli "Upload results to FIRE Dataase"
         user -> file_server "Get and move end products to own PC"
 
         cli -> download_api "Get data from sources in campaign.yaml"
+        cli -> sitelog_to_sta "Produce/update STA file from sitelog."
 
         cli -> qaqc "Check data integrity, accessibility, etc."
         cli -> qaqc "Perform quality assurance/control on end products"
@@ -69,7 +76,7 @@ workspace "GNSS processing with AutoBernese" {
         # Relationships to/from components
         # TBW
         # Here will come the interactions between the different parts on the component level.
-
+        gensta_runner -> gensta "Run converter for a given sitelog."
     }
 
     views {
@@ -92,6 +99,11 @@ workspace "GNSS processing with AutoBernese" {
         }
 
         component download_api "Data" {
+            include *
+            autoLayout
+        }
+
+        component sitelog_to_sta "Sitelog" {
             include *
             autoLayout
         }
