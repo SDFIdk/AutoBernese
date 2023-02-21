@@ -13,7 +13,8 @@ def download_http(domain: str, path: str, localpath: str) -> None:
     Allow following redirects for simplicity."""
     r = requests.get(domain + path, allow_redirects=True)
     path = Path(localpath)
-    open(localpath + path.name, "wb").write(r.content)
+    with open(localpath + path.name, "wb") as f:
+        f.write(r.content)
 
 
 def download_ftp(scheme: str, domain: str, remotepath: str, localpath: str) -> None:
