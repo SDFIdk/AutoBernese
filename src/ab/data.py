@@ -2,18 +2,17 @@
 Module for downloading source data
 
 """
-import requests
+from datetime import date
 from ftplib import FTP, FTP_TLS
 from pathlib import Path
-from datetime import date, timedelta
+
+import requests
 
 
 def calc_gps_week(tocalc: date) -> int:
     """Calculates the GPS week number for a given date"""
     gps_epoch = date(1980, 1, 6)  # first GPS week
-    epoch_monday = gps_epoch - timedelta(gps_epoch.weekday())
-    today_monday = tocalc - timedelta(tocalc.weekday())
-    return int((today_monday - epoch_monday).days // 7)
+    return (tocalc - gps_epoch).days // 7
 
 
 def download_http(domain: str, remotepath: Path, localpath: Path) -> None:
