@@ -12,30 +12,34 @@
     for BSW and the automation program.
 
 
-## Production | PROD
+## Environments
 
-| What                       | Value                       |
-| -------------------------- | --------------------------- |
-| Installation directory     | `/home/bin/BERN54`          |
-| DATAPOOL                   | `/home/data/bsw/DATAPOOL`   |
-| CAMPAIGN                   | `/home/data/bsw/CAMPAIGN54` |
-| SAVEDISK                   | `/home/data/bsw/SAVEDISK`   |
-| User environment           | `$HOME/bsw/user`            |
-| Temporary user environment | `$HOME/bsw/temp`            |
+BSW is installed in three different locations used for different purposes
+focusing either on maintaining a durable production-ready [`prod`] installation
+and more brittle environments for trying out new things with the automation
+program [`dev`] and testing them [`test`], before they are made available in the
+production environment.
+
+| `[BSW_ENV]` | Description | Function                              | Updated/rebuilt                    |
+| ----------- | ----------- | ------------------------------------- | ---------------------------------- |
+| `prod`      | Production  | Used for actual work                  | With new BSW updates               |
+| `test`      | Test        | Used for testing new features         | With new BSW updates               |
+| `dev`       | Development | Wild west environment for developers. | When need a new fresh installation |
+
+Each environment's paths are set in the following way parameterised byt the
+short-names defined for the different environments:
+
+| What                       | Value                               |
+| -------------------------- | ----------------------------------- |
+| Installation directory     | `/home/bsw/[BSW_ENV]/BERN54`        |
+| DATAPOOL                   | `/home/bsw/[BSW_ENV]/data/DATAPOOL` |
+| CAMPAIGN                   | `/home/bsw/[BSW_ENV]/CAMPAIGN54`    |
+| SAVEDISK                   | `/home/bsw/[BSW_ENV]/SAVEDISK`      |
+| User environment           | `$HOME/bsw/[BSW_ENV]/user`          |
+| Temporary user environment | `$HOME/bsw/[BSW_ENV]/temp`          |
 
 
-## Test | TEST
-
-| What                       | Value                            |
-| -------------------------- | -------------------------------- |
-| Installation directory     | `/home/bin/bsw54/test`           |
-| DATAPOOL                   | `/home/data/bsw/test/DATAPOOL`   |
-| CAMPAIGN                   | `/home/data/bsw/test/CAMPAIGN54` |
-| SAVEDISK                   | `/home/data/bsw/test/SAVEDISK`   |
-| User environment           | `$HOME/bsw/test/user`            |
-| Temporary user environment | `$HOME/bsw/test/temp`            |
-
-## Setup user environment
+## Setup BSW user environment
 
 !!! note "Deviations from the default installation"
 
@@ -54,7 +58,7 @@ On the server
 *   Set environment variables for the current shell session
 
     ```sh
-    source /home/bin/BERN54/LOADGPS.setvar
+    source /home/bsw/prod/BERN54/LOADGPS.setvar
     ```
 
 *   Run the BSW configuration tool.
