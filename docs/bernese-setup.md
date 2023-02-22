@@ -39,7 +39,17 @@ short-names defined for the different environments:
 | Temporary user environment | `$HOME/bsw/[BSW_ENV]/temp`          |
 
 
-## Setup BSW user environment
+## Setup a user environment for Bernese GNSS Software
+
+A user of BSW needs a user environment consisting of two user-specific
+directories in the path established by the environment variables set in
+`LOADGPS.setvar` script. To create a new user environment, you need to `source`
+the file, run the configuration script and select the action that creates a new
+user environment. This is demonstrated below.
+
+A normal user should only need to create a user in what we have named the
+production environment. (See previous section for details.)
+
 
 !!! note "Deviations from the default installation"
 
@@ -52,6 +62,7 @@ short-names defined for the different environments:
     | `basename($U)` | `GPSUSER52` | `GPSUSER` | `user`          |
     | `basename($T)` | `GPSTEMP`   | `GPSWORK` | `temp`          |
 
+### Steps
 
 On the server
 
