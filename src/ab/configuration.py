@@ -35,5 +35,5 @@ def load() -> Any:
     # if not ifname.is_file():
     #     raise LookupError(f'Configuration file {ifname} does not exist ...')
     # return yaml.safe_load(ifname.read_text())
-    ifname = resources.files(ab).joinpath("configuration.yaml")
+    ifname = resources.files(ab).joinpath("autobernese.yaml")
     return yaml.safe_load(ifname.read_text())
