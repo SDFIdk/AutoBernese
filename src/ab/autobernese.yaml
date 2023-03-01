@@ -5,3 +5,12 @@ logging:
   - datefmt: '%a, %d %b %Y %H:%M:%S +0000'
   - style: '%'
   - level: DEBUG
+sources:
+- name: EPN
+  url: ftp://epncb.oma.be
+
+- name: AIUB
+  url: ftp://ftp.aiub.unibe.ch
+
+- name: SDFI
+  url: ftp://ftp.sdfe.dk
