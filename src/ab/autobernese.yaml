@@ -1,2 +1,12 @@
 key: value_global
 key2: !ENV PATH
+
+sources:
+- name: EPN
+  url: ftp://epncb.oma.be
+
+- name: AIUB
+  url: ftp://ftp.aiub.unibe.ch
+
+- name: SDFI
+  url: ftp://ftp.sdfe.dk
