@@ -62,6 +62,7 @@ production environment. (See previous section for details.)
     | `basename($U)` | `GPSUSER52` | `GPSUSER` | `user`          |
     | `basename($T)` | `GPSTEMP`   | `GPSWORK` | `temp`          |
 
+
 ### Steps to create environment
 
 On the server
@@ -125,13 +126,54 @@ On the server
 Despite the warning above, the environment is now created by creating the above
 directory as well as a temporary directory.
 
-### Steps to delete an environment
+!!! info "Steps to delete an environment"
 
-If you need to delete an environment, this can be done by simply deleting the
-directory `[BSW_ENV]` corresponding to the user environment, you want to get rid
-of:
+    If you need to delete an environment, this can be done by simply deleting the
+    directory `[BSW_ENV]` corresponding to the user environment, you want to get rid
+    of:
+
+    ```
+    rm -rf ~/bsw/[BSW_ENV]
+    ```
+
+### Initial directory content for a new user environment
+
+A newly-created user environment contains to directories `temp` and `user`.
+`temp` has no initial content, whereas `user` gets copies of content from source
+directories under the main directory of the BErnese installation path. The `user
+directory` is initialised with the following content:
+
+| `user/*` | Initial content         |
+| -------- | ----------------------- |
+| `OPT`    | Copied from `$C/USER`   |
+| `OUT`    | *Empty*                 |
+| `PAN`    | Copied from `$C/SUPGUI` |
+| `PCF`    | Copied from `$C/USER`   |
+| `SCRIPT` | Copied from `$C/USER`   |
+| `WORK`   | *Empty*                 |
+
+
+## Campaign management
+
+A newly-created campaign consists of a directory with an arbitrary name and an
+entry in the campaign menu `MENU_CMP.INP` panel file inside the Bernese
+installation directory.
+
+A new campaign directory has the following basic content:
 
 ```
-cd ~
-rm -rf bsw/[BSW_ENV]
+.
+├── ATM
+├── BPE
+├── GEN
+│   ├── OBSERV_COD.SEL
+│   └── SESSIONS.SES
+├── GRD
+├── OBS
+├── ORB
+├── ORX
+├── OUT
+├── RAW
+├── SOL
+└── STA
 ```
