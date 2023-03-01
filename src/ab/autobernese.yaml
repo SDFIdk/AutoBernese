@@ -1,7 +1,7 @@
 key: value_global
 key2: !ENV PATH
 logging:
-  - filename: ab.log
+  - filename: autobernese.log
   - datefmt: '%a, %d %b %Y %H:%M:%S +0000'
   - style: '%'
   - level: DEBUG
