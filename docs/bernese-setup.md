@@ -62,7 +62,7 @@ production environment. (See previous section for details.)
     | `basename($U)` | `GPSUSER52` | `GPSUSER` | `user`          |
     | `basename($T)` | `GPSTEMP`   | `GPSWORK` | `temp`          |
 
-### Steps
+### Steps to create environment
 
 On the server
 
@@ -124,3 +124,14 @@ On the server
 
 Despite the warning above, the environment is now created by creating the above
 directory as well as a temporary directory.
+
+### Steps to delete an environment
+
+If you need to delete an environment, this can be done by simply deleting the
+directory `[BSW_ENV]` corresponding to the user environment, you want to get rid
+of:
+
+```
+cd ~
+rm -rf bsw/[BSW_ENV]
+```
