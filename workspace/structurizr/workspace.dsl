@@ -14,15 +14,15 @@ workspace "GNSS processing with AutoBernese" {
                     downloader = component "Downloader" "Downloads specified files from external data sources." "FTP/HTTP"
                     download_controller = component "Download controller" "Specifies source files and local destinations."
                 }
-                sitelog_to_sta = container "Sitelog to station file" {
-                    gensta = component "Legacy converter" "Converts sitelog to station file." "Perl"
+                preprocessor = container "Preprocess and organise input to and output from BSW" {
+                    qaqc = component "Kvalitetssikring [QA] og kvalitetskontrol [QC]" {}
+                    gensta = component "Legacy converter" "Converts sitelogs to station file." "Perl"
                     gensta_runner = component "gensta runner" "Creates subprocess with a call to the Perl program"
                 }
-                qaqc = container "Kvalitetssikring [QA] og kvalitetskontrol [QC]" {}
-                organiser = container "Input organiser" {}
                 bsw_api = container "BSW API" {
-                    bpe_interface = component "BPE interface" "Perl scripts that call the Bernese Processing Engine" "Perl 5"
+                    bpe_interface = component "BPE interface" "Perl scripts that configure and start the Bernese Processing Engine" "Perl 5"
                     bpe_runner = component "BPE runner" "Creates subprocess with a call to the BPE interface"
+                    campaign_manager = component "Create, configure and work with BSW campaigns"
                 }
                 fire_api = container "FIRE API" {
                     fire_wrapper = component "FIRE wrapper" "Creates a subprocess that runs FIRE command to read in specified results from the campaign." "MambaForge, FIRE"
@@ -53,15 +53,15 @@ workspace "GNSS processing with AutoBernese" {
         user -> file_server "Get and move end products to own PC"
 
         cli -> download_api "Get data from sources in campaign.yaml"
-        cli -> sitelog_to_sta "Produce/update STA file from sitelog."
 
         cli -> qaqc "Check data integrity, accessibility, etc."
         cli -> qaqc "Perform quality assurance/control on end products"
 
-        cli -> organiser "Rebuild general input data" ""
-        cli -> organiser "Transfer relevant input data to the campaign directory"
+        cli -> preprocessor "Rebuild general input data" ""
+        cli -> preprocessor "Transfer relevant input data to the campaign directory"
 
         cli -> bsw_api "Create new campaign of given type" "NKG, 5D, KDI, RTK service"
+        cli -> bsw_api "Convert sitelog to station file"
         cli -> bsw_api "Start BPE using campaign-specific PCF file"
 
         cli -> fire_api "Upload results to FIRE Database" ".CRD and .VEL files"
@@ -103,7 +103,7 @@ workspace "GNSS processing with AutoBernese" {
             autoLayout
         }
 
-        component sitelog_to_sta "Sitelog" {
+        component preprocessor "Preprocessor" {
             include *
             autoLayout
         }
