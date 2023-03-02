@@ -7,7 +7,7 @@ import logging
 import pathlib
 
 import ab
-import configuration
+from ab import configuration
 
 __version__ = metadata.version(ab.__name__)
 
