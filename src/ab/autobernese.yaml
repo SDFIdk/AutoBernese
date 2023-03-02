@@ -1,4 +1,4 @@
-key: !ENV PATH
+bsw_path: !ENV [C, '.']
 
 logging:
   filename: autobernese.log
