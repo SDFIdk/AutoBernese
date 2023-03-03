@@ -16,6 +16,7 @@ Command-line interface
 
 """
 from typing import Any
+import logging
 
 import click
 from rich import print
@@ -26,6 +27,8 @@ from ab import (
     data,
     organiser,
 )
+
+log = logging.getLogger(__name__)
 
 
 @click.group
@@ -40,6 +43,7 @@ def config(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
     """
     print(configuration.load(*args, **kwargs))
+    log.debug("Kan vi skrive til autobernese.log?")
 
 
 @main.command

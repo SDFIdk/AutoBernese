@@ -1,5 +1,11 @@
-key: value_global
-key2: !ENV PATH
+bsw_path: !ENV [C, '.']
+
+logging:
+  filename: autobernese.log
+  format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
+  datefmt: '%Y-%m-%d %H:%M:%S'
+  style: '%'
+  level: DEBUG
 
 sources:
 - name: EPN

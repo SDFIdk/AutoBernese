@@ -2,11 +2,10 @@
 Configuration
 
 """
+import pathlib
 from importlib import (
     resources,
-    metadata,
 )
-import pathlib
 from typing import Any
 
 import yaml
@@ -16,24 +15,15 @@ import ab
 
 yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
 
-
-# fname_autobernese = 'autobernese.yaml'
-# ifname_default = pathlib.Path.home() / fname_autobernese
-
-# ifname_candidates = (
-#     ifname_
-# )
+ifname_default = resources.files(ab).joinpath("autobernese.yaml")
 
 
-# def load(fname: str | pathlib.Path = ifname_default) -> Any:
-def load() -> Any:
+def load(fname: str | pathlib.Path = ifname_default) -> Any:
     """
     Load built-in configuration file for AutoBernese.
 
     """
-    # ifname = pathlib.Path(fname)
-    # if not ifname.is_file():
-    #     raise LookupError(f'Configuration file {ifname} does not exist ...')
-    # return yaml.safe_load(ifname.read_text())
-    ifname = resources.files(ab).joinpath("autobernese.yaml")
+    ifname = pathlib.Path(fname)
+    if not ifname.is_file():
+        raise LookupError(f"Configuration file {ifname} does not exist ...")
     return yaml.safe_load(ifname.read_text())
