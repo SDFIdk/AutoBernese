@@ -10,7 +10,7 @@ environment from the environment-dev.yml file in the root of the Git archive.
 
 ### MambaForge
 
-The [`mamba` official documentation][MAMBA-INSTALLATION] recommends installnig
+The [`mamba` official documentation][MAMBA-INSTALLATION] recommends installing
 MambaForge rather than installing the `mamba` program with `conda`.
 
 On [GitHub][MAMBA-INSTALLER] the following command for Linux/Unix installs the

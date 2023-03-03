@@ -29,7 +29,7 @@ ab download-data <TIDSPUNKT> <DATATYPE> <DATATYPE> ... <DATATYPE>
 # Oprettelse af ny station, fx opdatering STA-fil og beregning af foreløbige koordinater
 ab ny-station <STATION>
 
-# Pendant til Søren Juels NKG-scripts
+# Pendant til Søren Juuls NKG-scripts
 ab regn-kampagne <NGK|5D|KDI> --stationer ABCD,EFGH,...,ZXYZ
 
 ```
