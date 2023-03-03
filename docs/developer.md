@@ -65,6 +65,11 @@ workspace file.
     In this case, change the permissions on the `workspace.dsl` to give yourself
     write permissions for the file.
 
+### Contribution guidelines
+
+Please run `black` (provided in the development conda environment) before pushing to GitHub, or else the lint check will fail.
+
+
 ### Alternative diagramming tools:
 
 *   [Ilograph](https://www.ilograph.com/) has an online viewer, which may be used for free.
