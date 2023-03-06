@@ -10,6 +10,8 @@ from urllib.parse import urlparse
 
 import requests
 
+from ab import configuration
+
 log = logging.getLogger(__name__)
 
 
@@ -42,22 +44,26 @@ def download_ftp(scheme: str, domain: str, remotepath: Path, localpath: Path) ->
 
 def download_sources(*args: list, **kwargs: dict) -> None:
     """
-    Download the external files from the specification.
+    Download the external files from the specification in the configuration file.
     """
-    log.debug("Started downloading")
-    log.debug(str(args) + " " + str(kwargs))
-    # for location in downloadlist["sources"]:
-    #     log.debug("Downloading " + location)
-    #     parsedurl = urlparse(downloadlist["sources"]["url"])
-    #     dest = Path(downloadlist["sources"][location]["destination"])
-    #     match parsedurl.scheme:
-    #         case "http" | "https":
-    #             download_http(parsedurl.netloc, Path(parsedurl.path), localpath=dest)
-    #         case "ftp" | "ftps":
-    #             download_ftp(
-    #                 parsedurl.scheme,
-    #                 parsedurl.netloc,
-    #                 Path(parsedurl.path),
-    #                 localpath=dest,
-    #             )
-    log.debug("Finished downloading")
+    log.debug("Started downloading sources")
+    config = configuration.load()
+    i = 0
+    for location in config["sources"]:
+        log.debug("Downloading " + str(location["name"]))
+        parsedurl = urlparse(config["sources"][i]["url"])
+        # dest = Path(config["sources"][i]["destination"])
+        match parsedurl.scheme:
+            case "http" | "https":
+                pass
+                # download_http(parsedurl.netloc, Path(parsedurl.path), localpath=dest)
+            case "ftp" | "ftps":
+                pass
+                # download_ftp(
+                #     parsedurl.scheme,
+                #     parsedurl.netloc,
+                #     Path(parsedurl.path),
+                #     localpath=dest,
+                # )
+        i += 1
+    log.debug("Finished downloading sources")
