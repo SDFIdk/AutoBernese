@@ -10,9 +10,12 @@ logging:
 sources:
 - name: EPN
   url: ftp://epncb.oma.be
+  destination:
 
 - name: AIUB
   url: ftp://ftp.aiub.unibe.ch
+  destination:
 
 - name: SDFI
   url: ftp://ftp.sdfe.dk
+  destination:

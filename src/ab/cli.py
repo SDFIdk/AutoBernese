@@ -43,7 +43,7 @@ def config(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
     """
     print(configuration.load(*args, **kwargs))
-    log.debug("Kan vi skrive til autobernese.log?")
+    log.debug("Loaded config")
 
 
 @main.command
@@ -58,7 +58,7 @@ def create_campaign(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 @main.command
 def download_sources(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
     """
-    Download sources based on campaign configuration file..
+    Download sources based on campaign configuration file.
 
     """
     data.download_sources(*args, **kwargs)

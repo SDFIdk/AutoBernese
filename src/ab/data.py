@@ -5,8 +5,14 @@ Module for downloading source data
 from datetime import date
 from ftplib import FTP, FTP_TLS
 from pathlib import Path
+import logging
+from urllib.parse import urlparse
 
 import requests
+
+from ab import configuration
+
+log = logging.getLogger(__name__)
 
 
 def calc_gps_week(tocalc: date) -> int:
@@ -36,12 +42,28 @@ def download_ftp(scheme: str, domain: str, remotepath: Path, localpath: Path) ->
     ftp.quit()
 
 
-def download_sources() -> None:
-    print("Downloading A")
-    print("Downloading B")
-    print("Downloading C")
-    print("Downloading D")
-    print("Downloading .")
-    print("Downloading .")
-    print("Downloading .")
-    print("Finished")
+def download_sources(*args: list, **kwargs: dict) -> None:
+    """
+    Download the external files from the specification in the configuration file.
+    """
+    log.debug("Started downloading sources")
+    config = configuration.load()
+    i = 0
+    for location in config["sources"]:
+        log.debug("Downloading " + str(location["name"]))
+        parsedurl = urlparse(config["sources"][i]["url"])
+        # dest = Path(config["sources"][i]["destination"])
+        match parsedurl.scheme:
+            case "http" | "https":
+                pass
+                # download_http(parsedurl.netloc, Path(parsedurl.path), localpath=dest)
+            case "ftp" | "ftps":
+                pass
+                # download_ftp(
+                #     parsedurl.scheme,
+                #     parsedurl.netloc,
+                #     Path(parsedurl.path),
+                #     localpath=dest,
+                # )
+        i += 1
+    log.debug("Finished downloading sources")
