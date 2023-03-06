@@ -1,3 +1,4 @@
+
 !!! note "Work in progress"
 
     We are currently preparing the installation of Bernese GNSS Software version 5.4
@@ -155,6 +156,8 @@ directory` is initialised with the following content:
 
 ## Campaign management
 
+### Given: Newly-created campaign
+
 A newly-created campaign consists of a directory with an arbitrary name and an
 entry in the campaign menu `MENU_CMP.INP` panel file inside the Bernese
 installation directory.
@@ -177,3 +180,19 @@ A new campaign directory has the following basic content:
 ├── SOL
 └── STA
 ```
+
+### Given: Possible campaign-directory paths
+
+*   Campaigns do not have to follow the given example [`${P}/EXAMPLE`] but may
+    be put in any desired directory, e.g.:
+
+    ```
+    /home/<some-user>/my-campaigns/campaign
+    ```
+
+    This means that our campaigns can and, probably, should, be ordered in sub
+    directories by campaign type, e.g.:
+
+    -   `${P}/<type-A>/2222`
+    -   `${P}/<type-B>/2222`
+    -   ...
