@@ -1,0 +1,564 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Joachim Mortensen" name="author"/>
+<link href=".." rel="prev"/>
+<link href="../system-overview/" rel="next"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.4.2, mkdocs-material-9.1.1" name="generator"/>
+<title>Bernese setup - GNSS-Process Automation with Bernese GNSS Software</title>
+<link href="../assets/stylesheets/main.402914a4.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.a0c5b2b5.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<link href="../stylesheets/extra.css" rel="stylesheet"/>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+<link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            
+                .gscrollbar-fixer { padding-right: 15px; }
+                .gdesc-inner { font-size: 0.75rem; }
+                body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+                body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+                body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+                </style><script src="../assets/javascripts/glightbox.min.js"></script></head>
+<body data-md-color-accent="" data-md-color-primary="" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#environments">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="GNSS-Process Automation with Bernese GNSS Software" class="md-header__button md-logo" data-md-component="logo" href=".." title="GNSS-Process Automation with Bernese GNSS Software">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            GNSS-Process Automation with Bernese GNSS Software
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Bernese setup
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/SDFIdk/AutoBernese" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    AutoBernese
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="GNSS-Process Automation with Bernese GNSS Software" class="md-nav__button md-logo" data-md-component="logo" href=".." title="GNSS-Process Automation with Bernese GNSS Software">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+    GNSS-Process Automation with Bernese GNSS Software
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/SDFIdk/AutoBernese" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    AutoBernese
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+        Home
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          Bernese setup
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+        Bernese setup
+      </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#environments">
+    Environments
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-a-user-environment-for-bernese-gnss-software">
+    Setup a user environment for Bernese GNSS Software
+  </a>
+<nav aria-label="Setup a user environment for Bernese GNSS Software" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#steps-to-create-environment">
+    Steps to create environment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#initial-directory-content-for-a-new-user-environment">
+    Initial directory content for a new user environment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#campaign-management">
+    Campaign management
+  </a>
+<nav aria-label="Campaign management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#given-newly-created-campaign">
+    Given: Newly-created campaign
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#given-possible-campaign-directory-paths">
+    Given: Possible campaign-directory paths
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../system-overview/">
+        System overview
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../developer/">
+        Developer
+      </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#environments">
+    Environments
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#setup-a-user-environment-for-bernese-gnss-software">
+    Setup a user environment for Bernese GNSS Software
+  </a>
+<nav aria-label="Setup a user environment for Bernese GNSS Software" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#steps-to-create-environment">
+    Steps to create environment
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#initial-directory-content-for-a-new-user-environment">
+    Initial directory content for a new user environment
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#campaign-management">
+    Campaign management
+  </a>
+<nav aria-label="Campaign management" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#given-newly-created-campaign">
+    Given: Newly-created campaign
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#given-possible-campaign-directory-paths">
+    Given: Possible campaign-directory paths
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1>Bernese setup</h1>
+<div class="admonition note">
+<p class="admonition-title">Work in progress</p>
+<p>We are currently preparing the installation of Bernese GNSS Software version 5.4
+[BSW].</p>
+<p>This page will eventuelly explain to the users how we have set up the server
+that runs the software.</p>
+<p>For now, here are the settings that we have set during installation.</p>
+<p>The settings below are apt to change until we have established a good working solution
+for BSW and the automation program.</p>
+</div>
+<h2 id="environments">Environments<a class="headerlink" href="#environments" title="Permanent link">¶</a></h2>
+<p>BSW is installed in three different locations used for different purposes
+focusing either on maintaining a durable production-ready [<code>prod</code>] installation
+and more brittle environments for trying out new things with the automation
+program [<code>dev</code>] and testing them [<code>test</code>], before they are made available in the
+production environment.</p>
+<table>
+<thead>
+<tr>
+<th><code>[BSW_ENV]</code></th>
+<th>Description</th>
+<th>Function</th>
+<th>Updated/rebuilt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>prod</code></td>
+<td>Production</td>
+<td>Used for actual work</td>
+<td>With new BSW updates</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>Test</td>
+<td>Used for testing new features</td>
+<td>With new BSW updates</td>
+</tr>
+<tr>
+<td><code>dev</code></td>
+<td>Development</td>
+<td>Wild west environment for developers.</td>
+<td>When need a new fresh installation</td>
+</tr>
+</tbody>
+</table>
+<p>Each environment's paths are set in the following way parameterised byt the
+short-names defined for the different environments:</p>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Installation directory</td>
+<td><code>/home/bsw/[BSW_ENV]/BERN54</code></td>
+</tr>
+<tr>
+<td>DATAPOOL</td>
+<td><code>/home/bsw/[BSW_ENV]/data/DATAPOOL</code></td>
+</tr>
+<tr>
+<td>CAMPAIGN</td>
+<td><code>/home/bsw/[BSW_ENV]/CAMPAIGN54</code></td>
+</tr>
+<tr>
+<td>SAVEDISK</td>
+<td><code>/home/bsw/[BSW_ENV]/SAVEDISK</code></td>
+</tr>
+<tr>
+<td>User environment</td>
+<td><code>$HOME/bsw/[BSW_ENV]/user</code></td>
+</tr>
+<tr>
+<td>Temporary user environment</td>
+<td><code>$HOME/bsw/[BSW_ENV]/temp</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="setup-a-user-environment-for-bernese-gnss-software">Setup a user environment for Bernese GNSS Software<a class="headerlink" href="#setup-a-user-environment-for-bernese-gnss-software" title="Permanent link">¶</a></h2>
+<p>A user of BSW needs a user environment consisting of two user-specific
+directories in the path established by the environment variables set in
+<code>LOADGPS.setvar</code> script. To create a new user environment, you need to <code>source</code>
+the file, run the configuration script and select the action that creates a new
+user environment. This is demonstrated below.</p>
+<p>A normal user should only need to create a user in what we have named the
+production environment. (See previous section for details.)</p>
+<div class="admonition note">
+<p class="admonition-title">Deviations from the default installation</p>
+<p>Between versions 5.2 and 5.4, the default names for the user environment
+directories have changed. However, we chose a different naming convention than
+the default one:</p>
+<table>
+<thead>
+<tr>
+<th>Directory</th>
+<th>5.2</th>
+<th>5.4</th>
+<th>5.4 (our names)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>basename($U)</code></td>
+<td><code>GPSUSER52</code></td>
+<td><code>GPSUSER</code></td>
+<td><code>user</code></td>
+</tr>
+<tr>
+<td><code>basename($T)</code></td>
+<td><code>GPSTEMP</code></td>
+<td><code>GPSWORK</code></td>
+<td><code>temp</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="steps-to-create-environment">Steps to create environment<a class="headerlink" href="#steps-to-create-environment" title="Permanent link">¶</a></h3>
+<p>On the server</p>
+<ul>
+<li>
+<p>Set environment variables for the current shell session</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>/home/bsw/prod/BERN54/LOADGPS.setvar
+</code></pre></div>
+</li>
+<li>
+<p>Run the BSW configuration tool.</p>
+<div class="highlight"><pre><span></span><code>$EXE/configure.pm
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>==========================================
+CONFIGURATION OF THE BERNESE GNSS SOFTWARE
+==========================================
+1 ... Update LOADGPS.setvar
+2 ... Install online updates
+<span class="hll">3 ... Add a new user environment
+</span>4 ... Compile the menu
+5 ... Compile the programs
+6 ... Install the example campaign
+7 ... Update / install Bernese license file
+8 ...   ---
+
+x ... Exit
+
+Enter option:
+</code></pre></div>
+</li>
+<li>
+<p>Choose option 3</p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Enter option: 3
+
+<span class="hll">Create user environment /home/&lt;user&gt;/bsw/user (y/n):
+</span></code></pre></div>
+</li>
+<li>
+<p>Say yes <code>y</code></p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Create user environment /home/&lt;user&gt;/bsw/user (y/n): y
+
+Copying menu and program input files...
+Copying BPE user scripts...
+Copying examples for process control files...
+Copying BPE options for processing examples...
+Copying ICONS ...
+<span class="hll">### Archive of ICONS not found!
+</span>
+**********************************************************************
+* User area /home/&lt;user&gt;/bsw/user
+* has been added/updated.
+**********************************************************************
+</code></pre></div>
+</li>
+</ul>
+<p>Despite the warning above, the environment is now created by creating the above
+directory as well as a temporary directory.</p>
+<div class="admonition info">
+<p class="admonition-title">Steps to delete an environment</p>
+<p>If you need to delete an environment, this can be done by simply deleting the
+directory <code>[BSW_ENV]</code> corresponding to the user environment, you want to get rid
+of:</p>
+<div class="highlight"><pre><span></span><code>rm -rf ~/bsw/[BSW_ENV]
+</code></pre></div>
+</div>
+<h3 id="initial-directory-content-for-a-new-user-environment">Initial directory content for a new user environment<a class="headerlink" href="#initial-directory-content-for-a-new-user-environment" title="Permanent link">¶</a></h3>
+<p>A newly-created user environment contains to directories <code>temp</code> and <code>user</code>.
+<code>temp</code> has no initial content, whereas <code>user</code> gets copies of content from source
+directories under the main directory of the BErnese installation path. The <code>user
+directory</code> is initialised with the following content:</p>
+<table>
+<thead>
+<tr>
+<th><code>user/*</code></th>
+<th>Initial content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OPT</code></td>
+<td>Copied from <code>$C/USER</code></td>
+</tr>
+<tr>
+<td><code>OUT</code></td>
+<td><em>Empty</em></td>
+</tr>
+<tr>
+<td><code>PAN</code></td>
+<td>Copied from <code>$C/SUPGUI</code></td>
+</tr>
+<tr>
+<td><code>PCF</code></td>
+<td>Copied from <code>$C/USER</code></td>
+</tr>
+<tr>
+<td><code>SCRIPT</code></td>
+<td>Copied from <code>$C/USER</code></td>
+</tr>
+<tr>
+<td><code>WORK</code></td>
+<td><em>Empty</em></td>
+</tr>
+</tbody>
+</table>
+<h2 id="campaign-management">Campaign management<a class="headerlink" href="#campaign-management" title="Permanent link">¶</a></h2>
+<h3 id="given-newly-created-campaign">Given: Newly-created campaign<a class="headerlink" href="#given-newly-created-campaign" title="Permanent link">¶</a></h3>
+<p>A newly-created campaign consists of a directory with an arbitrary name and an
+entry in the campaign menu <code>MENU_CMP.INP</code> panel file inside the Bernese
+installation directory.</p>
+<p>A new campaign directory has the following basic content:</p>
+<div class="highlight"><pre><span></span><code>.
+├── ATM
+├── BPE
+├── GEN
+│   ├── OBSERV_COD.SEL
+│   └── SESSIONS.SES
+├── GRD
+├── OBS
+├── ORB
+├── ORX
+├── OUT
+├── RAW
+├── SOL
+└── STA
+</code></pre></div>
+<h3 id="given-possible-campaign-directory-paths">Given: Possible campaign-directory paths<a class="headerlink" href="#given-possible-campaign-directory-paths" title="Permanent link">¶</a></h3>
+<ul>
+<li>
+<p>Campaigns do not have to follow the given example [<code>${P}/EXAMPLE</code>] but may
+    be put in any desired directory, e.g.:</p>
+<div class="highlight"><pre><span></span><code>/home/&lt;some-user&gt;/my-campaigns/campaign
+</code></pre></div>
+<p>This means that our campaigns can and, probably, should, be ordered in sub
+directories by campaign type, e.g.:</p>
+<ul>
+<li><code>${P}/&lt;type-A&gt;/2222</code></li>
+<li><code>${P}/&lt;type-B&gt;/2222</code></li>
+<li>...</li>
+</ul>
+</li>
+</ul>
+</article>
+</div>
+</div>
+<a class="md-top md-icon" data-md-component="top" hidden="" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"></path></svg>
+            Back to top
+          </a>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.top"], "search": "../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../assets/javascripts/bundle.b78d2936.min.js"></script>
+<script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>
