@@ -1,19 +1,16 @@
-# use lib $ENV{BPE};
+use lib $ENV{BPE};
 use startBPE;
-# use bpe_util;
 
 my $bpe = new startBPE();
 
-$$bpe{PCF_FILE}     = "NKG_ATX";
+$$bpe{PCF_FILE}     = "PPP";
 $$bpe{CPU_FILE}     = "USER";
-$$bpe{BPE_CAMPAIGN} = "NKG$gpsweek";
-$$bpe{YEAR}         = $yyyy;
-$$bpe{SESSION}      = "${doystr}0";
-$$bpe{SYSOUT}       = "ATX2PCV";
-$$bpe{STATUS}       = "ATX2PCV.RUN";
-$$bpe{TASKID}       = "A2P";
+$$bpe{BPE_CAMPAIGN} = "EXAMPLE";
+$$bpe{YEAR}         = "2019";
+$$bpe{SESSION}      = "0440";
+$$bpe{SYSOUT}       = "PPP";
+$$bpe{STATUS}       = "PPP.RUN";
+$$bpe{TASKID}       = "PP";
 
 $bpe->resetCPU();
 $bpe->run();
-
-# ---
