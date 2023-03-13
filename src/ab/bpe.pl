@@ -1,3 +1,4 @@
+#!/usr/bin/perl -w
 use lib $ENV{BPE};
 use startBPE;
 

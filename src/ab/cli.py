@@ -74,12 +74,13 @@ def prepare_campaign_data(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
 
 @main.command
-def run(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+def runbpe(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
     """
     Run Bernese Processing Engine [BPE].
 
     """
-    bsw.run(*args, **kwargs)
+    # bsw.runbpe(*args, **kwargs)
+    bsw.runbpe()
 
 
 @main.command

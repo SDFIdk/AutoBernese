@@ -3,6 +3,23 @@ API for Bernese GNSS Software
 
 """
 from typing import Any
+import subprocess as sub
+import os
+
+from ab.ressources import bpe_runner
+
+
+KEYS_BPE: set[str] = {
+    'AB_PCF_FILE',
+    'AB_CPU_FILE',
+    'AB_BPE_CAMPAIGN',
+    'AB_YEAR',
+    'AB_SESSION',
+    'AB_SYSOUT',
+    'AB_STATUS',
+    'AB_TASKID',
+}
+
 
 
 def create_campaign(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
@@ -18,5 +35,10 @@ def create_campaign(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
     print("Creating campaign...")
 
 
-def run() -> None:
-    return
+def runbpe(**campaign) -> None:
+    # keys_gotten = set(campaign)
+    # diff = KEYS_BPE - keys_gotten
+    # if diff:
+    #     raise ValueError('PCF data missing {diff!r}')
+    env = {**os.environ, **campaign}
+    f = sub.Popen(f'{bpe_runner}', env=env)
