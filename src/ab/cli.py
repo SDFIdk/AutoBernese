@@ -22,9 +22,9 @@ import click
 from rich import print
 
 from ab import (
-    bsw,
     configuration,
     data,
+    bsw,
     organiser,
 )
 
@@ -43,7 +43,7 @@ def config(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
     """
     print(configuration.load(*args, **kwargs))
-    log.debug("Loaded config")
+    log.debug("Configuration loaded ...")
 
 
 @main.command

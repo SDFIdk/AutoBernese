@@ -1,9 +1,7 @@
 """
-Shortcuts for reaching package data
+Package file paths
 
 """
-
-import pathlib
 from importlib import resources
 
 import ab
