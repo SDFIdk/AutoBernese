@@ -55,7 +55,7 @@ def runbpe(**bpe_settings) -> None:
     try:
         log.debug(f"Run BPE runner ...")
         process = sub.Popen(f"{bpe_runner}", env={**os.environ, **bpe_settings})
-        proces.wait()
+        process.wait()
         log.debug(f"BPE runner finished ...")
     except KeyboardInterrupt:
         process.terminate()
