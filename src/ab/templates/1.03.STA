@@ -1,0 +1,44 @@
+STATION INFORMATION FILE FOR BERNESE GNSS SOFTWARE 5.4           {created_time}
+--------------------------------------------------------------------------------
+
+FORMAT VERSION: 1.03
+TECHNIQUE:      GNSS
+
+TYPE 001: RENAMING OF STATIONS
+------------------------------
+
+STATION NAME          FLG          FROM                   TO         OLD STATION NAME      REMARK
+****************      ***  YYYY MM DD HH MM SS  YYYY MM DD HH MM SS  ********************  ************************
+{type_1_rows}
+
+
+TYPE 002: STATION INFORMATION
+-----------------------------
+
+STATION NAME          FLG          FROM                   TO         RECEIVER TYPE         RECEIVER SERIAL NBR   REC #   ANTENNA TYPE          ANTENNA SERIAL NBR    ANT #    NORTH      EAST      UP     AZIMUTH  LONG NAME  DESCRIPTION             REMARK
+****************      ***  YYYY MM DD HH MM SS  YYYY MM DD HH MM SS  ********************  ********************  ******  ********************  ********************  ******  ***.****  ***.****  ***.****  ****.*  *********  **********************  ************************
+{type_2_rows}
+
+
+TYPE 003: HANDLING OF STATION PROBLEMS
+--------------------------------------
+
+STATION NAME          FLG          FROM                   TO         REMARK
+****************      ***  YYYY MM DD HH MM SS  YYYY MM DD HH MM SS  ************************************************************
+{type_3_rows}
+
+
+TYPE 004: STATION COORDINATES AND VELOCITIES (ADDNEQ)
+-----------------------------------------------------
+                                            RELATIVE CONSTR. POSITION     RELATIVE CONSTR. VELOCITY
+STATION NAME 1        STATION NAME 2        NORTH     EAST      UP        NORTH     EAST      UP
+****************      ****************      **.*****  **.*****  **.*****  **.*****  **.*****  **.*****
+{type_4_rows}
+
+
+TYPE 005: HANDLING STATION TYPES
+--------------------------------
+
+STATION NAME          FLG  FROM                 TO                   MARKER TYPE           REMARK
+****************      ***  YYYY MM DD HH MM SS  YYYY MM DD HH MM SS  ********************  ************************
+{type_5_rows}

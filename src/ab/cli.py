@@ -1,19 +1,6 @@
 """
 Command-line interface
 
-*   Prepare new station data
-*   Download general data sources
-*   Create campaign
-*   Download input sources
-*   Quality assurance
-*   Preprocess input data for general use
-*   Preprocess input data for campaign
-*   Organise input data for the campaign
-*   Run BPE for chosen campaign and PCF.
-*   Set file ownership and permissions
-*   Prepare end products
-*   Quality control
-
 """
 from typing import Any
 import logging
@@ -27,13 +14,21 @@ from ab import (
     bsw,
     organiser,
 )
+from ab.preprocessing import (
+    sitelog,
+    sta,
+)
+
 
 log = logging.getLogger(__name__)
 
 
 @click.group
 def main() -> None:
-    ...
+    """
+    Root command group for subsequent groups and actions.
+
+    """
 
 
 @main.command
@@ -47,11 +42,40 @@ def config(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
 
 @main.command
-def create_campaign(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+def read_sitelog(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+    """
+    Parse sitelog
+
+    """
+    print('This is a temporary command')
+    sitelog.main()
+
+
+@main.command
+def create_sta_file(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+    """
+    Create STA file
+
+    """
+    print('This is a temporary command')
+    sta.main()
+
+
+@main.group
+def campaign() -> None:
+    """
+    Command group for campaign-specific actions.
+
+    """
+
+
+@campaign.command
+def create(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
     """
     Create campaign
 
     """
+    log.debug("Create campaign ...")
     bsw.create_campaign(*args, **kwargs)
 
 
