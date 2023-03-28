@@ -47,7 +47,7 @@ def read_sitelog(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
     Parse sitelog
 
     """
-    print('This is a temporary command')
+    print("This is a temporary command")
     sitelog.main()
 
 
@@ -57,7 +57,7 @@ def create_sta_file(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
     Create STA file
 
     """
-    print('This is a temporary command')
+    print("This is a temporary command")
     sta.main()
 
 
