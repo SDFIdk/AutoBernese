@@ -1,21 +1,15 @@
-bsw_path: !ENV [C, '.']
+bsw_env:
+  bsw_path: &BSW !ENV [C, .]
+
+common:
+- &sitelogs !Path [!ENV D, sitelogs]
+
+system_user:
+  system_path: !Path [!Parent [*BSW], system]
 
 logging:
-  filename: autobernese.log
+  filename: !Path [!Parent [*BSW], autobernese.log]
   format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
   datefmt: '%Y-%m-%d %H:%M:%S'
   style: '%'
   level: DEBUG
-
-sources:
-- name: EPN
-  url: ftp://epncb.oma.be
-  destination:
-
-- name: AIUB
-  url: ftp://ftp.aiub.unibe.ch
-  destination:
-
-- name: SDFI
-  url: ftp://ftp.sdfe.dk
-  destination:
