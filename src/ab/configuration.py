@@ -19,7 +19,6 @@ yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
 
 
 def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
-
     if isinstance(node, yaml.ScalarNode):
         return pathlib.Path(loader.construct_scalar(node)).absolute()
 
@@ -28,10 +27,10 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
         root = pathlib.Path(elements[0])
         return root.joinpath(*elements[1:])
 
-    raise KeyError(f'Must be single string or list of strings. Got {node.value!r} ...')
+    raise KeyError(f"Must be single string or list of strings. Got {node.value!r} ...")
 
 
-yaml.SafeLoader.add_constructor('!Path', path_constructor)
+yaml.SafeLoader.add_constructor("!Path", path_constructor)
 
 
 def parent_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
@@ -47,7 +46,7 @@ def parent_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
     return pathlib.Path(construction).absolute().parent
 
 
-yaml.SafeLoader.add_constructor('!Parent', parent_constructor)
+yaml.SafeLoader.add_constructor("!Parent", parent_constructor)
 
 
 def load() -> Any:

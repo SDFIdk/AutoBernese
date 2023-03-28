@@ -89,7 +89,7 @@ log = logging.getLogger(__name__)
 def STA_created_timestamp(d: dt.datetime | dt.date = None) -> str:
     if d is None:
         d = dt.datetime.now()
-    return d.strftime('%d-%b-%y %H:%M').upper()
+    return d.strftime("%d-%b-%y %H:%M").upper()
 
 
 # Section 1
@@ -244,8 +244,9 @@ And send it back to the user.
 """
 
 # @dataclass
-# class Type001:
-#     STATION NAME: str = '' # TODO: This is a mix of four-character ID and DOMES Number
+# class Type001Row:
+#     _format =
+#     STATION_NAME: str = '' # TODO: This is a mix of four-character ID and DOMES Number
 #     FLG: str = ''
 #     FROM: str = ''
 #     TO: str = ''
@@ -283,36 +284,41 @@ And send it back to the user.
 #     DESCRIPTION: str = ''
 #     REMARK: str = ''
 
-    # TYPE 001: RENAMING OF STATIONS
-    # ------------------------------
+# TYPE 001: RENAMING OF STATIONS
+# ------------------------------
 
-    # STATION NAME
-    # Format: f'{site_name} {four_character_id}'
-    # (SITE_NAME, '',),
-    # (FOUR_CHARACTER_ID, '',),
+# STATION NAME
+# Format: f'{site_name} {four_character_id}'
+# (SITE_NAME, '',),
+# (FOUR_CHARACTER_ID, '',),
 
-    #
-    # (DATE_INSTALLED, '',),
+#
+# (DATE_INSTALLED, '',),
 
-    # FLG=(re.compile=(r''), '',),
-    # FROM=(re.compile=(r''), '',),
-    # TO=(re.compile=(r''), '',),
-    # RECEIVER TYPE=(re.compile=(r''), '',),
-    # RECEIVER SERIAL NBR=(re.compile=(r''), '',),
-    # REC_NUMBER=(re.compile(r''), '999999',),
-    # ANTENNA_TYPE=(re.compile=(r''), '',),
-    # ANTENNA_SERIAL_NBR=(re.compile=(r''), '',),
-    # ANT_NUMBER=(re.compile=(r''), '',),
-    # NORTH=(re.compile=(r''), '',),
-    # EAST=(re.compile=(r''), '',),
-    # UP=(re.compile=(r''), '',),
-    # AZIMUTH=(re.compile=(r''), '',),
-    # LONG NAME=(re.compile=(r''), '',),
-    # DESCRIPTION=(re.compile=(r''), '',),
-    # REMARK=(re.compile=(r''), '',),
+# FLG=(re.compile=(r''), '',),
+# FROM=(re.compile=(r''), '',),
+# TO=(re.compile=(r''), '',),
+# RECEIVER TYPE=(re.compile=(r''), '',),
+# RECEIVER SERIAL NBR=(re.compile=(r''), '',),
+# REC_NUMBER=(re.compile(r''), '999999',),
+# ANTENNA_TYPE=(re.compile=(r''), '',),
+# ANTENNA_SERIAL_NBR=(re.compile=(r''), '',),
+# ANT_NUMBER=(re.compile=(r''), '',),
+# NORTH=(re.compile=(r''), '',),
+# EAST=(re.compile=(r''), '',),
+# UP=(re.compile=(r''), '',),
+# AZIMUTH=(re.compile=(r''), '',),
+# LONG NAME=(re.compile=(r''), '',),
+# DESCRIPTION=(re.compile=(r''), '',),
+# REMARK=(re.compile=(r''), '',),
 
 
 # ---
+
+
+def sitelog_data(sitelog: str) -> None:
+    ...
+
 
 def create_stafile_from_sitelog() -> str:
     """
@@ -323,16 +329,17 @@ def create_stafile_from_sitelog() -> str:
     *
 
     """
+
     rows = dict(
         created_time=STA_created_timestamp(),
-        type_1_rows = '',
-        type_2_rows = '',
-        type_3_rows = '',
-        type_4_rows = '',
-        type_5_rows = '',
+        type_1_rows="",
+        type_2_rows="",
+        type_3_rows="",
+        type_4_rows="",
+        type_5_rows="",
     )
     sta_content = pkg.sta_template.read_text().format(**rows)
-    with open('campaign.STA', 'w+') as f:
+    with open("campaign.STA", "w+") as f:
         f.write(sta_content)
 
 
@@ -355,7 +362,30 @@ def main():
     # for section in sections:
     #     print(sections[section]['content'])
 
-    create_stafile_from_sitelog()
+    # create_stafile_from_sitelog()
+
+    config = configuration.load()
+    campaign = config.get("campaign_types").get("default")
+    s2s = campaign.get("sitelogs2sta")
+    fname = s2s.get("sitelogs")[0]
+    from rich import print
+
+    print(fname.is_file())
+    # print(sitelog_data(fname))
+
+    sections = sitelog.parse(fname.read_text())
+
+    print(parse_section_1(sections["1"]["content"]))
+    print(parse_section_2(sections["2"]["content"]))
+
+    for subsection in sections["3"]["subsections"]:
+        print(parse_subsection_3(subsection))
+
+    for subsection in sections["4"]["subsections"]:
+        print(parse_subsection_4(subsection))
+
+    for section in sections:
+        print(sections[section]["content"])
 
 
 if __name__ == "__main__":

@@ -111,6 +111,7 @@ def main():
     # TODO (JM): Remove this debugging method
     from rich import print
     from ab import pkg
+
     sections = parse(pkg.demo_sitelog.read_text())
     print(sections)
 
