@@ -25,7 +25,7 @@ jobs:
           use-mamba: true
           environment-file: environment-dev.yml
           auto-activate-base: false
-          activate-environment: brahmath-dev
+          activate-environment: ab-dev
 
     - name: Install test dependencies
       run: python -m pip install -e .
