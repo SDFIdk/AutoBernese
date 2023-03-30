@@ -1,50 +1,15 @@
 """
-Module for creating a STA-file in various ways, including:
-
-*   Add data from a parsed sitelog file to an existing STA-file
-*   (Prune existing STA-file to only include needed stations)
-
-# The module assumes that the default STA file to merge is located at the path
-# given in the configuration file.
+Module for creating a stand-alone STA-file from a parsed sitelog.
 
 Given:
 
-*   STA-file version 1.03
+*   STA-file version 1.03 (used as template).
 *   Antenna serial number is '9' * 6 for type-specific calibrated.
-*   The site for the given sitelog file is known to be either type- or individually-calibrated.
+*   The site for the given sitelog file is known to be either type- or
+    individually-calibrated.
 
-Be able to produce lines for the following sections of a STA 1.03-file
-
-```
-STATION INFORMATION FILE FOR BERNESE GNSS SOFTWARE 5.4           15-MAR-23 13:50
---------------------------------------------------------------------------------
-
-FORMAT VERSION: 1.03
-TECHNIQUE:      GNSS
-
-TYPE 001: RENAMING OF STATIONS
-------------------------------
-
-STATION NAME          FLG          FROM                   TO         OLD STATION NAME      REMARK
-****************      ***  YYYY MM DD HH MM SS  YYYY MM DD HH MM SS  ********************  ************************
-ACOR 13434M001        001  1998 12 06 00 00 00                       ACOR*                 acor00esp_20221124.log
-...
-
-TYPE 002: STATION INFORMATION
------------------------------
-
-STATION NAME          FLG          FROM                   TO         RECEIVER TYPE         RECEIVER SERIAL NBR   REC #   ANTENNA TYPE          ANTENNA SERIAL NBR    ANT #    NORTH      EAST      UP     AZIMUTH  LONG NAME  DESCRIPTION             REMARK
-****************      ***  YYYY MM DD HH MM SS  YYYY MM DD HH MM SS  ********************  ********************  ******  ********************  ********************  ******  ***.****  ***.****  ***.****  ****.*  *********  **********************  ************************
-ACOR 13434M001        001  1998 12 06 10 10 00  2001 12 19 00 00 00  ASHTECH UZ-12                        00224     224  ASH700936D_M    SNOW                999999  999999    0.0000    0.0000    3.0420     0.0             A Coruna, ESP           UE00-0A12
-ACOR 13434M001        001  2001 12 19 00 00 00  2004 04 15 00 00 00  ASHTECH UZ-12                        12109   12109  ASH700936D_M    SNOW                999999  999999    0.0000    0.0000    3.0420     0.0             A Coruna, ESP           ZC00
-ACOR 13434M001        001  2004 04 15 00 00 00  2007 03 17 23 59 00  ASHTECH UZ-12                        12110   12110  ASH700936D_M    SNOW                999999  999999    0.0000    0.0000    3.0420     0.0             A Coruna, ESP           ZC00
-ACOR 13434M001        001  2007 03 18 00 00 00  2008 04 21 09 00 00  LEICA GRX1200PRO                    459187  459187  LEIAT504        LEIS                999999  999999    0.0000    0.0000    3.0460     0.0             A Coruna, ESP           5.00
-ACOR 13434M001        001  2008 04 21 09 30 00  2008 12 05 12 30 00  LEICA GRX1200PRO                    459187  459187  LEIAT504        LEIS                999999  999999    0.0000    0.0000    3.0460     0.0             A Coruna, ESP           5.62
-ACOR 13434M001        001  2008 12 05 12 30 00  2010 02 02 09 30 00  LEICA GRX1200PRO                    459187  459187  LEIAT504        LEIS                999999  999999    0.0000    0.0000    3.0460     0.0             A Coruna, ESP           6.02
-...
-```
-
-The mapping from the sitelog is such that the following sections of the sitelog should be extracted:
+The mapping from the sitelog is such that the following sections of the sitelog
+should be extracted:
 
 |  Section  |     Field key     | Value format |     Used for    | STA Section |
 |-----------|-------------------|--------------|-----------------|-------------|
@@ -73,7 +38,10 @@ The mapping from the sitelog is such that the following sections of the sitelog 
 import re
 import logging
 from typing import Any
-from dataclasses import dataclass
+from dataclasses import (
+    dataclass,
+    asdict,
+)
 import datetime as dt
 
 from ab import (
@@ -125,7 +93,8 @@ DATE_REMOVED: re.Pattern = re.compile(
 )
 
 # Expansion for regular-expression search results
-EXPAND_FORMAT_DATE = r"\1\2\3"
+EXPAND_DATE_SPACE = r"\1 \2 \3"
+EXPAND_DATE = r"\1\2\3"
 
 # Defaults for empty regular-expression search results
 MARKER_DEFAULT = "0.0000"
@@ -139,25 +108,25 @@ def post_process_marker(s: str) -> str:
         return MARKER_DEFAULT
 
 
-class NameSpace:
-    """
-    A simple container for adding various instance members for different
-    purposes.
+# class NameSpace:
+#     """
+#     A simple container for adding various instance members for different
+#     purposes.
 
-    """
+#     """
 
-    _name = "NameSpace"
+#     _name = "NameSpace"
 
-    def __init__(self, name: str = None) -> None:
-        if not name is None:
-            self._name = name
+#     def __init__(self, name: str = None) -> None:
+#         if not name is None:
+#             self._name = name
 
-    def __repr__(self):
-        members = [m for m in dir(self) if not m.startswith("_")]
-        key_value_pairs = ", ".join(
-            [f'{key}="{getattr(self, key)}"' for key in members]
-        )
-        return f"{self._name}({key_value_pairs})"
+#     def __repr__(self):
+#         members = [m for m in dir(self) if not m.startswith("_")]
+#         key_value_pairs = ", ".join(
+#             [f'{key}="{getattr(self, key)}"' for key in members]
+#         )
+#         return f"{self._name}({key_value_pairs})"
 
 
 def search_and_expand(
@@ -182,138 +151,49 @@ def search_and_expand(
     if post is None:
         return expanded
 
-    print("Post processing")
     return post(expanded)
 
 
-def parse_section_1(s: str) -> Any:
-    ns = NameSpace("Section1")
-    ns.name = SITE_NAME.search(s)[1]
-    ns.domes = IERS_DOMES_NUMBER.search(s)[1]
-    return ns
-
-
-def parse_section_2(s: str) -> Any:
-    ns = NameSpace("Section2")
-    ns.city_or_town = CITY_OR_TOWN.search(s)[1]
-    return ns
-
-
-def parse_subsection_3(s: str) -> Any:
-    ns = NameSpace("Section3")
-    ns.receiver_type = RECEIVER_TYPE.search(s)[1]
-    ns.serial_number = RECEIVER_SERIAL_NUMBER.search(s)[1]
-    ns.firmware = FIRMWARE_VERSION.search(s)[1]
-    ns.date_installed = search_and_expand(DATE_INSTALLED, s, EXPAND_FORMAT_DATE)
-    ns.date_removed = search_and_expand(DATE_REMOVED, s, EXPAND_FORMAT_DATE)
-    return ns
-
-
-def parse_subsection_4(s: str) -> Any:
-    ns = NameSpace("Section4")
-    ns.antenna_type = ANTENNA_TYPE.search(s)[1]
-    ns.antenna_serial_number = ANTENNA_SERIAL_NUMBER.search(s)[1]
-    ns.marker_up = search_and_expand(
-        MARKER_UP, s, default=MARKER_DEFAULT, post=post_process_marker
+def parse_section_1(s: str) -> dict[str, str]:
+    return dict(
+        site_name=SITE_NAME.search(s)[1],
+        four_character_id=FOUR_CHARACTER_ID.search(s)[1],
+        domes=IERS_DOMES_NUMBER.search(s)[1],
+        date_installed=search_and_expand(DATE_INSTALLED, s, EXPAND_DATE_SPACE),
     )
-    ns.marker_north = search_and_expand(MARKER_NORTH, s, post=post_process_marker)
-    ns.marker_east = search_and_expand(MARKER_EAST, s, post=post_process_marker)
-    ns.date_installed = search_and_expand(DATE_INSTALLED, s, EXPAND_FORMAT_DATE)
-    ns.date_removed = search_and_expand(DATE_REMOVED, s, EXPAND_FORMAT_DATE)
-    return ns
 
 
-"""
-TO DO:
-
-1)
-Given the download module is implemented
-And the single-program-execution-module is implemented and can run the STA2STA program
-And the EUREF52.STA file is downloaded
-And the EUREF52.STA is converted
-
-When the EUREF54.STA file is loaded and its content is provided
-And the sitelog is loaded and its content is provided
-And a list of individually-calibrated sites are provided
-And a list of the needed sites (no pruning if None provided)
-
-Then create a STA-file content from the above
-And send it back to the user.
+def parse_section_2(s: str) -> dict[str, str]:
+    return dict(
+        city_or_town=CITY_OR_TOWN.search(s)[1],
+    )
 
 
-"""
-
-# @dataclass
-# class Type001Row:
-#     _format =
-#     STATION_NAME: str = '' # TODO: This is a mix of four-character ID and DOMES Number
-#     FLG: str = ''
-#     FROM: str = ''
-#     TO: str = ''
-#     RECEIVER TYPE: str = ''
-#     RECEIVER SERIAL NBR: str = ''
-#     REC #: str = '999999'
-#     ANTENNA TYPE: str = ''
-#     ANTENNA SERIAL NBR: str = ''
-#     ANT #: str = ''
-#     NORTH: str = ''
-#     EAST: str = ''
-#     UP: str = ''
-#     AZIMUTH: str = ''
-#     LONG NAME: str = ''
-#     DESCRIPTION: str = ''
-#     REMARK: str = ''
-
-# @dataclass
-# class Type002:
-#     STATION NAME: str = ''
-#     FLG: str = ''
-#     FROM: str = ''
-#     TO: str = ''
-#     RECEIVER TYPE: str = ''
-#     RECEIVER SERIAL NBR: str = ''
-#     REC #: str = '999999'
-#     ANTENNA TYPE: str = ''
-#     ANTENNA SERIAL NBR: str = ''
-#     ANT #: str = ''
-#     NORTH: str = ''
-#     EAST: str = ''
-#     UP: str = ''
-#     AZIMUTH: str = ''
-#     LONG NAME: str = ''
-#     DESCRIPTION: str = ''
-#     REMARK: str = ''
-
-# TYPE 001: RENAMING OF STATIONS
-# ------------------------------
-
-# STATION NAME
-# Format: f'{site_name} {four_character_id}'
-# (SITE_NAME, '',),
-# (FOUR_CHARACTER_ID, '',),
-
-#
-# (DATE_INSTALLED, '',),
-
-# FLG=(re.compile=(r''), '',),
-# FROM=(re.compile=(r''), '',),
-# TO=(re.compile=(r''), '',),
-# RECEIVER TYPE=(re.compile=(r''), '',),
-# RECEIVER SERIAL NBR=(re.compile=(r''), '',),
-# REC_NUMBER=(re.compile(r''), '999999',),
-# ANTENNA_TYPE=(re.compile=(r''), '',),
-# ANTENNA_SERIAL_NBR=(re.compile=(r''), '',),
-# ANT_NUMBER=(re.compile=(r''), '',),
-# NORTH=(re.compile=(r''), '',),
-# EAST=(re.compile=(r''), '',),
-# UP=(re.compile=(r''), '',),
-# AZIMUTH=(re.compile=(r''), '',),
-# LONG NAME=(re.compile=(r''), '',),
-# DESCRIPTION=(re.compile=(r''), '',),
-# REMARK=(re.compile=(r''), '',),
+def parse_subsection_3(s: str) -> dict[str, str]:
+    return dict(
+        receiver_type=RECEIVER_TYPE.search(s)[1],
+        serial_number=RECEIVER_SERIAL_NUMBER.search(s)[1],
+        firmware=FIRMWARE_VERSION.search(s)[1],
+        date_installed=search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
+        date_removed=search_and_expand(DATE_REMOVED, s, EXPAND_DATE),
+    )
 
 
-# ---
+def parse_subsection_4(s: str) -> dict[str, str]:
+    return dict(
+        antenna_type=ANTENNA_TYPE.search(s)[1],
+        antenna_serial_number=ANTENNA_SERIAL_NUMBER.search(s)[1],
+        marker_up=search_and_expand(
+            MARKER_UP,
+            s,
+            default=MARKER_DEFAULT,
+            post=post_process_marker,
+        ),
+        marker_north=search_and_expand(MARKER_NORTH, s, post=post_process_marker),
+        marker_east=search_and_expand(MARKER_EAST, s, post=post_process_marker),
+        date_installed=search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
+        date_removed=search_and_expand(DATE_REMOVED, s, EXPAND_DATE),
+    )
 
 
 def sitelog_data(sitelog: str) -> None:
@@ -344,49 +224,172 @@ def create_stafile_from_sitelog() -> str:
 
 
 def main():
-    # from rich import print
-
-    # from ab import pkg
-
-    # sections = sitelog.parse(pkg.demo_sitelog.read_text())
-
-    # print(parse_section_1(sections["1"]["content"]))
-    # print(parse_section_2(sections["2"]["content"]))
-
-    # for subsection in sections["3"]["subsections"]:
-    #     print(parse_subsection_3(subsection))
-
-    # for subsection in sections["4"]["subsections"]:
-    #     print(parse_subsection_4(subsection))
-
-    # for section in sections:
-    #     print(sections[section]['content'])
+    from rich import print
 
     # create_stafile_from_sitelog()
 
     config = configuration.load()
     campaign = config.get("campaign_types").get("default")
-    s2s = campaign.get("sitelogs2sta")
-    fname = s2s.get("sitelogs")[0]
-    from rich import print
+    sitelogs2sta = campaign.get("sitelogs2sta")
+    fname = sitelogs2sta.get("sitelogs")[0]
+    individually_calibrated = sitelogs2sta.get('individually_calibrated')
+    print(individually_calibrated)
 
-    print(fname.is_file())
-    # print(sitelog_data(fname))
-
+    log.info(f'Extract data hierarchy from {fname.name}')
     sections = sitelog.parse(fname.read_text())
 
-    print(parse_section_1(sections["1"]["content"]))
-    print(parse_section_2(sections["2"]["content"]))
+    log.info('Get content')
+    section_1 = parse_section_1(sections["1"]["content"])
+    section_2 = parse_section_2(sections["2"]["content"])
+    section_3_sections = [
+        parse_subsection_3(subsection) for subsection in sections["3"]["subsections"]
+    ]
+    section_4_sections = [
+        parse_subsection_4(subsection) for subsection in sections["4"]["subsections"]
+    ]
 
-    for subsection in sections["3"]["subsections"]:
-        print(parse_subsection_3(subsection))
+    log.info('Prepare section content: Type 001')
+    # TYPE 001: RENAMING OF STATIONS
+    type_1_data = dict(
+        station_name="{four_character_id:4s} {domes:s}".format(**section_1),
+        date_installed=section_1.get('date_installed'),
+        name_old='',
+        fname=fname.name,
+    )
 
-    for subsection in sections["4"]["subsections"]:
-        print(parse_subsection_4(subsection))
+    log.info('Prepare section content: Type 002')
+    # TYPE 002: STATION INFORMATION
 
-    for section in sections:
-        print(sections[section]["content"])
+    antenna_type = f"{...}"
+
+    """
+    Problem ascertainment:
+
+    *
+
+    Needed information:
+
+    *   [x] A list of four-letter ids for individually-calibrated station
+
+    """
+
+    combined_sections = [
+        {**subsection3, **subsection4}
+        for (subsection3, subsection4)
+        in zip(section_3_sections, section_4_sections)
+    ]
+    print(combined_sections[0])
+
+    type_2_data = dict(
+        description=section_1.get('name')
+    )
+
+    type_2_data_sets = (
+        type_2_data,
+    )
+
+    log.info('Build .STA-lines')
+
+    type_1_row = Type001Row(**type_1_data)
+    print(type_1_row)
+    raise SystemExit
+
+    type_2_lines = [
+        Type002Row(**type_2_data)
+        for type_2_data in type_2_data_sets
+    ]
+    print('\n'.join(str(line) for line in type_2_lines))
 
 
 if __name__ == "__main__":
     main()
+
+
+class BaseLine:
+    _line_fstr = ''
+    def __str__(self) -> str:
+        return self._line_fstr.format(asdict(self))
+
+
+@dataclass
+class Type001Row:
+    """
+    TYPE 001: RENAMING OF STATIONS
+
+    """
+    _line_fstr = (
+        "{station_name: <16s}"
+        "      001  "
+        # "{yyyy: >4d} {mm:0>2d} {dd:0>2d} 00 00 00"
+        "{date_installed:10s} 00 00 00"
+        "                       "
+        "{name_old: <20s}"
+        "  "
+        "{fname: <24s}"
+    )
+    station_name: str
+    date_installed: str
+    name_old: str = ''
+    fname: str = ''
+
+
+@dataclass
+class Type002Row(BaseLine):
+    """
+    TYPE 002: STATION INFORMATION
+
+    """
+    type_2_line_fstr = (
+        "{station_name: <16s}"
+        "      001  "
+        "{date_beg:19s}"
+        "  "
+        "{date_end:19s}"
+        "  "
+        "{receiver_type: <20s}"
+        "  "
+        "{receiver_serial: >20s}"
+        "  "
+        "{receiver_no: >6s}"
+        "  "
+        "{antenna_type: <20s}"
+        "  "
+        "{antenna_serial: >20s}"
+        "  "
+        "{antenna_no: >6s}"
+        "  "
+        "{north: >8.4f}"
+        "  "
+        "{east: >8.4f}"
+        "  "
+        "{up: >8.4f}"
+        "  "
+        "{azimuth: >6.1f}"
+        "  "
+        "{long_name: <9s}"  # Not used in EUREF52.STA
+        "  "
+        "{description: <22s}"
+        "  "
+        "{remark: <22s}"
+    )
+    station_name: str = ''
+
+    date_beg: str = ''
+    date_end: str = ''
+
+    receiver_type: str = ''
+    receiver_serial: str = ''
+    receiver_no: str = '9' * 6
+
+    antenna_type: str = ''
+    antenna_serial: str = ''
+    antenna_no: str = ''
+
+    north: float = 0.0
+    east: float = 0.0
+    up: float = 0.0
+    azimuth: float = 0.0
+
+    long_name: str = ''
+    description: str = ''
+    remark: str = ''
