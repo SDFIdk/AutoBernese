@@ -232,13 +232,13 @@ def main():
     campaign = config.get("campaign_types").get("default")
     sitelogs2sta = campaign.get("sitelogs2sta")
     fname = sitelogs2sta.get("sitelogs")[0]
-    individually_calibrated = sitelogs2sta.get('individually_calibrated')
+    individually_calibrated = sitelogs2sta.get("individually_calibrated")
     print(individually_calibrated)
 
-    log.info(f'Extract data hierarchy from {fname.name}')
+    log.info(f"Extract data hierarchy from {fname.name}")
     sections = sitelog.parse(fname.read_text())
 
-    log.info('Get content')
+    log.info("Get content")
     section_1 = parse_section_1(sections["1"]["content"])
     section_2 = parse_section_2(sections["2"]["content"])
     section_3_sections = [
@@ -248,16 +248,16 @@ def main():
         parse_subsection_4(subsection) for subsection in sections["4"]["subsections"]
     ]
 
-    log.info('Prepare section content: Type 001')
+    log.info("Prepare section content: Type 001")
     # TYPE 001: RENAMING OF STATIONS
     type_1_data = dict(
         station_name="{four_character_id:4s} {domes:s}".format(**section_1),
-        date_installed=section_1.get('date_installed'),
-        name_old='',
+        date_installed=section_1.get("date_installed"),
+        name_old="",
         fname=fname.name,
     )
 
-    log.info('Prepare section content: Type 002')
+    log.info("Prepare section content: Type 002")
     # TYPE 002: STATION INFORMATION
 
     antenna_type = f"{...}"
@@ -275,30 +275,22 @@ def main():
 
     combined_sections = [
         {**subsection3, **subsection4}
-        for (subsection3, subsection4)
-        in zip(section_3_sections, section_4_sections)
+        for (subsection3, subsection4) in zip(section_3_sections, section_4_sections)
     ]
     print(combined_sections[0])
 
-    type_2_data = dict(
-        description=section_1.get('name')
-    )
+    type_2_data = dict(description=section_1.get("name"))
 
-    type_2_data_sets = (
-        type_2_data,
-    )
+    type_2_data_sets = (type_2_data,)
 
-    log.info('Build .STA-lines')
+    log.info("Build .STA-lines")
 
     type_1_row = Type001Row(**type_1_data)
     print(type_1_row)
     raise SystemExit
 
-    type_2_lines = [
-        Type002Row(**type_2_data)
-        for type_2_data in type_2_data_sets
-    ]
-    print('\n'.join(str(line) for line in type_2_lines))
+    type_2_lines = [Type002Row(**type_2_data) for type_2_data in type_2_data_sets]
+    print("\n".join(str(line) for line in type_2_lines))
 
 
 if __name__ == "__main__":
@@ -306,7 +298,8 @@ if __name__ == "__main__":
 
 
 class BaseLine:
-    _line_fstr = ''
+    _line_fstr = ""
+
     def __str__(self) -> str:
         return self._line_fstr.format(asdict(self))
 
@@ -317,6 +310,7 @@ class Type001Row:
     TYPE 001: RENAMING OF STATIONS
 
     """
+
     _line_fstr = (
         "{station_name: <16s}"
         "      001  "
@@ -329,8 +323,8 @@ class Type001Row:
     )
     station_name: str
     date_installed: str
-    name_old: str = ''
-    fname: str = ''
+    name_old: str = ""
+    fname: str = ""
 
 
 @dataclass
@@ -339,6 +333,7 @@ class Type002Row(BaseLine):
     TYPE 002: STATION INFORMATION
 
     """
+
     type_2_line_fstr = (
         "{station_name: <16s}"
         "      001  "
@@ -372,24 +367,24 @@ class Type002Row(BaseLine):
         "  "
         "{remark: <22s}"
     )
-    station_name: str = ''
+    station_name: str = ""
 
-    date_beg: str = ''
-    date_end: str = ''
+    date_beg: str = ""
+    date_end: str = ""
 
-    receiver_type: str = ''
-    receiver_serial: str = ''
-    receiver_no: str = '9' * 6
+    receiver_type: str = ""
+    receiver_serial: str = ""
+    receiver_no: str = "9" * 6
 
-    antenna_type: str = ''
-    antenna_serial: str = ''
-    antenna_no: str = ''
+    antenna_type: str = ""
+    antenna_serial: str = ""
+    antenna_no: str = ""
 
     north: float = 0.0
     east: float = 0.0
     up: float = 0.0
     azimuth: float = 0.0
 
-    long_name: str = ''
-    description: str = ''
-    remark: str = ''
+    long_name: str = ""
+    description: str = ""
+    remark: str = ""
