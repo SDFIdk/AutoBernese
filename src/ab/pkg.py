@@ -15,4 +15,4 @@ bpe_runner = base.joinpath("bpe.pl")
 sta_template = base.joinpath("templates/1.03.STA")
 
 
-demo_sitelog = base.joinpath("demo/esbc00dnk_20221113.log")
+demo_sitelog = base.joinpath("demo/abmf_20211124.log")
