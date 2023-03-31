@@ -1,14 +1,20 @@
+# local: &local __ab__
+
 bsw_env:
-  bsw_path: &BSW !ENV [C, .]
+  - &BSW !ENV [C, .]
+  - &D !ENV [D, .]
+
+derived:
+  env: &env !Parent [*BSW]
 
 common:
-- &sitelogs !Path [!ENV D, sitelogs]
+- &sitelogs !Path [*D, sitelogs]
 
 system_user:
-  system_path: !Path [!Parent [*BSW], system]
+  system_path: !Path [*env, system]
 
 logging:
-  filename: !Path [!Parent [*BSW], autobernese.log]
+  filename: !Path [*env, autobernese.log]
   format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
   datefmt: '%Y-%m-%d %H:%M:%S'
   style: '%'
@@ -73,7 +79,7 @@ sources:
 
 - name: sadf
   url: ftp.aiub..../%Y(_M)?/*.ION.Z
-  destination: [!ENV D, BSW54] # sti/til/DATAPOOL/BSW54/...
+  destination: !Path [*D, BSW54] # sti/til/DATAPOOL/BSW54/...
 
 - name: EUREF STA file
   url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
