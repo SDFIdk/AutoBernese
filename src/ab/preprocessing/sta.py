@@ -104,27 +104,6 @@ def post_process_marker(s: str) -> str:
         return MARKER_DEFAULT
 
 
-# class NameSpace:
-#     """
-#     A simple container for adding various instance members for different
-#     purposes.
-
-#     """
-
-#     _name = "NameSpace"
-
-#     def __init__(self, name: str = None) -> None:
-#         if not name is None:
-#             self._name = name
-
-#     def __repr__(self):
-#         members = [m for m in dir(self) if not m.startswith("_")]
-#         key_value_pairs = ", ".join(
-#             [f'{key}="{getattr(self, key)}"' for key in members]
-#         )
-#         return f"{self._name}({key_value_pairs})"
-
-
 def search_and_expand(
     p: re.Pattern,
     s: str,
