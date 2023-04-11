@@ -60,37 +60,33 @@ def STA_created_timestamp(d: dt.datetime | dt.date = None) -> str:
     return d.strftime("%d-%b-%y %H:%M").upper()
 
 
+def compile(s: str, flags=re.M) -> re.Pattern:
+    return re.compile(s, flags=flags)
+
+
 # Section 1
-IERS_DOMES_NUMBER: re.Pattern = re.compile(r"IERS DOMES Number\s*:\s(.*)", flags=re.M)
-SITE_NAME: re.Pattern = re.compile(r"Site Name\s*:\s+(.*)", flags=re.M)
-FOUR_CHARACTER_ID: re.Pattern = re.compile(
-    r"Four Character ID\s+:\s+([A-Z0-9]{4}?)", flags=re.M
-)
+IERS_DOMES_NUMBER = compile(r"IERS DOMES Number\s*:\s(.*)")
+SITE_NAME = compile(r"Site Name\s*:\s+(.*)")
+FOUR_CHARACTER_ID = compile(r"Four Character ID\s+:\s+([A-Z0-9]{4}?)")
 
 # Section 2
-CITY_OR_TOWN: re.Pattern = re.compile(r"City or Town\s+:\s+(.*)", flags=re.M)
+CITY_OR_TOWN = compile(r"City or Town\s+:\s+(.*)")
 
 # Section 3
-RECEIVER_TYPE: re.Pattern = re.compile(r"Receiver Type\s+:\s(.*)", flags=re.M)
-RECEIVER_SERIAL_NUMBER: re.Pattern = re.compile(r"Serial Number\s+:\s(.*)", flags=re.M)
-FIRMWARE_VERSION: re.Pattern = re.compile(r"Firmware Version\s+:\s(.*)", flags=re.M)
+RECEIVER_TYPE = compile(r"Receiver Type\s+:\s(.*)")
+RECEIVER_SERIAL_NUMBER = compile(r"Serial Number\s+:\s(.*)")
+FIRMWARE_VERSION = compile(r"Firmware Version\s+:\s(.*)")
 
 # Section 4
-ANTENNA_TYPE: re.Pattern = re.compile(r"Antenna Type\s+:\s+(.*)", flags=re.M)
-ANTENNA_SERIAL_NUMBER: re.Pattern = re.compile(
-    r"Serial Number\s+:\s+(.*)\s?[\r\n]", flags=re.M
-)
-MARKER_UP: re.Pattern = re.compile(r"Marker->ARP Up.*\s+:\s+(.*)", flags=re.M)
-MARKER_NORTH: re.Pattern = re.compile(r"Marker->ARP North.*\s+:\s+(.*)", flags=re.M)
-MARKER_EAST: re.Pattern = re.compile(r"Marker->ARP East.*\s+:\s+(.*)", flags=re.M)
+ANTENNA_TYPE = compile(r"Antenna Type\s+:\s+(.*)")
+ANTENNA_SERIAL_NUMBER = compile(r"Serial Number\s+:\s+(.*)\s?[\r\n]")
+MARKER_UP = compile(r"Marker->ARP Up.*\s+:\s+(.*)")
+MARKER_NORTH = compile(r"Marker->ARP North.*\s+:\s+(.*)")
+MARKER_EAST = compile(r"Marker->ARP East.*\s+:\s+(.*)")
 
 # Common for the given sections
-DATE_INSTALLED: re.Pattern = re.compile(
-    r"Date Installed\s+:\s+(\d{4})-(\d{2})-(\d{2})", flags=re.M
-)
-DATE_REMOVED: re.Pattern = re.compile(
-    r"Date Removed\s+:\s(\d{4})-(\d{2})-(\d{2})", flags=re.M
-)
+DATE_INSTALLED = compile(r"Date Installed\s+:\s+(\d{4})-(\d{2})-(\d{2})")
+DATE_REMOVED = compile(r"Date Removed\s+:\s(\d{4})-(\d{2})-(\d{2})")
 
 # Expansion for regular-expression search results
 EXPAND_DATE_SPACE = r"\1 \2 \3"
