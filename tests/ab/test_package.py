@@ -10,4 +10,5 @@ def test_package_data_exist():
     assert pkg.bpe_runner.is_file()
     assert pkg.configuration.is_file()
     assert pkg.sta_template.is_file()
+    assert pkg.country_codes.is_file()
     assert pkg.demo_sitelog.is_file()
