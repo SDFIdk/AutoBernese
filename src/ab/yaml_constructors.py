@@ -19,8 +19,8 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
     if isinstance(node, yaml.SequenceNode):
         first, *after = [loader.construct_object(v) for v in node.value]
         root = pathlib.Path(first)
-        if any('*' in element for element in after):
-            full_paths = [full_path for full_path in root.glob('/'.join(after))]
+        if any("*" in element for element in after):
+            full_paths = [full_path for full_path in root.glob("/".join(after))]
             if full_paths:
                 return full_paths[0]
         return root.joinpath(*after)
