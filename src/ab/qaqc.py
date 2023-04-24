@@ -2,6 +2,10 @@
 Quality assurance and control
 
 """
+import logging
+
+
+log = logging.getLogger(__name__)
 
 
 def assure_quality() -> None:
