@@ -2,8 +2,10 @@
 Command-line interface
 
 """
-from typing import Any
 import logging
+import pathlib
+import json
+from typing import Any
 
 import click
 from rich import print
@@ -13,8 +15,6 @@ from ab import (
     data,
     bsw,
     organiser,
-)
-from ab.preprocessing import (
     sitelog,
     sta,
 )
@@ -42,22 +42,29 @@ def config(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
 
 @main.command
-def read_sitelog(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+@click.argument("filename", type=pathlib.Path)
+def parse_sitelog(filename: pathlib.Path) -> None:
     """
-    Parse sitelog
+    Parse sitelog and print it to the screen
 
     """
-    print("This is a temporary command")
-    sitelog.main()
+    print(json.dumps(sitelog.Sitelog(filename).sections_extracted, indent=2))
 
 
 @main.command
-def create_sta_file(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+@click.argument("sitelog_filenames", type=list[pathlib.Path])
+@click.argument("individually_calibrated", type=list[str])
+@click.argument("filename", type=pathlib.Path)
+def create_sta_file_from_sitelogs(
+    sitelog_filenames: list[pathlib.Path],
+    individually_calibrated: list[str],
+    filename: pathlib.Path,
+) -> None:
     """
-    Create STA file
+    Create STA file from sitelogs
 
     """
-    print("This is a temporary command")
+    # sta.create_sta_file_from_sitelogs(sitelog_filenames, individually_calibrated, filename)
     sta.main()
 
 
@@ -98,13 +105,12 @@ def prepare_campaign_data(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
 
 @main.command
-def runbpe(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+def bpe(**bpe_settings: dict[Any, Any]) -> None:
     """
     Run Bernese Processing Engine [BPE].
 
     """
-    # bsw.runbpe(*args, **kwargs)
-    bsw.runbpe()
+    bsw.runbpe(bpe_settings)
 
 
 @main.command

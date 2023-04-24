@@ -23,7 +23,6 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
 
         # Case: The user is using a wild card to get at one or many files.
         if any("*" in element for element in after):
-
             # Generate results
             full_paths = [full_path for full_path in root.glob("/".join(after))]
 

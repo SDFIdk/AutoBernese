@@ -496,7 +496,11 @@ def transform_sitelog_records_to_STA_lines(
     return type_1_lines, type_2_lines
 
 
-def create_sta_file_from_sitelogs(sitelog_filenames: list[pathlib.Path | str], individually_calibrated: list[str], ofname: pathlib.Path | str) -> None:
+def create_sta_file_from_sitelogs(
+    sitelog_filenames: list[pathlib.Path | str],
+    individually_calibrated: list[str],
+    ofname: pathlib.Path | str,
+) -> None:
     """
     Combine data from given sitelog files into a STA-file.
 
@@ -505,14 +509,13 @@ def create_sta_file_from_sitelogs(sitelog_filenames: list[pathlib.Path | str], i
     type_2_rows = []
 
     for fname in sorted(sitelog_filenames):
-
         # Extract sitelog data
-        log.info(f'Read {fname.name} ...')
+        log.info(f"Read {fname.name} ...")
         try:
             sitelog = Sitelog(fname)
-            log.debug(f'{fname.name} read ...')
+            log.debug(f"{fname.name} read ...")
         except Exception as e:
-            log.warn(f'{fname.name} could not be read: {e!r} ...')
+            log.warn(f"{fname.name} could not be read: {e!r} ...")
             continue
 
         # Transform sitelog data
@@ -538,7 +541,6 @@ def create_sta_file_from_sitelogs(sitelog_filenames: list[pathlib.Path | str], i
     sta_content = pkg.sta_template.read_text().format(**data)
 
     ofname.write_text(sta_content)
-
 
 
 def main():

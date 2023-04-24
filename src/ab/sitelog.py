@@ -235,7 +235,7 @@ class Sitelog:
         try:
             sitelog_content = filename.read_text()
         except:
-            sitelog_content = filename.read_text(encoding='cp1252')
+            sitelog_content = filename.read_text(encoding="cp1252")
 
         # Extract
         sections = parse_sections(sitelog_content)
