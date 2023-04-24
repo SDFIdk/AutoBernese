@@ -1,66 +1,73 @@
 # local: &local __ab__
 
+# Bernese GNSS Software environment variables
 bsw_env:
-  - &BSW !ENV [C, .]
+
+  # Installation directory
+  - &C !ENV [C, .]
+
+  # DATAPOOL directory
   - &D !ENV [D, .]
 
-derived:
-  env: &env !Parent [*BSW]
+  # CAMPAIGN directory
+  - &P !ENV [P, .]
+
+  # User directory
+  - &U !ENV [U, .]
+
+environment:
+  env_root: &env_root !Parent [*C]
+  ab_root: &ab_root !Path [*env_root, autobernese]
+  # system_user_root: !Path [*ab_root, system_user]
+  logging:
+    filename: !Path [*ab_root, autobernese.log]
+    format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    style: '%'
+    level: DEBUG
+  # datafiles:
+  #   sources: !Path [*ab_root, sources.yaml]
 
 common:
 - &sitelogs !Path [*D, sitelogs]
 
-system_user:
-  system_path: !Path [*env, system]
+station_meta:
+  sitelogs: # !Path [*sitelogs, '*.log']
+  - !Path [*sitelogs, esbc*.log]
+  - !Path [*sitelogs, fer5*.log]
+  - !Path [*sitelogs, fyha*.log]
+  - !Path [*sitelogs, gesr*.log]
+  - !Path [*sitelogs, haby*.log]
+  - !Path [*sitelogs, hirs*.log]
+  - !Path [*sitelogs, tejh*.log]
+  - !Path [*sitelogs, mojn*.log]
+  - !Path [*sitelogs, skej*.log]
+  - !Path [*sitelogs, riko*.log]
+  - !Path [*sitelogs, fyno*.log]
+  - !Path [*sitelogs, esh5*.log]
+  - !Path [*sitelogs, grej*.log]
 
-logging:
-  filename: !Path [*env, autobernese.log]
-  format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
-  datefmt: '%Y-%m-%d %H:%M:%S'
-  style: '%'
-  level: DEBUG
+  individually_calibrated: [BUDD, MOJN, RIKO]
 
 campaign_types:
 
   default:
     name: Default campaign
 
-    sitelogs2sta:
-      sites: [
-        # IGS
-        OSLS, STAS, SMID, SULD,
-        BUDP, BOR1, MAR6, ONSA,
-        POTS, RIGA, SPT0, VIS0,
-        WSRT, WTZR,
+    sites_needed: [
+      # IGS
+      OSLS, STAS, SMID, SULD,
+      BUDP, BOR1, MAR6, ONSA,
+      POTS, RIGA, SPT0, VIS0,
+      WSRT, WTZR,
 
-        # Local
-        ESBC, ESBH, FER5, FYHA,
-        GESR, HABY, HIRS, SMI2,
-        SUL5, TEJH, MOJN, BUDD,
-        SKEJ, RIKO, FYNO, ESH5,
-        GREJ
-      ]
-      sitelogs:
-      # TODO: Create sitelog-resolver that takes a site name and the path
-      - !Path [*sitelogs, esbc00dnk_20221113.log]
-      - !Path [*sitelogs, ESBH00DNK.log]
-      - !Path [*sitelogs, FER500DNK.log]
-      - !Path [*sitelogs, FYHA00DNK.log]
-      - !Path [*sitelogs, GESR00DNK.log]
-      - !Path [*sitelogs, HABY00DNK.log]
-      - !Path [*sitelogs, HIRS00DNK.log]
-      - !Path [*sitelogs, TEJH00DNK.log]
-      - !Path [*sitelogs, MOJN00DNK.log]
-      - !Path [*sitelogs, SKEJ00DNK.log]
-      - !Path [*sitelogs, RIKO00DNK.log]
-      - !Path [*sitelogs, FYNO00DNK.log]
-      - !Path [*sitelogs, ESH500DNK.log]
-      - !Path [*sitelogs, GREJ00DNK.log]
-
-      individually_calibrated:
-      - BUDD
-      - MOJN
-      - RIKO
+      # Local
+      ESBC, ESBH, FER5, FYHA,
+      GESR, HABY, HIRS, SMI2,
+      SUL5, TEJH, MOJN, BUDD,
+      SKEJ, RIKO, FYNO, ESH5,
+      GREJ
+    ]
 
   nkg:
     name: NKG
