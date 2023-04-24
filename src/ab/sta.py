@@ -185,10 +185,14 @@ def create_receiver_and_antenna_change_records(
 
     # At this point, either there are no more sub sections with receiver changes or antenna changes
 
-    # Could both be the case?
+    # Neither receiver nor antenna changes left
+    if ix_r == ix_r_max and ix_a == ix_a_max:
+        return r
+
+    # There must only be changes left for receiver or antenna (XOR)
     assert (ix_r == ix_r_max) ^ (
         ix_a == ix_a_max
-    ), f"Assumption violated: Both receivers and antennae changes available."
+    ), f"Assumption violated: Both receiver and antenna changes available."
     # No: either one instrument has more changes or none.
     # If no changes are left for either, the following while loops will not run.
 
@@ -459,18 +463,10 @@ def map_to_type_2_row(
     )
 
 
-# Load
-# ----
-
-
 def STA_created_timestamp(d: dt.datetime | dt.date = None) -> str:
     if d is None:
         d = dt.datetime.now()
     return d.strftime("%d-%b-%y %H:%M").upper()
-
-
-# Main
-# ----
 
 
 def transform_sitelog_records_to_STA_lines(
