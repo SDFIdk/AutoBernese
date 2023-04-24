@@ -429,7 +429,6 @@ def map_to_type_2_row(
 
     antenna_no = antenna_serial_number[-5:]
     if type_calibration:
-        # antenna_serial_number = type_calibrated_serial
         antenna_no = type_calibrated_serial
 
     if date_removed.strip() == "":
@@ -477,6 +476,10 @@ def STA_created_timestamp(d: dt.datetime | dt.date = None) -> str:
 def transform_sitelog_records_to_STA_lines(
     sitelog: Sitelog, type_calibration: bool = True
 ) -> dict[Any, Any]:
+    """
+    Create lines for STA file out of given Sitelog instance.
+
+    """
     log.info(f"Build Type-001 line for {sitelog.filename.name}")
     prepared = {**sitelog.section_1, **dict(fname=sitelog.filename)}
     type_1_lines = [Type001Row(**map_to_type_1_row(**prepared))]
@@ -497,33 +500,23 @@ def transform_sitelog_records_to_STA_lines(
     return type_1_lines, type_2_lines
 
 
-def main():
-    # General configuration
-    config = configuration.load()
-    station_meta = config.get("station_meta")
-    individually_calibrated = station_meta.get("individually_calibrated")
-    sitelog_filenames = station_meta.get("sitelogs")
+def create_sta_file_from_sitelogs(sitelog_filenames: list[pathlib.Path | str], individually_calibrated: list[str], ofname: pathlib.Path | str) -> None:
+    """
+    Combine data from given sitelog files into a STA-file.
 
-    # Campaign configuration
-    # TODO: Have a campaign configuration file, and if none given, use the
-    # default campaign configuration.
-    campaign = config.get("campaign_types").get("default")
-
-    # Combine several sitelogs converted to STa-data for a single STA-file.
+    """
     type_1_rows = []
     type_2_rows = []
 
-    # TODO: Remove rich import
-    from rich import print
-
     for fname in sorted(sitelog_filenames):
+
         # Extract sitelog data
-        print(f'Read {fname.name} ...', end='')
+        log.info(f'Read {fname.name} ...')
         try:
             sitelog = Sitelog(fname)
-            print('[green][ OK ][/green]')
-        except:
-            print('[red][ BAD ][/red]')
+            log.debug(f'{fname.name} read ...')
+        except Exception as e:
+            log.warn(f'{fname.name} could not be read: {e!r} ...')
             continue
 
         # Transform sitelog data
@@ -548,7 +541,24 @@ def main():
     )
     sta_content = pkg.sta_template.read_text().format(**data)
 
+    ofname.write_text(sta_content)
+
+
+
+def main():
+    # General configuration
+    config = configuration.load()
+    station_meta = config.get("station_meta")
+    individually_calibrated = station_meta.get("individually_calibrated")
+    sitelog_filenames = station_meta.get("sitelogs")
+
+    # Campaign configuration
+    # TODO: Have a campaign configuration file, and if none given, use the
+    # default campaign configuration.
+    # campaign = config.get("campaign_types").get("default")
+
     # Save the data
     # TODO: Store it in the campaign directory
     ofname = pathlib.Path(".") / "campaign.STA"
-    ofname.write_text(sta_content)
+
+    create_sta_file_from_sitelogs(sitelog_filenames, individually_calibrated, ofname)
