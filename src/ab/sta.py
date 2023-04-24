@@ -5,16 +5,15 @@ Concept: Implement one sitelog translated to STA-file.
 
 Problem ascertainment:
 
-*   Changes occur in parallel in sections 3 (reeivers) and 4 (antennae).
-*   A section always has an installation date
+*   Changes occur in parallel in sections 3 (receivers) and 4 (antennae).
+*   A section always has an installation date.
 *   All but the last section (the current/active one) have date of removal.
 *   A line in the STA file section 002 is any change in either antenna or
-    receiver.
-*   As antenna and receiver information changes are grouped toghether in
-    this one line, and the change in either equipment must be accounted for
-    (they can occur on the same date, however), the timeline must be created
-    with the different windows in which either receiver and antenna were
-    active.
+    receiver or both (if the install date is the exact same for both).
+*   As antenna and receiver information changes are grouped toghether in this
+    one line, and the change in either equipment must be accounted for, the
+    timeline must be created with the different windows in which either receiver
+    and antenna were active.
 
 Given:
 
@@ -50,6 +49,7 @@ should be extracted:
 |           | Marker->ARP East  | %.4f         |                 |             |
 
 """
+import re
 import logging
 from typing import Any
 import datetime as dt
@@ -137,7 +137,6 @@ def create_receiver_and_antenna_change_records(
 
         next_receiver_installed = next_receiver.get("date_installed")
         next_antenna_installed = next_antenna.get("date_installed")
-        print(f"{next_receiver_installed=}, {next_antenna_installed=}")
 
         # Case: next receiver installed before next antenna
         if next_receiver_installed < next_antenna_installed:
@@ -184,8 +183,6 @@ def create_receiver_and_antenna_change_records(
         # Set end date on previous change record
         r[-2]["date_removed"] = date
 
-        print(f"While end: {ix_r=} {ix_a=}")
-
     # At this point, either there are no more sub sections with receiver changes or antenna changes
 
     # Could both be the case?
@@ -197,7 +194,6 @@ def create_receiver_and_antenna_change_records(
 
     # Take receiver changes first
     while ix_r < ix_r_max:
-        # print(f'While receivers: {ix_r=}, {ix_a=}')
         ix_r += 1
         receiver = receivers[ix_r]
         antenna = antennae[ix_a]
@@ -206,10 +202,11 @@ def create_receiver_and_antenna_change_records(
         r[-2]["date_removed"] = r[-1]["date_installed"]
 
     while ix_a < len(antennae) - 1:
-        # print(f'While antennae: {ix_r=}, {ix_a=}')
         ix_a += 1
         receiver = receivers[ix_r]
         antenna = antennae[ix_a]
+        # Note that the order is different here, since the change is in the
+        # antenna, and data from this change must update the dict last.
         r.append({**receiver, **antenna})
         # Set date removed on previous change to that of current change
         r[-2]["date_removed"] = r[-1]["date_installed"]
@@ -225,7 +222,7 @@ def __repr__(self) -> str:
     Repeating myself for now.
 
     """
-    return self._fstr.format(**asdict(self))
+    return self._fstr.format(**asdict(self)).strip()
 
 
 @dataclass
@@ -262,12 +259,6 @@ def station_name(four_character_id: str, domes: str) -> str:
     return f"{four_character_id:4s} {domes:s}"
 
 
-import re
-
-
-NON_DIGITS = re.compile(r"\D*", flags=re.M | re.S)
-
-
 def map_to_type_1_row(
     four_character_id: str,
     domes: str,
@@ -285,7 +276,7 @@ def map_to_type_1_row(
     return dict(
         station_name=station_name(four_character_id, domes),
         date_installed=date_installed,
-        name_old="",
+        name_old=f"{four_character_id}*",
         filename=pathlib.Path(fname).name,
     )
 
@@ -369,6 +360,9 @@ class Type002Row:
     __repr__ = __repr__
 
 
+NON_DIGITS = re.compile(r"\D*", flags=re.M | re.S)
+
+
 def build_receiver_no(receiver_serial_number: str) -> str:
     """
 
@@ -395,15 +389,14 @@ def build_receiver_no(receiver_serial_number: str) -> str:
 
 def map_to_type_2_row(
     # Section 1
-    site_name: str,
     four_character_id: str,
     domes: str,
     # Section 2
     city_or_town: str,
     country: str,
-    # Campaign configuration # TODO: IF this is generally true or false, then it should go into the station metadata in the general configuration file
+    # Campaign configuration
     type_calibration: bool,
-    # Change record
+    # Receiver/antenna change record
     receiver_type: str,
     receiver_serial_number: str,
     firmware: str,
@@ -436,13 +429,13 @@ def map_to_type_2_row(
 
     antenna_no = antenna_serial_number[-5:]
     if type_calibration:
-        antenna_serial_number = type_calibrated_serial
+        # antenna_serial_number = type_calibrated_serial
         antenna_no = type_calibrated_serial
 
     if date_removed.strip() == "":
         date_removed = "2099 12 31"
 
-    description = site_name
+    description = city_or_town
     country_abbr = country_code(country)
     if country_abbr is not None:
         description = f"{description}, {country_abbr}"
@@ -484,23 +477,14 @@ def STA_created_timestamp(d: dt.datetime | dt.date = None) -> str:
 def transform_sitelog_records_to_STA_lines(
     sitelog: Sitelog, type_calibration: bool = True
 ) -> dict[Any, Any]:
-    log.info(f"Build Type-001 line for {sitelog.filename}")
+    log.info(f"Build Type-001 line for {sitelog.filename.name}")
     prepared = {**sitelog.section_1, **dict(fname=sitelog.filename)}
     type_1_lines = [Type001Row(**map_to_type_1_row(**prepared))]
 
-    log.info(f"Build Type-002 lines for {sitelog.filename}")
+    log.info(f"Build Type-002 lines for {sitelog.filename.name}")
     type_2_data = create_receiver_and_antenna_change_records(
         sitelog.receivers, sitelog.antennae
     )
-
-    # # TODO: Remove debug code
-    # # Debug
-    # import json
-
-    # with open("sta-timeline.json", "w+") as f:
-    #     json.dump(type_2_data, f, indent=2)
-    # # END Debug
-    # # raise SystemExit
 
     calibration = dict(type_calibration=type_calibration)
     constants = {**sitelog.section_1, **sitelog.section_2, **calibration}
@@ -516,22 +500,37 @@ def transform_sitelog_records_to_STA_lines(
 def main():
     # General configuration
     config = configuration.load()
-    individually_calibrated = config.get("station_meta").get("individually_calibrated")
+    station_meta = config.get("station_meta")
+    individually_calibrated = station_meta.get("individually_calibrated")
+    sitelog_filenames = station_meta.get("sitelogs")
 
     # Campaign configuration
+    # TODO: Have a campaign configuration file, and if none given, use the
+    # default campaign configuration.
     campaign = config.get("campaign_types").get("default")
-    sitelog_filenames = campaign.get("sitelogs")
 
+    # Combine several sitelogs converted to STa-data for a single STA-file.
     type_1_rows = []
     type_2_rows = []
-    for fname in sitelog_filenames:
+
+    # TODO: Remove rich import
+    from rich import print
+
+    for fname in sorted(sitelog_filenames):
         # Extract sitelog data
-        sitelog = Sitelog(fname)
+        print(f'Read {fname.name} ...', end='')
+        try:
+            sitelog = Sitelog(fname)
+            print('[green][ OK ][/green]')
+        except:
+            print('[red][ BAD ][/red]')
+            continue
 
         # Transform sitelog data
         type_calibration = sitelog.station_id not in individually_calibrated
         _1, _2 = transform_sitelog_records_to_STA_lines(sitelog, type_calibration)
 
+        # Gather with the rest of the sitelog records
         type_1_rows.extend(_1)
         type_2_rows.extend(_2)
 
@@ -551,4 +550,5 @@ def main():
 
     # Save the data
     # TODO: Store it in the campaign directory
-    campaign.stafile.write_text(sta_content)
+    ofname = pathlib.Path(".") / "campaign.STA"
+    ofname.write_text(sta_content)
