@@ -232,7 +232,10 @@ class Sitelog:
         self, filename: pathlib.Path | str, individual_calibration: bool = False
     ) -> None:
         filename = pathlib.Path(filename)
-        sitelog_content = filename.read_text()
+        try:
+            sitelog_content = filename.read_text()
+        except:
+            sitelog_content = filename.read_text(encoding='cp1252')
 
         # Extract
         sections = parse_sections(sitelog_content)
