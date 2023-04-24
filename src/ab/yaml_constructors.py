@@ -17,12 +17,25 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
         return pathlib.Path(loader.construct_scalar(node)).absolute()
 
     if isinstance(node, yaml.SequenceNode):
+        # Let the first item be the root of the specified path
         first, *after = [loader.construct_object(v) for v in node.value]
         root = pathlib.Path(first)
+
+        # Case: The user is using a wild card to get at one or many files.
         if any("*" in element for element in after):
+
+            # Generate results
             full_paths = [full_path for full_path in root.glob("/".join(after))]
-            if full_paths:
+
+            # Return only the one item
+            if len(full_paths) == 1:
                 return full_paths[0]
+
+            # Return the entire list of results
+            elif len(full_paths) > 1:
+                return full_paths
+
+        # Return the specified path
         return root.joinpath(*after)
 
     raise KeyError(f"Must be single string or list of strings. Got {node.value!r} ...")
