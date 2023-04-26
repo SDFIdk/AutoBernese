@@ -1,16 +1,22 @@
 """
+Module for Bernese GNSS Software interaction.
+
 API for the Bernese GNSS Software system
 
 """
-from typing import Any
+from typing import (
+    Any,
+    Mapping,
+)
 import subprocess as sub
 import os
 import logging
 
-from ab.pkg import bpe_runner
+from ab import pkg
+from ab import campaign
+
 
 log = logging.getLogger(__name__)
-
 
 SETTINGS_DEFAULT_BPE: dict[str, str] = dict(
     ab_bpe_pcf_file="PPP",
@@ -32,17 +38,22 @@ def create_campaign(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
 
     """
     log.debug("Creating campaign...")
+    campaign.create()
 
 
-def runbpe(**bpe_settings) -> None:
+def runbpe(bpe_settings: Mapping) -> None:
     f"""
-    Start specified Proces Control File with Bernese Processing Engine.
+    Start specified Proces Control File with Bernese Processing Engine [BPE].
+
+    Technically, Python runs Perl-program that initiates and starts BPE with
+    given PCF.
 
     Parameters: {', '.join(SETTINGS_DEFAULT_BPE.keys())}
 
     """
     if not bpe_settings:
-        log.debug("Use default BPE settings")
+        log.debug("Use default BPE settings ...")
+        # TODO: Break here instead of running the EXAMPLE campaign
         bpe_settings = SETTINGS_DEFAULT_BPE
 
     keys_gotten = set(bpe_settings)
@@ -52,11 +63,16 @@ def runbpe(**bpe_settings) -> None:
         log.debug(msg)
         raise ValueError(msg)
 
+    log.info(f"Using the following PCF metadata as input:")
+    sz = max(len(key) for key in bpe_settings)
+    for key, value in bpe_settings.items():
+        log.info(f"{key: <{sz}s}: {value}")
     try:
         log.debug(f"Run BPE runner ...")
-        process = sub.Popen(f"{bpe_runner}", env={**os.environ, **bpe_settings})
+        process = sub.Popen(f"{pkg.bpe_runner}", env={**os.environ, **bpe_settings})
         process.wait()
         log.debug(f"BPE runner finished ...")
+
     except KeyboardInterrupt:
         process.terminate()
         process.kill()
