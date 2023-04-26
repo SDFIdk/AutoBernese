@@ -38,7 +38,7 @@ def env() -> None:
     Show BSW environment loaded into autobernese configuration
 
     """
-    print(configuration.load().get('bsw_env'))
+    print(configuration.load().get("bsw_env"))
 
 
 @main.command
@@ -93,6 +93,7 @@ def get_list() -> None:
     """
     log.debug("List campaigns ...")
     from ab import campaign
+
     print(campaign.get_list())
 
 

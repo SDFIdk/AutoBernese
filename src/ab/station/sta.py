@@ -47,6 +47,7 @@ log = logging.getLogger(__name__)
 
 """Transform sitelog data"""
 
+
 def create_receiver_and_antenna_change_records(
     receivers: list[dict[Any, Any]], antennae: list[dict[Any, Any]]
 ) -> list[dict[Any, Any]]:

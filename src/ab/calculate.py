@@ -11,5 +11,5 @@ def gps_week(date: dt.date | dt.datetime) -> int:
 
     """
     if date < GPS_EPOCH:
-        raise ValueError('Date must be on or after first GPS week. Got {date!r} ...')
+        raise ValueError("Date must be on or after first GPS week. Got {date!r} ...")
     return (date - GPS_EPOCH).days // 7
