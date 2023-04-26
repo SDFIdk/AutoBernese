@@ -7,7 +7,7 @@ import pathlib
 
 import yaml
 
-import ab.yaml_constructors
+import ab.configuration.yaml_constructors
 from ab import pkg
 
 

@@ -19,7 +19,8 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Any:
     if isinstance(node, yaml.SequenceNode):
         # Let the first item be the root of the specified path
         first, *after = [loader.construct_object(v) for v in node.value]
-        root = pathlib.Path(first)
+        root = pathlib.Path(first) # .resolve()
+        # print(root)
 
         # Case: The user is using a wild card to get at one or many files.
         if any("*" in element for element in after):
