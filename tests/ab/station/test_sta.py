@@ -1,6 +1,6 @@
 import datetime as dt
 
-from ab.sta import (
+from ab.station.sta import (
     STA_created_timestamp,
     build_receiver_no,
 )

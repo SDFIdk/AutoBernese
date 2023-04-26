@@ -39,7 +39,7 @@ from ab import (
     pkg,
     country_code,
 )
-from ab.sitelog import Sitelog
+from ab.station.sitelog import Sitelog
 
 
 log = logging.getLogger(__name__)
