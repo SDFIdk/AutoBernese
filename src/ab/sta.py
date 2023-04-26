@@ -1,7 +1,5 @@
 """
-Module for creating a stand-alone STA-file from a parsed sitelog.
-
-Concept: Implement one sitelog translated to STA-file.
+Module for creating a stand-alone STA-file from a list of sitelog files.
 
 Problem ascertainment:
 
@@ -15,38 +13,12 @@ Problem ascertainment:
     timeline must be created with the different windows in which either receiver
     and antenna were active.
 
-Given:
+Assumptions:
 
 *   STA-file version 1.03 (used as template).
 *   Antenna serial number is '9' * 6 for type-specific calibrated.
 *   The site for the given sitelog file is known to be either type- or
     individually-calibrated.
-
-The mapping from the sitelog is such that the following sections of the sitelog
-should be extracted:
-
-|  Section  |     Field key     | Value format |     Used for    | STA Section |
-|-----------|-------------------|--------------|-----------------|-------------|
-| Section 1 |                   |              |                 |             |
-|           | Four Character ID | AS-IS        | STATION NAME    |         001 |
-|           | IERS DOMES Number | AS-IS        | STATION NAME    |             |
-|           | Date Installed    | %y%m%d       |                 |             |
-| Section 2 |                   |              |                 |             |
-|           | City or Town      | AS-IS        | DESCRIPTION     |             |
-| Section 3 |                   |              |                 |             |
-|           | Receiver Type     | AS-IS        |                 |             |
-|           | Serial Number     | AS-IS        |                 |             |
-|           | Firmware Version  | AS-IS        |                 |             |
-|           | Date Installed    | %y%m%d       |                 |             |
-|           | Date Removed      | %y%m%d       |                 |             |
-| Section 4 |                   |              |                 |             |
-|           | Antenna Type      |              |                 |         002 |
-|           |                   | 0.0000       | NORTH, EAST, UP |             |
-|           | Serial Number     | AS-IS        |                 |             |
-|           | Date Installed    | %y%m%d       |                 |             |
-|           | Marker->ARP Up    | %.4f         |                 |             |
-|           | Marker->ARP North | %.4f         |                 |             |
-|           | Marker->ARP East  | %.4f         |                 |             |
 
 """
 import re
@@ -65,6 +37,7 @@ import yaml
 from ab import (
     configuration,
     pkg,
+    country_code,
 )
 from ab.sitelog import Sitelog
 
@@ -74,26 +47,6 @@ log = logging.getLogger(__name__)
 
 """Transform sitelog data"""
 
-_COUNTRY_CODES: dict[str, str] = None
-
-
-@functools.cache
-def country_code(country_name: str) -> str:
-    """
-    Get three-letter country code for given country name if it exists in the
-    package-version of the ISO 3166 standard.
-
-    References:
-    -----------
-    *   [ISO 3166 Country Codes](https://www.iso.org/iso-3166-country-codes.html)
-
-    """
-    global _COUNTRY_CODES
-    if _COUNTRY_CODES is None:
-        _COUNTRY_CODES = yaml.safe_load(pkg.country_codes.read_text())
-    return _COUNTRY_CODES.get(country_name.strip())
-
-
 def create_receiver_and_antenna_change_records(
     receivers: list[dict[Any, Any]], antennae: list[dict[Any, Any]]
 ) -> list[dict[Any, Any]]:
@@ -101,7 +54,6 @@ def create_receiver_and_antenna_change_records(
     Build timeline of changes in either receiver or antenna.
 
     """
-    # TODO: Git-comit msg: Re-implement logic from perl program to refactor later
     assert (
         receivers and antennae
     ), f"Assumption violated: There must always be one receiver and antenna"
@@ -419,14 +371,15 @@ def map_to_type_2_row(
     Map sitelog section-2 data to key-value pairs needed for a row in
     the STA-file section `TYPE 002: STATION INFORMATION`
 
+    Rules for antenna serial number and antenna number:
+    *   If the antenna is individually-calibrated,
+        -   use the value in the record.
+        -   for the short version, use only the rightmost 5 digits in the
+            number.
+    *   otherwise:
+        -   Use the type-calibration-convention value '999999' for antenna_no.
+
     """
-    # Rules for antenna serial number and antenna number:
-    # *   If the antenna is individually-calibrated,
-    #     -   use the value in the record.
-    #     -   for the short version, use only the rightmost 5 digits in the
-    #         number.
-    # *   otherwise:
-    #     -   Use the type-calibration-convention value '999999' for both values.
 
     # By convention this value is used for type-calibrated instruments.
     type_calibrated_serial = "9" * 6
@@ -439,7 +392,7 @@ def map_to_type_2_row(
         date_removed = "2099 12 31"
 
     description = city_or_town
-    country_abbr = country_code(country)
+    country_abbr = country_code.get(country)
     if country_abbr is not None:
         description = f"{description}, {country_abbr}"
 
@@ -497,18 +450,23 @@ def transform_sitelog_records_to_STA_lines(
 
 
 def create_sta_file_from_sitelogs(
-    sitelog_filenames: list[pathlib.Path | str],
+    sitelogs: list[pathlib.Path | str],
     individually_calibrated: list[str],
-    ofname: pathlib.Path | str,
+    filename_sta: pathlib.Path | str,
+    **_: dict[Any, Any],
 ) -> None:
     """
     Combine data from given sitelog files into a STA-file.
 
     """
+    # Output data
+    filename_sta = pathlib.Path(filename_sta)
+    filename_sta.parent.mkdir(parents=True, exist_ok=True)
     type_1_rows = []
     type_2_rows = []
 
-    for fname in sorted(sitelog_filenames):
+    # Handle each site-log file
+    for fname in sorted(sitelogs):
         # Extract sitelog data
         log.info(f"Read {fname.name} ...")
         try:
@@ -526,9 +484,8 @@ def create_sta_file_from_sitelogs(
         type_1_rows.extend(_1)
         type_2_rows.extend(_2)
 
-    log.info("Build .STA-file")
-
     # Load station data
+    log.info(f"Write output to {filename_sta} ...")
     data = dict(
         created_time=STA_created_timestamp(),
         type_1_rows="\n".join(str(row) for row in type_1_rows),
@@ -539,24 +496,4 @@ def create_sta_file_from_sitelogs(
         type_5_rows="",
     )
     sta_content = pkg.sta_template.read_text().format(**data)
-
-    ofname.write_text(sta_content)
-
-
-def main():
-    # General configuration
-    config = configuration.load()
-    station_meta = config.get("station_meta")
-    individually_calibrated = station_meta.get("individually_calibrated")
-    sitelog_filenames = station_meta.get("sitelogs")
-
-    # Campaign configuration
-    # TODO: Have a campaign configuration file, and if none given, use the
-    # default campaign configuration.
-    # campaign = config.get("campaign_types").get("default")
-
-    # Save the data
-    # TODO: Store it in the campaign directory
-    ofname = pathlib.Path(".") / "campaign.STA"
-
-    create_sta_file_from_sitelogs(sitelog_filenames, individually_calibrated, ofname)
+    filename_sta.write_text(sta_content)

@@ -1,37 +1,51 @@
 # local: &local __ab__
 
-# Bernese GNSS Software environment variables
+# Bernese GNSS Software [BSW] environment variables available after 'source'ing
+# the shell script` LOADGPS.setvar` in the root of the installation directory.
 bsw_env:
 
   # Installation directory
-  - &C !ENV [C, .]
+  C: &C !ENV [C, .]
+
+  # Bernese program panels
+  PAN: &PAN !ENV [PAN, .]
+
+  # Global model files used by Bernese programs
+  MODEL: &MODEL !ENV [MODEL, .]
+
+  # Global configuration file used by Bernese programs
+  CONFIG: &CONFIG !ENV [CONFIG, .]
 
   # DATAPOOL directory
-  - &D !ENV [D, .]
+  D: &D !ENV [D, .]
 
   # CAMPAIGN directory
-  - &P !ENV [P, .]
+  P: &P !ENV [P, .]
 
   # User directory
-  - &U !ENV [U, .]
+  U: &U !ENV [U, .]
 
+# Autobernese runtime environment
 environment:
   env_root: &env_root !Parent [*C]
   ab_root: &ab_root !Path [*env_root, autobernese]
-  # system_user_root: !Path [*ab_root, system_user]
   logging:
     filename: !Path [*ab_root, autobernese.log]
     format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
     style: '%'
     level: DEBUG
+
+  # system_user_root: !Path [*ab_root, system_user]
+  # state: !Path [*ab_root, state.yaml]
   # datafiles:
   #   sources: !Path [*ab_root, sources.yaml]
 
 common:
 - &sitelogs !Path [*D, sitelogs]
+- &station !Path [*D, station]
 
-station_meta:
+station:
   sitelogs: # !Path [*sitelogs, '*.log']
   - !Path [*sitelogs, esbc*.log]
   - !Path [*sitelogs, fer5*.log]
@@ -49,49 +63,64 @@ station_meta:
 
   individually_calibrated: [BUDD, MOJN, RIKO]
 
-campaign_types:
+  filename_sta: !Path [*station, sitelogs.STA]
 
-  default:
-    name: Default campaign
+campaign:
 
-    sites_needed: [
-      # IGS
-      OSLS, STAS, SMID, SULD,
-      BUDP, BOR1, MAR6, ONSA,
-      POTS, RIGA, SPT0, VIS0,
-      WSRT, WTZR,
+  menu: !Path [*PAN, MENU_CMP.INP]
 
-      # Local
-      ESBC, ESBH, FER5, FYHA,
-      GESR, HABY, HIRS, SMI2,
-      SUL5, TEJH, MOJN, BUDD,
-      SKEJ, RIKO, FYNO, ESH5,
-      GREJ
-    ]
+  types:
 
-  nkg:
-    name: NKG
+    default:
+      name: Default campaign
 
-    # Til STA
-    IGS_stations:
-    - ABCD
-    - EFGF
+      sites_needed: [
+        # IGS
+        OSLS, STAS, SMID, SULD,
+        BUDP, BOR1, MAR6, ONSA,
+        POTS, RIGA, SPT0, VIS0,
+        WSRT, WTZR,
 
-    # Til STA
-    COR_stations:
-    - sadf
-    - fdsa
+        # Local
+        ESBC, ESBH, FER5, FYHA,
+        GESR, HABY, HIRS, SMI2,
+        SUL5, TEJH, MOJN, BUDD,
+        SKEJ, RIKO, FYNO, ESH5,
+        GREJ
+      ]
+
+    nkg:
+      name: NKG
+
+      # Til STA
+      IGS_stations:
+      - ABCD
+      - EFGF
+
+      # Til STA
+      COR_stations:
+      - sadf
+      - fdsa
 
 sources:
 
-- name: sadf
-  url: ftp.aiub..../%Y(_M)?/*.ION.Z
-  destination: !Path [*D, BSW54] # sti/til/DATAPOOL/BSW54/...
+# - name: EUREF STA file
+#   url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
+#   destination: !Path [*D, REF54]
 
 - name: EUREF STA file
   url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
-  # destination: !ENV [U, .]
-  destination: .
+  destination: *station
+
+- name: BSW Model data
+  url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
+  destination: *MODEL
+  # TODO: Remove debug path
+  # destination: !Path [., __ab__/MODEL]
+
+- name: BSW Configuration data
+  url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
+  destination: *CONFIG
 
 # - name: EPN
 #   url: ftp://epncb.oma.be
