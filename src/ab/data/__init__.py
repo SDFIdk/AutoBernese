@@ -5,97 +5,52 @@ Module for downloading source data
 import datetime as dt
 from dataclasses import dataclass
 from typing import Any
-from ftplib import FTP
-from pathlib import Path
-import logging
+import pathlib
 from urllib.parse import (
     urlparse,
     ParseResult,
 )
+import ftplib
+import logging
 
 import requests
+
+from ab.data import (
+    ftp,
+    http,
+)
 
 
 log = logging.getLogger(__name__)
 
 
-# _SESSIONS: dict[str, requests.Session | FTP] = {}
+def date_changed(fname: pathlib.Path | str) -> dt.date:
+    raw = pathlib.Path(fname).stat().st_ctime
+    return dt.datetime.fromtimestamp(raw).date()
 
 
-# def get_session(which: requests.Session | FTP, call_sign: str) -> requests.Session | FTP:
-#     global _SESSIONS
-#     if call_sign not in _SESSIONS:
-#         _SESSIONS[call_sign] = which()
+def already_downloaded(fname: pathlib.Path) -> bool:
+    return fname.is_file() and date_changed(fname) == dt.date.today()
 
 
 @dataclass
 class Source:
     name: str
-    url: str | Path
-    destination: str | Path
+    url: str | pathlib.Path
+    destination: str | pathlib.Path
     parameters: dict[str, Any]
-    filenames: list[str | Path]
+    filenames: list[str | pathlib.Path]
 
-    _session: requests.Session | FTP = None
+    _session: requests.Session | ftplib.FTP = None
 
     @property
-    def session(self) -> requests.Session | FTP:
+    def session(self) -> requests.Session | ftplib.FTP:
         ...
 
-    def download(self):
-        ...
-
-
-def http_download(
-    domain: str, remotepath: Path, localpath: Path, *, call_sign="Odyssey"
-) -> None:
-    """
-    Download a file over HTTP (TLS or no)
-
-    """
-    url = f"{domain}{remotepath}"
-    ofname = localpath / remotepath.name
-    log.info(f"Download {url} to {ofname}...")
-    r = requests.get(url, allow_redirects=True, timeout=30)
-    ofname.write_bytes(r.content)
-
-
-def date_changed(fname: Path | str) -> dt.date:
-    raw = Path(fname).stat().st_ctime
-    return dt.datetime.fromtimestamp(raw).date()
-
-
-def already_downloaded(fname: Path) -> bool:
-    return fname.is_file() and date_changed(fname) == dt.date.today()
-
-
-def ftp_download(
-    domain: str, remotepath: Path, ofname: Path, *, force=False, call_sign="Aquarius"
-) -> None:
-    """
-    Handles FTP (insecure) and FTPS downloads using anonymous user.
-
-    """
-    if already_downloaded(ofname) and not force:
-        log.debug(f"{ofname.name} already downloaded today ...")
-        return
-    with FTP(domain) as ftp:
-        ftp.login()
-        ftp.cwd(f"{remotepath.parent}")
-        ftp.retrbinary(f"RETR {remotepath.name}", ofname.write_bytes)
-
-
-def ftp_list_files(parsed: ParseResult) -> list[str]:
-    """
-    List files in given location.
-
-    """
-    log.debug(f"List files in FTP directory {parsed.netloc}{parsed.path} ...")
-    with FTP(parsed.netloc) as ftp:
-        ftp.login()
-        ftp.cwd(parsed.path)
-        is_file = lambda candidate: ftp.nlst(candidate) == [candidate]
-        return [candidate for candidate in ftp.nlst() if is_file(candidate)]
+    def download(self, ofname):
+        if already_downloaded(ofname):  #  and not force:
+            log.debug(f"{ofname.name} already downloaded today ...")
+            return
 
 
 def download(sources) -> None:
@@ -134,8 +89,8 @@ def download(sources) -> None:
         # print(parsed)
         source_is_directory = parsed.path.endswith("/")
         # TODO: Rename paths path and dest to remote and local dir.
-        path = Path(parsed.path)
-        dest = Path(source.get("destination"))
+        path = pathlib.Path(parsed.path)
+        dest = pathlib.Path(source.get("destination"))
 
         if source_is_directory:
             dest.mkdir(parents=True, exist_ok=True)
@@ -144,7 +99,7 @@ def download(sources) -> None:
                 filenames = source.get('filenames')
             else:
                 # Get all files
-                filenames = ftp_list_files(parsed)
+                filenames = ftp.list_files(parsed)
 
             # Build full paths to individual source and destination files
             ifnames = (path / fname for fname in filenames)
@@ -154,7 +109,7 @@ def download(sources) -> None:
             for ifname, ofname in zip(ifnames, ofnames):
                 log.debug(f"Download {ifname}")
                 # TODO: Check protocol
-                ftp_download(
+                ftp.download(
                     parsed.netloc,
                     ifname,
                     ofname,
@@ -163,20 +118,17 @@ def download(sources) -> None:
 
         # TODO: Reconsider assumption
         # Assume that the destination is a directory
-        ofname = dest / Path(source["url"]).name
+        ofname = dest / pathlib.Path(source["url"]).name
 
+        args = (
+            parsed.netloc,
+            path,
+            ofname,
+        )
         match parsed.scheme:
             case "http" | "https":
-                http_download(
-                    parsed.netloc,
-                    path,
-                    ofname,
-                )
+                http.download(*args)
             case "ftp":
-                ftp_download(
-                    parsed.netloc,
-                    path,
-                    ofname,
-                )
+                ftp.download(*args)
 
     log.debug("Finished downloading sources")
