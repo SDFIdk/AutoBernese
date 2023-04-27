@@ -13,7 +13,7 @@ import os
 import logging
 
 from ab import pkg
-from ab import campaign
+from ab.bsw import campaign
 
 
 log = logging.getLogger(__name__)
