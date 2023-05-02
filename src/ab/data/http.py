@@ -3,35 +3,35 @@ Module for downloading files over HTTP.
 
 """
 import logging
-import pathlib
+from pathlib import Path
 
 import requests
+
+# from ab.data import Source
 
 
 log = logging.getLogger(__name__)
 
 _SESSION: requests.Session = None
-_HEADERS: dict[str, str] = dict(
-
-)
 
 
-def get_session(headers: dict[str, str] = None) -> requests.Session:
-    global _SESSION, _HEADERS
-    if _SESSION is None and headers is None:
-        _SESSION = requests.Session(headers={**_HEADERS, **headers})
+def get_session() -> requests.Session:
+    global _SESSION
+    if _SESSION is None:
+        _SESSION = requests.Session()
     return _SESSION
 
 
-def download(
-    domain: str, remotepath: pathlib.Path, localpath: pathlib.Path,
-) -> None:
+# def download(
+#     domain: str, remotepath: pathlib.Path, localpath: pathlib.Path,
+# ) -> None:
+def download(url: str, local_path: str) -> None:
     """
-    Download a file over HTTP (TLS or no)
+    Download a file over HTTP (TLS or not)
 
     """
-    url = f"{domain}{remotepath}"
-    ofname = localpath / remotepath.name
+    ofname = Path(local_path) / Path(url).name
     log.info(f"Download {url} to {ofname}...")
     r = get_session().get(url, allow_redirects=True, timeout=30)
+    # TODO: Check response is OK, before saving the data
     ofname.write_bytes(r.content)

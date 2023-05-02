@@ -3,7 +3,6 @@ Configuration
 
 """
 from typing import Any
-import pathlib
 
 import yaml
 
@@ -11,7 +10,7 @@ import ab.configuration.yaml_constructors
 from ab import pkg
 
 
-_CONFIGURATION: Any = None
+_CONFIGURATION: dict[str, Any] = None
 
 
 def load() -> Any:
@@ -20,13 +19,6 @@ def load() -> Any:
 
     """
     global _CONFIGURATION
-
-    if _CONFIGURATION is not None:
-        return _CONFIGURATION
-
-    ifname = pathlib.Path(pkg.configuration)
-    if not ifname.is_file():
-        raise LookupError(f"Configuration file {ifname} does not exist ...")
-
-    _CONFIGURATION = yaml.safe_load(ifname.read_text())
+    if _CONFIGURATION is None:
+        _CONFIGURATION = yaml.safe_load(pkg.configuration.read_text())
     return _CONFIGURATION

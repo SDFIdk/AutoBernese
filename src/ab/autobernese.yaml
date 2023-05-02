@@ -42,6 +42,9 @@ environment:
   #   sources: !Path [*ab_root, sources.yaml]
 
 common:
+# TODO: Remove test directory
+- &test !Path [*D, test]
+
 - &sitelogs !Path [*D, sitelogs]
 - &station !Path [*D, station]
 
@@ -65,71 +68,83 @@ station:
 
   filename_sta: !Path [*station, sitelogs.STA]
 
-campaign:
+bsw:
 
-  menu: !Path [*PAN, MENU_CMP.INP]
+  campaign:
+    menu: !Path [*PAN, MENU_CMP.INP]
 
-  types:
+data:
 
-    default:
-      name: Default campaign
+  # Download scenarier:
+  #
+  # 1) Download en specifik fil på en FTP-server
+  #
+  # 2) Download alle filer (ikke i undermapper) fra en given mappe på en
+  #    FTP-server til en given destinationsmappe (indholdet, ikke i en
+  #    undermappe)
+  #
+  # 3) Download specifik fil givet en URL via HTTP.
+  #
+  # 4) Download specifikke filer angivet som fulde filnavne fra en given mappe
+  #    på en FTP-server. Kræver, at man lister navne på mappen op og kun tager
+  #    dem, der findes.
+  #
+  # 5) Download specifikke filtyper fra en FTP-servermappe, hvor filerne er
+  #    angivet med wildcard så som *.EPH.Z.
 
-      sites_needed: [
-        # IGS
-        OSLS, STAS, SMID, SULD,
-        BUDP, BOR1, MAR6, ONSA,
-        POTS, RIGA, SPT0, VIS0,
-        WSRT, WTZR,
+  sources:
 
-        # Local
-        ESBC, ESBH, FER5, FYHA,
-        GESR, HABY, HIRS, SMI2,
-        SUL5, TEJH, MOJN, BUDD,
-        SKEJ, RIKO, FYNO, ESH5,
-        GREJ
-      ]
+  # ad.1)
+  - !Source
+    name: EUREF STA file
+    url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
+    destination: *station
 
-    nkg:
-      name: NKG
+  # # ad.2)
+  - !Source
+    name: BSW Model data
+    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
+    destination: *MODEL
+    # TODO: Remove debug path
+    # destination: !Path [., __ab__/MODEL]
 
-      # Til STA
-      IGS_stations:
-      - ABCD
-      - EFGF
+  # ad.2)
+  - !Source
+    name: BSW Configuration data
+    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
+    destination: *CONFIG
 
-      # Til STA
-      COR_stations:
-      - sadf
-      - fdsa
+  # ad.3)
+  - !Source
+    name: TU Wien Vienna Mapping Model 3
+    url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
+    destination: !Path [*D, test, VMF3_1x1_OP, '{date.year}']
+    parameters:
+      date: !DateRange
+        beg: 2023-01-01
+        end: 2023-01-02
+      hour: ['00', '06', '12', '18']
 
-sources:
+  # ad.4)
+  - !Source
+    name: Universal and BSW-specific antenna files
+    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
+    filenames:
+    - ANTENNA_I14.PCV
+    - ANTENNA_I20.PCV
+    - I14.ATX
+    - I20.ATX
+    destination: !Path [*D, REF54]
+    # download_rate: asdf
 
-# - name: EUREF STA file
-#   url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
-#   destination: !Path [*D, REF54]
-
-- name: EUREF STA file
-  url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
-  destination: *station
-
-- name: BSW Model data
-  url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
-  destination: *MODEL
-  # TODO: Remove debug path
-  # destination: !Path [., __ab__/MODEL]
-
-- name: BSW Configuration data
-  url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
-  destination: *CONFIG
-
-# - name: EPN
-#   url: ftp://epncb.oma.be
-#   destination:
-
-# - name: AIUB
-#   url: ftp://ftp.aiub.unibe.ch
-#   destination:
-
-# - name: SDFI
-#   url: ftp://ftp.sdfe.dk
-#   destination:
+  # ad.5)
+  # - !Source
+  #   name: Ionosphere and satellite-bias files
+  #   url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CODE/{year}/
+  #   destination: !Path [*test, CODE, '{year}']
+  #   parameters:
+  #     year: [2022, 2023]
+  #   filenames:
+  #   - '*.ION.Z'
+  #   - '*.BIA'
+  #   # max_age: 1

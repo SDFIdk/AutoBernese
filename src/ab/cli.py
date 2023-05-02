@@ -48,7 +48,6 @@ def config() -> None:
 
     """
     print(configuration.load())
-    log.debug("Configuration loaded ...")
 
 
 @main.command
@@ -113,7 +112,7 @@ def download_sources() -> None:
     Download sources based on campaign configuration file. TODO: Rewrite this to make it either a command for campaign-specific or general files.
 
     """
-    data.download(configuration.load().get("sources"))
+    data.download(configuration.load().get("data").get("sources"))
 
 
 # @main.command
@@ -125,12 +124,13 @@ def download_sources() -> None:
 #     organiser.prepare_campaign_data(*args, **kwargs)
 
 
-@main.group
+@main.group(invoke_without_command=True)
 def bpe() -> None:
     """
     Tools for the Bernese Processing Engine [BPE].
 
     """
+    print("BPE")
 
 
 @bpe.command
@@ -150,7 +150,8 @@ def run(**bpe_settings: dict[Any, Any]) -> None:
     Run Bernese Processing Engine [BPE].
 
     """
-    bsw.runbpe(bpe_settings)
+    # bsw.runbpe(bpe_settings)
+    bsw.runbpe()
 
 
 # @main.command
