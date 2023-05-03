@@ -75,24 +75,26 @@ bsw:
 
 data:
 
-  # Download scenarier:
-  #
-  # 1) Download en specifik fil på en FTP-server
-  #
-  # 2) Download alle filer (ikke i undermapper) fra en given mappe på en
-  #    FTP-server til en given destinationsmappe (indholdet, ikke i en
-  #    undermappe)
-  #
-  # 3) Download specifik fil givet en URL via HTTP.
-  #
-  # 4) Download specifikke filer angivet som fulde filnavne fra en given mappe
-  #    på en FTP-server. Kræver, at man lister navne på mappen op og kun tager
-  #    dem, der findes.
-  #
-  # 5) Download specifikke filtyper fra en FTP-servermappe, hvor filerne er
-  #    angivet med wildcard så som *.EPH.Z.
+  ftp:
+    list_directory_cache: !Path [*ab_root, list_directory.yaml]
 
   sources:
+
+  # Download scenarios:
+  #
+  # 1) Download specific file on an FTP-server.
+  #
+  # 2) Download all files (excluding directories) from a given directory on an
+  #    FTP server to a given destination directory.
+  #
+  # 3) Download specific files denoted with complete filenames from a given
+  #    source directory on an FTP server. This requires a liste of the filenames
+  #    in the directory.
+  #
+  # 4) Download specific files from an FTP server directory, where filenames are
+  #    given with a wildcard, e.g. '*.EPH.Z'.
+  #
+  # 5) Download specific file URI via HTTP.
 
   # ad.1)
   - !Source
@@ -105,16 +107,42 @@ data:
     name: BSW Model data
     url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
     destination: *MODEL
-    # TODO: Remove debug path
-    # destination: !Path [., __ab__/MODEL]
+    # max_age: 1
 
   # ad.2)
   - !Source
     name: BSW Configuration data
     url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
     destination: *CONFIG
+    # max_age: 1
 
   # ad.3)
+  - !Source
+    name: Universal and BSW-specific antenna files
+    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
+    destination: !Path [*D, REF54]
+    filenames:
+    - ANTENNA_I14.PCV
+    - ANTENNA_I20.PCV
+    - I14.ATX
+    - I20.ATX
+    # max_age: 1
+
+  # ad.4)
+  - !Source
+    name: Ionosphere and satellite-bias files
+    url: ftp://ftp.aiub.unibe.ch/CODE/{year}/
+    destination: !Path [*test, CODE, '{year}']
+    filenames:
+    - '*.ION.gz'
+    - '*.ION.Z'
+    - '*.BIA.gz'
+    - '*.BIA.Z'
+    parameters:
+      year: [2022, 2023]
+    # max_age: 1
+
+  # ad.5)
   - !Source
     name: TU Wien Vienna Mapping Model 3
     url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
@@ -124,27 +152,3 @@ data:
         beg: 2023-01-01
         end: 2023-01-02
       hour: ['00', '06', '12', '18']
-
-  # ad.4)
-  - !Source
-    name: Universal and BSW-specific antenna files
-    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
-    filenames:
-    - ANTENNA_I14.PCV
-    - ANTENNA_I20.PCV
-    - I14.ATX
-    - I20.ATX
-    destination: !Path [*D, REF54]
-    # download_rate: asdf
-
-  # ad.5)
-  # - !Source
-  #   name: Ionosphere and satellite-bias files
-  #   url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CODE/{year}/
-  #   destination: !Path [*test, CODE, '{year}']
-  #   parameters:
-  #     year: [2022, 2023]
-  #   filenames:
-  #   - '*.ION.Z'
-  #   - '*.BIA'
-  #   # max_age: 1

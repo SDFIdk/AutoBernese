@@ -12,9 +12,12 @@ from rich import print
 
 from ab import (
     configuration,
-    data,
     bsw,
     organiser,
+)
+from ab.data import (
+    ftp,
+    http,
 )
 from ab.station import (
     sitelog,
@@ -76,6 +79,52 @@ def sitelogs2sta(
     sta.create_sta_file_from_sitelogs(**configuration.load().get("station"))
 
 
+@main.command
+def download_sources() -> None:
+    """
+    Download sources based on campaign configuration file.
+
+    So far a source entry is assumed to be a Source instance.
+
+    """
+    sources = configuration.load().get("data").get("sources")
+    for source in sources:
+        msg = f"Download source: {source.name}"
+        print(msg)
+        log.debug(msg)
+        match source.protocol:
+            case "ftp":
+                ftp.download(source)
+            case "http" | "https":
+                http.download(source)
+    else:
+        msg = "Finished downloading sources"
+        print(msg)
+        log.debug(msg)
+
+
+@main.command
+def logfile() -> None:
+    """
+    Follow log file (run `tail -f path/to/logfile.log`).
+
+    """
+    filename = configuration.load().get("environment").get("logging").get("filename")
+    import subprocess as sub
+
+    try:
+        log.debug(f"Show log tail ...")
+        process = sub.Popen(["/usr/bin/tail", "-f", f"{filename}"])
+        process.wait()
+
+    except KeyboardInterrupt:
+        log.debug(f"Log tail finished ...")
+
+    finally:
+        process.terminate()
+        process.kill()
+
+
 @main.group
 def campaign() -> None:
     """
@@ -104,15 +153,6 @@ def create() -> None:
     """
     log.debug("Create campaign ...")
     bsw.create_campaign()
-
-
-@main.command
-def download_sources() -> None:
-    """
-    Download sources based on campaign configuration file. TODO: Rewrite this to make it either a command for campaign-specific or general files.
-
-    """
-    data.download(configuration.load().get("data").get("sources"))
 
 
 # @main.command

@@ -2,15 +2,17 @@
 Module for downloading files over HTTP.
 
 """
-import logging
 from pathlib import Path
+import logging
 
 import requests
 
-# from ab.data import Source
+from ab.data.source import Source
+from ab.data.stats import already_downloaded
 
 
 log = logging.getLogger(__name__)
+
 
 _SESSION: requests.Session = None
 
@@ -22,16 +24,19 @@ def get_session() -> requests.Session:
     return _SESSION
 
 
-# def download(
-#     domain: str, remotepath: pathlib.Path, localpath: pathlib.Path,
-# ) -> None:
-def download(url: str, local_path: str) -> None:
+def download(source: Source) -> None:
     """
     Download a file over HTTP (TLS or not)
 
     """
-    ofname = Path(local_path) / Path(url).name
-    log.info(f"Download {url} to {ofname}...")
-    r = get_session().get(url, allow_redirects=True, timeout=30)
-    # TODO: Check response is OK, before saving the data
-    ofname.write_bytes(r.content)
+    for pair in source.resolve():
+        destination = Path(pair.path_local)
+        destination.mkdir(parents=True, exist_ok=True)
+        ofname = destination / pair.fname
+        if already_downloaded(ofname):
+            log.debug(f"{ofname.name} already downloaded ...")
+            continue
+        log.info(f"Download {pair.uri} to {ofname} ...")
+        r = get_session().get(pair.uri, allow_redirects=True, timeout=30)
+        # TODO: Check response is OK, before saving the data
+        ofname.write_bytes(r.content)
