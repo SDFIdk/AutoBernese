@@ -23,6 +23,8 @@ from ab.station import (
     sitelog,
     sta,
 )
+from ab.gps import GPSWeek
+
 
 log = logging.getLogger(__name__)
 
@@ -125,34 +127,46 @@ def logfile() -> None:
         process.kill()
 
 
-@main.group
+@main.group(invoke_without_command=True)
 def campaign() -> None:
     """
     Command group for campaign-specific actions.
 
     """
+    bsw.campaign.init_template_dir()
 
 
 @campaign.command
-def get_list() -> None:
+def ls() -> None:
     """
-    List campaigns
+    List existing campaigns
 
     """
-    log.debug("List campaigns ...")
-    from ab import campaign
-
-    print(campaign.get_list())
+    log.debug("List existing campaigns ...")
+    print("\n".join(bsw.campaign.ls()))
 
 
 @campaign.command
-def create() -> None:
+def templates() -> None:
     """
-    Create campaign
+    List existing campaigns
 
     """
-    log.debug("Create campaign ...")
-    bsw.create_campaign()
+    log.debug("List available campaign templates ...")
+    print("\n".join(bsw.campaign.available_templates()))
+
+
+@campaign.command
+@click.argument("gpsweek", type=GPSWeek)
+@click.argument("template", type=str, default="default")
+def create(gpsweek: GPSWeek, template: str) -> None:
+    """
+    Create a campaign directory based on the specified template and adds the
+    campaign path to the list of available campaigns in the corresponding menu.
+
+    """
+    log.debug(f"Create campaign ...")
+    bsw.campaign.create(gpsweek, template)
 
 
 # @main.command

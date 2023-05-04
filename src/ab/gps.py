@@ -26,7 +26,10 @@ def date_from_gps_week(gps_week: str | int) -> dt.date:
 
 @dataclass
 class GPSWeek:
-    week: str
+    week: int
+
+    def __post_init__(self) -> None:
+        self.week = int(self.week)
 
     def date(self) -> dt.date:
         return date_from_gps_week(self.week)

@@ -18,3 +18,6 @@ country_codes = base.joinpath("country_code/ISO-3166-1-alpha-3.yaml")
 sta_template = base.joinpath("station/1.03.STA")
 
 demo_sitelog = base.joinpath("demo/abmf_20211124.log")
+
+campaign_template = base.joinpath("bsw/default.yaml")
+campaign_header = base.joinpath("bsw/campaign_header.yaml")
