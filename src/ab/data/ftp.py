@@ -21,7 +21,7 @@ import logging
 from ab import configuration
 from ab.cache import KeyValueCache
 from ab.data.source import Source
-from ab.data.stats import already_downloaded
+from ab.data.stats import already_updated
 
 
 log = logging.getLogger(__name__)
@@ -87,7 +87,6 @@ def download(source: Source) -> None:
         ftp.login()
 
         try:
-            # TODO: Check that we get at least one path
             for pair in source.resolve():
                 # Prepare local destination
 
@@ -135,10 +134,7 @@ def download(source: Source) -> None:
                     # Get the resolved destination filename
                     ofname = destination / fname
 
-                    # TODO: Implement safeguard here, so that we do not always
-                    # download everything older than a day. Most data should be a
-                    # one-time thing.
-                    if already_downloaded(ofname, max_age=source.max_age):
+                    if already_updated(ofname, max_age=source.max_age):
                         log.debug(f"{ofname.name} already downloaded ...")
                         continue
 

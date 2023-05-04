@@ -117,9 +117,8 @@ class Source:
     A Source instance can tell what method (scheme in URL language) is used so
     that the user can use the right tool to get the source.
 
-    TODO: Split source and URI resolution from how it is obtained and in what
-    way. Source may not be the best name, since it contains information about
-    the corresponding file destination(s).
+    Source may not be the best name, since it contains information about the
+    corresponding file destination(s).
 
     A Source instance handles the following input:
 
@@ -149,9 +148,10 @@ class Source:
             source files are downloaded for each of the paths resolved.
 
         -   Filenames may contain UNIX wildcard patterns as can be matched
-            against using Python's fnmatch module.
+            against using Python's fnmatch module. (See what wildards are
+            matchable in the documentation for fnmatch.)
 
-    Questions:
+    Questions addressed:
 
     *   Where to add the final URL parsing that will give the host/domain, path
         to download from?
@@ -174,7 +174,7 @@ class Source:
             forces one to change directory before getting a file in that
             directory.
 
-    *   For a Source instance, the same connection should be used for each
+    *   For a given Source instance, the same connection should be used for each
         filename that is to be downloaded from the source paths.
 
         -   This constrains where the final resolution of the filenames should
@@ -199,9 +199,6 @@ class Source:
     filenames: list[str | Path] = None
     parameters: dict[str, Iterable[Any]] = None
     max_age: int | float = math.inf
-
-    """
-    """
 
     def __post_init__(self):
         # Path version for path joining

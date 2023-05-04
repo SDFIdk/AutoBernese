@@ -1,7 +1,8 @@
+# IDEA. NOT IN USE.
 # local: &local __ab__
 
 # Bernese GNSS Software [BSW] environment variables available after 'source'ing
-# the shell script` LOADGPS.setvar` in the root of the installation directory.
+# the shell script `LOADGPS.setvar` in the root of the installation directory.
 bsw_env:
 
   # Installation directory
@@ -31,11 +32,14 @@ environment:
   ab_root: &ab_root !Path [*env_root, autobernese]
   logging:
     filename: !Path [*ab_root, autobernese.log]
-    format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
+    # Special parameters that can be added here are:
+    # `{user}` which adds the username using Python's getpass.getuser().
+    format: '%(asctime)s | {user} | %(levelname)s | %(name)s | %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
     style: '%'
     level: DEBUG
 
+  # IDEAS. NOT IN USE.
   # system_user_root: !Path [*ab_root, system_user]
   # state: !Path [*ab_root, state.yaml]
   # datafiles:
@@ -99,7 +103,7 @@ data:
   # ad.1)
   - !Source
     name: EUREF STA file
-    url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
+    url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
     destination: *station
 
   # # ad.2)

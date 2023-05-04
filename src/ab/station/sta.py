@@ -277,14 +277,16 @@ class Type002Row:
         "      001  "
         "{date_installed:10s}"
         " "
-        # This is bad, but a historical relic. TODO: Change this to include %H
-        # and %M. Sitelog format does not specify seconds.
+        # Stripping the timestamp is a historical relic.
+        #
+        # Note: Sitelog format does not specify seconds.
         "00 00 00"
         "  "
         "{date_removed:10s}"
         " "
-        # This is bad, but a historical relic. TODO: Change this to include %H
-        # and %M. Sitelog format does not specify seconds.
+        # Stripping the timestamp is a historical relic.
+        #
+        # Note: Sitelog format does not specify seconds.
         "00 00 00"
         "  "
         "{receiver_type: <20s}"

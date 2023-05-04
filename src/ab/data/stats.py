@@ -18,8 +18,14 @@ log = logging.getLogger(__name__)
 
 # Local files
 def date_changed(fname: Path | str) -> dt.date:
-    raw = Path(fname).stat().st_ctime
-    return dt.datetime.fromtimestamp(raw).date()
+    """
+    Return the last modification date for given file.
+
+    """
+    fname = Path(fname)
+    if not fname.is_file():
+        raise ValueError(f"File {fname!r} does not exist ...")
+    return dt.datetime.fromtimestamp(fname.stat().st_ctime).date()
 
 
 def file_age(fname: Path) -> int:
@@ -30,9 +36,9 @@ def file_age(fname: Path) -> int:
     return (dt.date.today() - date_changed(fname)).days
 
 
-def already_downloaded(fname: Path, *, max_age: int | float = math.inf) -> bool:
+def already_updated(fname: Path, *, max_age: int | float = math.inf) -> bool:
     """
-    A file is already downloaded if it exists, and it is newer than the given
+    A file is already updated if it exists, and it is newer than the given
     maximum age.
 
     """
