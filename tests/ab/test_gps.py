@@ -5,7 +5,11 @@ import datetime as dt
 
 import pytest
 
-from ab.calculate import gps_week
+from ab.gps import (
+    GPS_EPOCH,
+    gps_week,
+    date_from_gps_week,
+)
 
 
 @pytest.mark.parametrize(
@@ -23,3 +27,10 @@ from ab.calculate import gps_week
 def test_gps_week(date, week):
     print(f"{date=}: {week=}")
     assert gps_week(date) == week
+
+
+def test_date_from_gps_week():
+    expected = dt.date(1980, 1, 6)
+    gps_week_for_gps_epoch = 0
+    result = date_from_gps_week(gps_week_for_gps_epoch)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."

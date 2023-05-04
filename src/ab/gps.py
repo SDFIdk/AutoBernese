@@ -1,4 +1,9 @@
+"""
+Module for GPS dates.
+
+"""
 import datetime as dt
+from dataclasses import dataclass
 
 
 GPS_EPOCH = dt.date(1980, 1, 6)
@@ -13,3 +18,15 @@ def gps_week(date: dt.date | dt.datetime) -> int:
     if date < GPS_EPOCH:
         raise ValueError("Date must be on or after first GPS week. Got {date!r} ...")
     return (date - GPS_EPOCH).days // 7
+
+
+def date_from_gps_week(gps_week: str | int) -> dt.date:
+    return GPS_EPOCH + dt.timedelta(7 * int(gps_week))
+
+
+@dataclass
+class GPSWeek:
+    week: str
+
+    def date(self) -> dt.date:
+        return date_from_gps_week(self.week)
