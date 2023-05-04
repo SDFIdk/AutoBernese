@@ -3,6 +3,7 @@ AutoBernese
 
 """
 from importlib import metadata
+import getpass
 import logging
 
 import ab
@@ -13,4 +14,7 @@ __version__ = metadata.version(ab.__name__)
 env = configuration.load().get("environment")
 env.get("ab_root").mkdir(exist_ok=True)
 env.get("logging").get("filename").touch()
-logging.basicConfig(**env.get("logging"))
+replacements = dict(
+    format=env.get("logging").get("format").format(user=getpass.getuser()),
+)
+logging.basicConfig(**{**env.get("logging"), **replacements})

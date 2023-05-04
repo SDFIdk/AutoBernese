@@ -12,13 +12,17 @@ from rich import print
 
 from ab import (
     configuration,
-    data,
     bsw,
     organiser,
+)
+from ab.data import (
+    ftp,
+    http,
+)
+from ab.station import (
     sitelog,
     sta,
 )
-
 
 log = logging.getLogger(__name__)
 
@@ -32,13 +36,21 @@ def main() -> None:
 
 
 @main.command
-def config(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+def env() -> None:
+    """
+    Show BSW environment loaded into autobernese configuration
+
+    """
+    print(configuration.load().get("bsw_env"))
+
+
+@main.command
+def config() -> None:
     """
     Show configuration
 
     """
-    print(configuration.load(*args, **kwargs))
-    log.debug("Configuration loaded ...")
+    print(configuration.load())
 
 
 @main.command
@@ -52,20 +64,65 @@ def parse_sitelog(filename: pathlib.Path) -> None:
 
 
 @main.command
-@click.argument("sitelog_filenames", type=list[pathlib.Path])
-@click.argument("individually_calibrated", type=list[str])
-@click.argument("filename", type=pathlib.Path)
-def create_sta_file_from_sitelogs(
-    sitelog_filenames: list[pathlib.Path],
-    individually_calibrated: list[str],
-    filename: pathlib.Path,
+# @click.argument("sitelog_filenames", type=list[pathlib.Path])
+# @click.argument("individually_calibrated", type=list[str])
+# @click.argument("filename", type=pathlib.Path)
+def sitelogs2sta(
+    # sitelog_filenames: list[pathlib.Path],
+    # individually_calibrated: list[str],
+    # filename: pathlib.Path,
 ) -> None:
     """
     Create STA file from sitelogs
 
     """
-    # sta.create_sta_file_from_sitelogs(sitelog_filenames, individually_calibrated, filename)
-    sta.main()
+    sta.create_sta_file_from_sitelogs(**configuration.load().get("station"))
+
+
+@main.command
+def download_sources() -> None:
+    """
+    Download sources based on campaign configuration file.
+
+    So far a source entry is assumed to be a Source instance.
+
+    """
+    sources = configuration.load().get("data").get("sources")
+    for source in sources:
+        msg = f"Download source: {source.name}"
+        print(msg)
+        log.debug(msg)
+        match source.protocol:
+            case "ftp":
+                ftp.download(source)
+            case "http" | "https":
+                http.download(source)
+    else:
+        msg = "Finished downloading sources"
+        print(msg)
+        log.debug(msg)
+
+
+@main.command
+def logfile() -> None:
+    """
+    Follow log file (run `tail -f path/to/logfile.log`).
+
+    """
+    filename = configuration.load().get("environment").get("logging").get("filename")
+    import subprocess as sub
+
+    try:
+        log.debug(f"Show log tail ...")
+        process = sub.Popen(["/usr/bin/tail", "-f", f"{filename}"])
+        process.wait()
+
+    except KeyboardInterrupt:
+        log.debug(f"Log tail finished ...")
+
+    finally:
+        process.terminate()
+        process.kill()
 
 
 @main.group
@@ -77,55 +134,79 @@ def campaign() -> None:
 
 
 @campaign.command
-def create(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+def get_list() -> None:
+    """
+    List campaigns
+
+    """
+    log.debug("List campaigns ...")
+    from ab import campaign
+
+    print(campaign.get_list())
+
+
+@campaign.command
+def create() -> None:
     """
     Create campaign
 
     """
     log.debug("Create campaign ...")
-    bsw.create_campaign(*args, **kwargs)
+    bsw.create_campaign()
 
 
-@main.command
-def download_sources(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+# @main.command
+# def prepare_campaign_data(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+#     """
+#     Organises campaign data
+
+#     """
+#     organiser.prepare_campaign_data(*args, **kwargs)
+
+
+@main.group(invoke_without_command=True)
+def bpe() -> None:
     """
-    Download sources based on campaign configuration file.
+    Tools for the Bernese Processing Engine [BPE].
 
     """
-    data.download_sources(*args, **kwargs)
+    print("BPE")
 
 
-@main.command
-def prepare_campaign_data(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+@bpe.command
+def recipes() -> None:
     """
-    Organises campaign data
+    Show the recipes for the active campaign.
 
     """
-    organiser.prepare_campaign_data(*args, **kwargs)
+    # active = state.active_campaign()
+    for recipe in bpe.get_recipes():
+        print(recipe)
 
 
-@main.command
-def bpe(**bpe_settings: dict[Any, Any]) -> None:
+@bpe.command
+def run(**bpe_settings: dict[Any, Any]) -> None:
     """
     Run Bernese Processing Engine [BPE].
 
     """
-    bsw.runbpe(bpe_settings)
+    # bsw.runbpe(bpe_settings)
+    bsw.runbpe()
 
 
-@main.command
-def prepare_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-    """
-    Organises campaign end products.
+# @main.command
+# def prepare_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+#     """
+#     Organises campaign end products.
 
-    """
-    organiser.prepare_end_products(*args, **kwargs)
+#     """
+#     organiser.prepare_end_products(*args, **kwargs)
 
 
-@main.command
-def submit_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-    """
-    Submits campaign end products.
+# @main.command
+# def submit_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
+#     """
+#     Submits campaign end products.
 
-    """
-    organiser.submit_end_products(*args, **kwargs)
+#     """
+#     organiser.submit_end_products(*args, **kwargs)

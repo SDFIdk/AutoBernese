@@ -1,37 +1,58 @@
+# IDEA. NOT IN USE.
 # local: &local __ab__
 
-# Bernese GNSS Software environment variables
+# Bernese GNSS Software [BSW] environment variables available after 'source'ing
+# the shell script `LOADGPS.setvar` in the root of the installation directory.
 bsw_env:
 
   # Installation directory
-  - &C !ENV [C, .]
+  C: &C !ENV [C, .]
+
+  # Bernese program panels
+  PAN: &PAN !ENV [PAN, .]
+
+  # Global model files used by Bernese programs
+  MODEL: &MODEL !ENV [MODEL, .]
+
+  # Global configuration file used by Bernese programs
+  CONFIG: &CONFIG !ENV [CONFIG, .]
 
   # DATAPOOL directory
-  - &D !ENV [D, .]
+  D: &D !ENV [D, .]
 
   # CAMPAIGN directory
-  - &P !ENV [P, .]
+  P: &P !ENV [P, .]
 
   # User directory
-  - &U !ENV [U, .]
+  U: &U !ENV [U, .]
 
+# Autobernese runtime environment
 environment:
   env_root: &env_root !Parent [*C]
   ab_root: &ab_root !Path [*env_root, autobernese]
-  # system_user_root: !Path [*ab_root, system_user]
   logging:
     filename: !Path [*ab_root, autobernese.log]
-    format: '%(asctime)s | %(levelname)s | %(name)s | %(message)s'
+    # Special parameters that can be added here are:
+    # `{user}` which adds the username using Python's getpass.getuser().
+    format: '%(asctime)s | {user} | %(levelname)s | %(name)s | %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
     style: '%'
     level: DEBUG
+
+  # IDEAS. NOT IN USE.
+  # system_user_root: !Path [*ab_root, system_user]
+  # state: !Path [*ab_root, state.yaml]
   # datafiles:
   #   sources: !Path [*ab_root, sources.yaml]
 
 common:
-- &sitelogs !Path [*D, sitelogs]
+# TODO: Remove test directory
+- &test !Path [*D, test]
 
-station_meta:
+- &sitelogs !Path [*D, sitelogs]
+- &station !Path [*D, station]
+
+station:
   sitelogs: # !Path [*sitelogs, '*.log']
   - !Path [*sitelogs, esbc*.log]
   - !Path [*sitelogs, fer5*.log]
@@ -49,58 +70,89 @@ station_meta:
 
   individually_calibrated: [BUDD, MOJN, RIKO]
 
-campaign_types:
+  filename_sta: !Path [*station, sitelogs.STA]
 
-  default:
-    name: Default campaign
+bsw:
 
-    sites_needed: [
-      # IGS
-      OSLS, STAS, SMID, SULD,
-      BUDP, BOR1, MAR6, ONSA,
-      POTS, RIGA, SPT0, VIS0,
-      WSRT, WTZR,
+  campaign:
+    menu: !Path [*PAN, MENU_CMP.INP]
 
-      # Local
-      ESBC, ESBH, FER5, FYHA,
-      GESR, HABY, HIRS, SMI2,
-      SUL5, TEJH, MOJN, BUDD,
-      SKEJ, RIKO, FYNO, ESH5,
-      GREJ
-    ]
+data:
 
-  nkg:
-    name: NKG
+  ftp:
+    list_directory_cache: !Path [*ab_root, list_directory.yaml]
 
-    # Til STA
-    IGS_stations:
-    - ABCD
-    - EFGF
+  sources:
 
-    # Til STA
-    COR_stations:
-    - sadf
-    - fdsa
+  # Download scenarios:
+  #
+  # 1) Download specific file on an FTP-server.
+  #
+  # 2) Download all files (excluding directories) from a given directory on an
+  #    FTP server to a given destination directory.
+  #
+  # 3) Download specific files denoted with complete filenames from a given
+  #    source directory on an FTP server. This requires a liste of the filenames
+  #    in the directory.
+  #
+  # 4) Download specific files from an FTP server directory, where filenames are
+  #    given with a wildcard, e.g. '*.EPH.Z'.
+  #
+  # 5) Download specific file URI via HTTP.
 
-sources:
+  # ad.1)
+  - !Source
+    name: EUREF STA file
+    url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
+    destination: *station
 
-- name: sadf
-  url: ftp.aiub..../%Y(_M)?/*.ION.Z
-  destination: !Path [*D, BSW54] # sti/til/DATAPOOL/BSW54/...
+  # # ad.2)
+  - !Source
+    name: BSW Model data
+    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
+    destination: *MODEL
+    # max_age: 1
 
-- name: EUREF STA file
-  url: ftp://epncb.oma.be/pub/station/general/EUREF52.STA
-  # destination: !ENV [U, .]
-  destination: .
+  # ad.2)
+  - !Source
+    name: BSW Configuration data
+    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
+    destination: *CONFIG
+    # max_age: 1
 
-# - name: EPN
-#   url: ftp://epncb.oma.be
-#   destination:
+  # ad.3)
+  - !Source
+    name: Universal and BSW-specific antenna files
+    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
+    destination: !Path [*D, REF54]
+    filenames:
+    - ANTENNA_I14.PCV
+    - ANTENNA_I20.PCV
+    - I14.ATX
+    - I20.ATX
+    # max_age: 1
 
-# - name: AIUB
-#   url: ftp://ftp.aiub.unibe.ch
-#   destination:
+  # ad.4)
+  - !Source
+    name: Ionosphere and satellite-bias files
+    url: ftp://ftp.aiub.unibe.ch/CODE/{year}/
+    destination: !Path [*test, CODE, '{year}']
+    filenames:
+    - '*.ION.gz'
+    - '*.ION.Z'
+    - '*.BIA.gz'
+    - '*.BIA.Z'
+    parameters:
+      year: [2022, 2023]
+    # max_age: 1
 
-# - name: SDFI
-#   url: ftp://ftp.sdfe.dk
-#   destination:
+  # ad.5)
+  - !Source
+    name: TU Wien Vienna Mapping Model 3
+    url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
+    destination: !Path [*D, test, VMF3_1x1_OP, '{date.year}']
+    parameters:
+      date: !DateRange
+        beg: 2023-01-01
+        end: 2023-01-02
+      hour: ['00', '06', '12', '18']
