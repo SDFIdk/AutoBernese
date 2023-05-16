@@ -140,7 +140,15 @@ def download(source: Source) -> None:
 
                     log.info(f"Downloading {ofname.name} ...")
                     try:
-                        ftp.retrbinary(f"RETR {fname}", ofname.write_bytes)
+                        # Note: `pathlib.Path.write_text` is awesome, since it
+                        # eliminated the use of the with-statement, but when it
+                        # is used as a callback function in `retrbinary`, this
+                        # is called for each chunk of data, which means that the
+                        # file is overwritten with each new chunk only
+                        # preserving the last chunk in the 'downloaded' file.
+                        # Hence, we stick with the old way.
+                        with open(ofname, 'wb') as f:
+                            ftp.retrbinary(f"RETR {fname}", f.write)
                     except error_perm as e:
                         log.warn(f"Filename {fname} could not be downloaded ...")
                         log.debug(f"{e}")

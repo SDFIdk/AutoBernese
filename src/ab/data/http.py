@@ -33,7 +33,7 @@ def download(source: Source) -> None:
         destination = Path(pair.path_local)
         destination.mkdir(parents=True, exist_ok=True)
         ofname = destination / pair.fname
-        if already_updated(ofname):
+        if already_updated(ofname, max_age=source.max_age):
             log.debug(f"{ofname.name} already downloaded ...")
             continue
         log.info(f"Download {pair.uri} to {ofname} ...")

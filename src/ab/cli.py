@@ -82,9 +82,16 @@ def sitelogs2sta(
 
 
 @main.command
-def download_sources() -> None:
+@click.option(
+    "-f",
+    "--force",
+    help="Download files that are already downloaded according to their maximum age.",
+    required=False,
+    is_flag=True,
+)
+def download_sources(force: bool = False) -> None:
     """
-    Download sources based on campaign configuration file.
+    Download sources based on souece specification in the configuration file.
 
     So far a source entry is assumed to be a Source instance.
 
@@ -94,6 +101,10 @@ def download_sources() -> None:
         msg = f"Download source: {source.name}"
         print(msg)
         log.debug(msg)
+
+        if force:
+            source.max_age = 0
+
         match source.protocol:
             case "ftp":
                 ftp.download(source)
