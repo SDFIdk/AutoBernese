@@ -7,7 +7,6 @@ recommended way to load YAML-files.
 """
 import datetime as dt
 import pathlib
-from typing import Any
 
 import yaml
 from yaml_env_tag import construct_env_tag
@@ -67,7 +66,7 @@ def source_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> Source:
     return Source(**loader.construct_mapping(node))
 
 
-def date_range_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> Source:
+def date_range_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> list[dt.date]:
     d = loader.construct_mapping(node)
     beg = d.get("beg").toordinal()
     end = d.get("end").toordinal()
