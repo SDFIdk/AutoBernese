@@ -2,6 +2,8 @@
 Module for working with campaigns in the current BSW environment.
 
 """
+import datetime as dt
+import getpass
 from typing import Any
 from pathlib import Path
 import shutil
@@ -18,9 +20,16 @@ from ab.gps import GPSWeek
 log = logging.getLogger(__name__)
 
 
+def _campaign_config() -> dict[str, Any]:
+    return configuration.load().get("campaign")
+
+
 def _template_dir() -> Path:
-    config = configuration.load().get("campaign")
-    return config.get("templates")
+    return _campaign_config().get("templates")
+
+
+def _required_campaign_directories() -> list[dict[str, Any]]:
+    return _campaign_config().get("directories")
 
 
 def init_template_dir() -> dict[str, str]:
@@ -50,23 +59,29 @@ def available_templates() -> dict[str, str]:
     Return list of available campaign templates.
 
     """
-    template_dir = configuration.load().get("campaign").get("templates")
+    template_dir = _template_dir()
     return [fname.stem for fname in template_dir.glob("*.yaml")]
 
 
-def ls() -> None:
+def _extract_campaign_list(raw: str) -> list[str]:
+    meat = raw.split("  ## widget")[0]
+    meat = meat.split("CAMPAIGN ")[1]
+    meat = meat.split(maxsplit=1)[1].strip()
+    return [item.strip() for item in meat.splitlines()]
+
+
+def ls() -> list[str]:
     """
-    Return list of campaigns.
+    Return list of created campaigns.
 
     TODO: Return a list of cleaned names?
 
     """
-    config = configuration.load().get("campaign")
-    content = config.get("menu").read_text()
-    meat = content.split("  ## widget")[0]
-    meat = meat.split("CAMPAIGN ")[1]
-    meat = meat.split(maxsplit=1)[1].strip()
-    return [item.strip() for item in meat.splitlines()]
+    return _extract_campaign_list(_campaign_config().get("menu").read_text())
+
+
+def _bsw_env(key: str) -> str:
+    return configuration.load().get('bsw_env').get(key)
 
 
 # def _campaign_dir(template: str) -> Path:
@@ -83,46 +98,43 @@ def create(gps_week: GPSWeek, template: str) -> None:
     Create a campaign.
 
     """
-    # config = configuration.load().get("campaign")
-    # menu = config.get("menu")
-    # log.debug(f"{str(menu)} exists? {menu.is_file()} ...")
-
-    from rich import print
-
-    # print(menu.read_text())
-
-    print(gps_week.date())
-
+    # Is the template available?
     if template not in available_templates():
         msg = f"Template {template} does not exist ..."
         log.warn(msg)
         raise ValueError(msg)
 
-    P = configuration.load().get("bsw_env").get("P")
-    campaign_dir = Path(P).joinpath(template) / f"{template}{gps_week.week}"
-
+    # Does the campaign already exist?
+    root = Path(_bsw_env("P"))
+    campaign_dir = root.joinpath(template) / f"{template}{gps_week.week}"
     if campaign_dir.is_dir():
         msg = f"Campaign directory {campaign_dir} exists ..."
         log.warn(msg)
         raise ValueError(msg)
 
+    # Create campaign directory
     log.info(f"Creating campaign directory {campaign_dir} ...")
     campaign_dir.mkdir(parents=True)
 
-    # File to be
-    campaign_conf = campaign_dir / "campaign.yaml"
+    # Create required campaign-directory tree
+    log.info(f"Create required campaign-directory tree ...")
+    for directory_info in _required_campaign_directories():
+        path_full = campaign_dir / directory_info.get('name')
+        path_full.mkdir()
+        for fname_source in directory_info.get('files', []):
+            shutil.copy(fname_source, path_full / Path(fname_source).name)
 
-    # Template to copy
-    template_conf = _template_dir() / f"{template}.yaml"
-
-    log.info(f"Copying template {template_conf} to {campaign_dir} ...")
-    shutil.copy(template_conf, campaign_conf)
-
-    # Format the file content to make it parsable YAML
-    parameters = dict(
+    # Create AutoBernese campaign-configuration file
+    fname_campaign_config = campaign_dir / "campaign.yaml"
+    log.info(f"Creating AutoBErnese campaign-configuration file {fname_campaign_config} ...")
+    # Make parsable YAML
+    header_data = dict(
         version=ab.__version__,
+        created=dt.datetime.now().isoformat()[:19],
+        username=getpass.getuser(),
         gpsweek=gps_week.week,
     )
-    header = pkg.campaign_header.read_text().format(**parameters)
-    replaced = f"{header}\n{campaign_conf.read_text()}"
-    campaign_conf.write_text(replaced)
+    header = pkg.campaign_header.read_text().format(**header_data)
+    fname_template_config = _template_dir() / f"{template}.yaml"
+    content = f"{header}\n{fname_template_config.read_text()}"
+    fname_campaign_config.write_text(content)

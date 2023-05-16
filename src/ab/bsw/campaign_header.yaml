@@ -1,2 +1,4 @@
 version: {version}
+created: {created}
+username: {username}
 gpsweek: {gpsweek}

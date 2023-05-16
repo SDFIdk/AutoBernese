@@ -76,6 +76,21 @@ station:
 campaign:
   menu: !Path [*PAN, MENU_CMP.INP]
   templates: !Path [*ab_root, templates]
+  directories:
+  - name: ATM
+  - name: BPE
+  - name: GEN
+    files:
+    - !Path [*CONFIG, OBSERV.SEL]
+    - !Path [*PAN, SESSIONS.SES]
+  - name: GRD
+  - name: OBS
+  - name: ORB
+  - name: ORX
+  - name: OUT
+  - name: RAW
+  - name: SOL
+  - name: STA
 
 data:
 
