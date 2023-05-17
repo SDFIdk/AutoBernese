@@ -12,6 +12,7 @@ import yaml
 from yaml_env_tag import construct_env_tag
 
 from ab.data.source import Source
+from ab.dates import date_range
 
 
 def path_constructor(
@@ -68,9 +69,7 @@ def source_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> Source:
 
 def date_range_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> list[dt.date]:
     d = loader.construct_mapping(node)
-    beg = d.get("beg").toordinal()
-    end = d.get("end").toordinal()
-    return [dt.date.fromordinal(n) for n in range(beg, end + 1)]
+    return date_range(d.get("beg"), d.get("end"))
 
 
 yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
