@@ -147,7 +147,7 @@ def download(source: Source) -> None:
                         # file is overwritten with each new chunk only
                         # preserving the last chunk in the 'downloaded' file.
                         # Hence, we stick with the old way.
-                        with open(ofname, 'wb') as f:
+                        with open(ofname, "wb") as f:
                             ftp.retrbinary(f"RETR {fname}", f.write)
                     except error_perm as e:
                         log.warn(f"Filename {fname} could not be downloaded ...")

@@ -5,7 +5,11 @@ Command-line interface
 import logging
 import pathlib
 import json
-from typing import Any
+import datetime as dt
+from typing import (
+    Any,
+    Final,
+)
 
 import click
 from rich import print
@@ -23,7 +27,6 @@ from ab.station import (
     sitelog,
     sta,
 )
-from ab.gps import GPSWeek
 
 
 log = logging.getLogger(__name__)
@@ -146,6 +149,17 @@ def campaign() -> None:
     """
     bsw.campaign.init_template_dir()
 
+    # bsw.campaign.sources('nkg2239')
+
+
+@campaign.command
+def test() -> None:
+    """
+    TEST: Build MENU_CMP.INP from template.
+
+    """
+    bsw.campaign.menu()
+
 
 @campaign.command
 def ls() -> None:
@@ -160,24 +174,62 @@ def ls() -> None:
 @campaign.command
 def templates() -> None:
     """
-    List existing campaigns
+    List available campaign templates
 
     """
     log.debug("List available campaign templates ...")
     print("\n".join(bsw.campaign.available_templates()))
 
 
+DATE_FORMAT: Final[str] = "%Y-%m-%d"
+
+
+def date(s: str) -> dt.date:
+    return dt.datetime.strptime(s, DATE_FORMAT).date()
+
+
 @campaign.command
-@click.argument("gpsweek", type=GPSWeek)
-@click.argument("template", type=str, default="default")
-def create(gpsweek: GPSWeek, template: str) -> None:
+@click.option(
+    "-n",
+    "--name",
+    type=str,
+    required=True,
+    help=f"The name of the campaign used also as the name of the directory for the campaign.",
+)
+@click.option(
+    "-t",
+    "--template",
+    type=str,
+    default="default",
+    required=False,
+    help="Template for campaign configuration If not given, the default configuration is used.",
+)
+@click.option(
+    "-b",
+    "--beg",
+    type=date,
+    required=True,
+    help=f"Format: {DATE_FORMAT}",
+)
+@click.option(
+    "-e",
+    "--end",
+    type=date,
+    required=True,
+    help=f"Format: {DATE_FORMAT}",
+)
+# @click.argument("gpsweek", type=GPSWeek)
+# def create(gpsweek: GPSWeek, template: str) -> None:
+def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     """
     Create a campaign directory based on the specified template and adds the
     campaign path to the list of available campaigns in the corresponding menu.
 
     """
     log.debug(f"Create campaign ...")
-    bsw.campaign.create(gpsweek, template)
+    # from IPython import embed; embed(); raise SystemExit
+    # bsw.campaign.create(gpsweek, template)
+    bsw.campaign.create(name, template, beg, end)
 
 
 # @main.command

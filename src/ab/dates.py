@@ -4,10 +4,29 @@ Module for dates.
 """
 import datetime as dt
 from dataclasses import dataclass
-from typing import Iterable
+from typing import (
+    Iterable,
+    Protocol,
+    Any,
+)
 
 
-def date_range(beg: dt.date | dt.datetime, end: dt.date | dt.datetime, /) -> Iterable[dt.date]:
+class HasFromOrdinal(Protocol):
+    def fromordinal(ordinal: int) -> Any:
+        """
+        A formal definition of a type that can transform an ordinal date to what
+        is needed.
+
+        """
+
+
+def date_range(
+    beg: dt.date | dt.datetime,
+    end: dt.date | dt.datetime,
+    /,
+    *,
+    transformer: HasFromOrdinal = dt.date,
+) -> Iterable[Any]:
     """
     Return a range of dates between and including the given start and end dates.
 
@@ -21,7 +40,7 @@ def date_range(beg: dt.date | dt.datetime, end: dt.date | dt.datetime, /) -> Ite
         end = end.date()
 
     return [
-        dt.date.fromordinal(n)
+        transformer.fromordinal(n)
         for n in range(
             beg.toordinal(),
             end.toordinal() + 1,
@@ -68,7 +87,7 @@ def date_from_gps_week(gps_week: str | int) -> dt.date:
 
 class GPSDate(dt.date):
     @classmethod
-    def from_gps_week(cls, n: int | str, /) -> 'GPSDate':
+    def from_gps_week(cls, n: int | str, /) -> "GPSDate":
         date = date_from_gps_week(n)
         return cls(date.year, date.month, date.day)
 

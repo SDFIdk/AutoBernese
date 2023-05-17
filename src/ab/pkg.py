@@ -21,3 +21,4 @@ demo_sitelog = base.joinpath("demo/abmf_20211124.log")
 
 campaign_template = base.joinpath("bsw/default.yaml")
 campaign_header = base.joinpath("bsw/campaign_header.yaml")
+campaign_list_template = base.joinpath("bsw/MENU_CMP.INP")

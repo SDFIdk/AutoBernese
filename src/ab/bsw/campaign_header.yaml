@@ -1,4 +1,5 @@
-version: {version}
-created: {created}
-username: {username}
-gpsweek: {gpsweek}
+version: &version {version}
+username: &username {username}
+created: &created {created}
+beg: &beg {beg}
+end: &end {end}
