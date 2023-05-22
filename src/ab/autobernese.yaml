@@ -51,6 +51,7 @@ common:
 
 - &sitelogs !Path [*D, sitelogs]
 - &station !Path [*D, station]
+- &vmf_root !Path [*D, test, VMF3_1x1_OP]
 
 station:
   sitelogs: # !Path [*sitelogs, '*.log']
@@ -72,10 +73,24 @@ station:
 
   filename_sta: !Path [*station, sitelogs.STA]
 
-bsw:
-
-  campaign:
-    menu: !Path [*PAN, MENU_CMP.INP]
+campaign:
+  menu: !Path [*PAN, MENU_CMP.INP]
+  templates: !Path [*ab_root, templates]
+  directories:
+  - name: ATM
+  - name: BPE
+  - name: GEN
+    files:
+    - !Path [*CONFIG, OBSERV.SEL]
+    - !Path [*PAN, SESSIONS.SES]
+  - name: GRD
+  - name: OBS
+  - name: ORB
+  - name: ORX
+  - name: OUT
+  - name: RAW
+  - name: SOL
+  - name: STA
 
 data:
 
@@ -150,7 +165,7 @@ data:
   - !Source
     name: TU Wien Vienna Mapping Model 3
     url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
-    destination: !Path [*D, test, VMF3_1x1_OP, '{date.year}']
+    destination: !Path [*vmf_root, '{date.year}']
     parameters:
       date: !DateRange
         beg: 2023-01-01

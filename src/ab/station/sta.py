@@ -30,12 +30,8 @@ from dataclasses import (
     dataclass,
     asdict,
 )
-import functools
-
-import yaml
 
 from ab import (
-    configuration,
     pkg,
     country_code,
 )
@@ -498,5 +494,5 @@ def create_sta_file_from_sitelogs(
         type_4_rows="",
         type_5_rows="",
     )
-    sta_content = pkg.sta_template.read_text().format(**data)
-    filename_sta.write_text(sta_content)
+    content = pkg.sta_template.read_text().format(**data)
+    filename_sta.write_text(content)
