@@ -12,10 +12,14 @@ from typing import (
 
 
 class HasFromOrdinal(Protocol):
+    """
+    A formal definition of a type that can transform an ordinal date to what
+    is needed.
+
+    """
     def fromordinal(ordinal: int) -> Any:
         """
-        A formal definition of a type that can transform an ordinal date to what
-        is needed.
+        Method that converts a Python integer date.
 
         """
 
@@ -74,22 +78,22 @@ def date_from_gps_week(gps_week: str | int) -> dt.date:
     return GPS_EPOCH + dt.timedelta(7 * int(gps_week))
 
 
-# @dataclass
-# class GPSWeek:
-#     week: int
-
-#     def __post_init__(self) -> None:
-#         self.week = int(self.week)
-
-#     def date(self) -> dt.date:
-#         return date_from_gps_week(self.week)
-
-
 class GPSDate(dt.date):
+    @classmethod
+    def from_date(cls, date: dt.date | dt.datetime, /) -> "GPSDate":
+        return cls(date.year, date.month, date.day)
+
     @classmethod
     def from_gps_week(cls, n: int | str, /) -> "GPSDate":
         date = date_from_gps_week(n)
         return cls(date.year, date.month, date.day)
+
+    @classmethod
+    def from_year_doy(cls, year: int | str, doy: int | str, /) -> "GPSDate":
+        return cls(int(year), 1, 1) + dt.timedelta(int(doy) - 1)
+
+    def date(self) -> dt.date:
+        return dt.date(self.year, self.month, self.day)
 
     @property
     def gps_week(self) -> int:
@@ -98,3 +102,12 @@ class GPSDate(dt.date):
     @property
     def doy(self) -> int:
         return doy(self)
+
+    def dateinfo(self) -> dict[str, Any]:
+        return dict(
+            date=self.isoformat(),
+            doy=self.doy,
+            gps_week=self.gps_week,
+            iso_week=self.isocalendar()[1],
+            iso_weekday=self.isocalendar()[2],
+        )
