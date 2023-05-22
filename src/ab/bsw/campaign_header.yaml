@@ -1,5 +1,7 @@
-version: &version {version}
-username: &username {username}
-created: &created {created}
-beg: &beg {beg}
-end: &end {end}
+metadata:
+  version: &version {version}
+  username: &username {username}
+  created: &created {created}
+  template: &template {template}
+  beg: &beg {beg}
+  end: &end {end}

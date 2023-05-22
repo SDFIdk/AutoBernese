@@ -42,7 +42,7 @@ def date(s: str) -> dt.date:
 
 
 @click.group(invoke_without_command=True)
-@click.option('--version', 'show_version', is_flag=True, default=False)
+@click.option("--version", "show_version", is_flag=True, default=False)
 @click.pass_context
 def main(ctx: click.Context, show_version: bool) -> None:
     """
@@ -198,7 +198,7 @@ def campaign(ctx: click.Context) -> None:
 
 
 @campaign.command
-@click.option('--verbose', '-v', is_flag=True, help="Print details.")
+@click.option("--verbose", "-v", is_flag=True, help="Print details.")
 def ls(verbose: bool) -> None:
     """
     List existing campaigns

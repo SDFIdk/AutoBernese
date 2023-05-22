@@ -4,7 +4,10 @@ Module for working with campaigns in the current BSW environment.
 """
 import datetime as dt
 import getpass
-from typing import Any
+from typing import (
+    Any,
+    Final,
+)
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
@@ -23,39 +26,59 @@ from ab.dates import date_range
 
 log = logging.getLogger(__name__)
 
+# TODO: Better differentiate between the different configuration files.
+# * The general configuration file has configuration about campaign creation and
+#   management.
+# * The module here creates a campaign-specific configuration file that is also
+#   a campaign configuration, but campaign-specific (an instance)
+# * The package also has internal package data thate are ued to create the
+#   campaign-specific configuration file, and whose name says that it is a
+#   campaign-template.
+# * However, the campaign template internal to the package, is an example of a
+#   campaign-specific configuration template (to be prepended with a meta-data
+#   section) that is copied over to the campaign-template directory that is the
+#   source where users put their templates and manage them.
+# * Finally, the list of existing campaigns known to Bernese is put in the
+#   installation directory under SUPGUI and is called MENU_CMP.INP. This file is
+#   used by BSW to know where the campaign is located. It has to be read and
+#   updated, when a user creates a campaign with this program.
 
-def _campaign_config() -> dict[str, Any]:
-    return configuration.load().get("campaign")
+# Campaign-management configuration
+_CAMPAIGN_CONF: Final[dict[str, Any]] = configuration.load().get("campaign")
+_TEMPLATE_DIR: Final[Path] = _CAMPAIGN_CONF.get("templates")
+_REQUIRED_CAMPAIGN_DIRECTORIES: Final[list[dict[str, Any]]] = _CAMPAIGN_CONF.get(
+    "directories"
+)
+_CAMPAIGN_MENU: Final[Path] = _CAMPAIGN_CONF.get("menu")
 
+# Current Bernese installation environment
+_BSW_ENV: Final[dict[str, Any]] = configuration.load().get("bsw_env")
 
-def _template_dir() -> Path:
-    return _campaign_config().get("templates")
-
-
-def _required_campaign_directories() -> list[dict[str, Any]]:
-    return _campaign_config().get("directories")
+# Other
+_P: Final[str] = "${P}"
 
 
 def init_template_dir() -> dict[str, str]:
     """
-    Check if campaign-template directory exists.
+    Create a directory for user-defined campaign templates in the autobernese
+    directory.
 
-    Create a new one with campaign type `default` adding the latest version of
-    the package.
+    Does nothing if the template directory already exists.
+
+    If it does not exist, the directory is created and the packaged default
+    template is added.
 
     """
-    template_dir = _template_dir()
-    template = template_dir / pkg.campaign_template.name
-
-    if template.is_file():
+    if _TEMPLATE_DIR.is_dir():
         return
 
-    if not template_dir.is_dir():
-        log.info(f"Creating campaign-template directory in {template_dir} ...")
-        template_dir.mkdir(exist_ok=True, parents=True)
+    log.info(f"Create campaign-template directory in {_TEMPLATE_DIR} ...")
+    _TEMPLATE_DIR.mkdir(exist_ok=True, parents=True)
 
-    log.info(f"Copy campaign-template {pkg.campaign_template} to {template_dir} ...")
-    shutil.copy(pkg.campaign_template, template_dir)
+    log.info(
+        f"Copy default template-campaign configuration {pkg.campaign_template} to {_TEMPLATE_DIR} ..."
+    )
+    shutil.copy(pkg.campaign_template, _TEMPLATE_DIR)
 
 
 def available_templates() -> dict[str, str]:
@@ -63,87 +86,109 @@ def available_templates() -> dict[str, str]:
     Return list of available campaign templates.
 
     """
-    template_dir = _template_dir()
-    return [fname.stem for fname in template_dir.glob("*.yaml")]
+    return [fname.stem for fname in _TEMPLATE_DIR.glob("*.yaml")]
 
 
 def _extract_campaign_list(raw: str) -> list[str]:
+    """
+    Reads the list of existing campaign directories from a string matching
+    possible content in the file `MENU_CMP.INP` in the current Bernese
+    installation directory.
+
+    """
     meat = raw.split("  ## widget")[0]
     meat = meat.split("CAMPAIGN ")[1]
     meat = meat.split(maxsplit=1)[1].strip()
     lines = [item.strip() for item in meat.splitlines()]
-    bsw_env = configuration.load().get("bsw_env")
-    return [Template(s).safe_substitute(bsw_env) for s in lines]
+    # Use Template instance to avoid security leaks.
+    return [Template(s).safe_substitute(_BSW_ENV).strip('"') for s in lines]
 
 
-def ls() -> list[str]:
+def ls(verbose: bool = False) -> list[str]:
     """
     Return list of created campaigns.
 
     """
-    return _extract_campaign_list(_campaign_config().get("menu").read_text())
+    raw = _extract_campaign_list(_CAMPAIGN_MENU.read_text())
+    if not verbose:
+        return raw
 
+    dirs = [Path(r) for r in raw]
+    lines = []
+    # TODO: Remove the template string that is not needed.
+    # fstr = "{directory} - {template} - {version} - {username} - {created}"
+    fstr = "{directory} {template} {version} {username} {created}"
+    default = dict(directory="", template="", version="", username="", created="")
+    for d in dirs:
+        kwargs = {**default, **dict(directory=d)}
+        ifname = d / "campaign.yaml"
+        if not ifname.is_file():
+            lines.append(fstr.format(**kwargs))
+            continue
 
-def _bsw_env(key: str) -> str:
-    return configuration.load().get("bsw_env").get(key)
+        campaign = yaml.safe_load(ifname.read_text())
+        meta = campaign.get("metadata")
+        lines.append(fstr.format(**{**kwargs, **meta}))
+
+    return lines
 
 
 def _campaign_dir(name: str) -> Path:
-    return Path(_bsw_env("P")) / f"{name}"
+    """
+    Return the path to the campaign given by its directory name.
+
+    """
+    return Path(_BSW_ENV.get("P")) / f"{name}"
 
 
-# def _campaign_dir(template: str) -> Path:
-#     P = configuration.load().get('bsw_env').get('P')
-#     return Path(P).joinpath(template) / f"{template}{week}"
+def build_campaign_menu(campaigns: list[str] = None) -> None:
+    """
+    Build content for a MENU_CMP.INP file with list of the given campaigns.
 
+    If a campaign path matches that of the default Bernese campaign directory
+    denoted `${P}`, the respective path component is replaced with these
+    literals.
 
-# def _campaign_file(week: int | str, template: str) -> Path:
-#     return _campaign_dir(template) / f"{template}{week}"
+    """
+    if not campaigns:
+        log.info("No campaign list to format ...")
+        return
 
-
-def load(name: str) -> dict[str, Any]:
-    ifname = _campaign_dir(name) / "campaign.yaml"
-    return yaml.safe_load(ifname.read_text())
-
-
-_P = "${P}"
-
-
-def menu():
-    from rich import print
-
-    P = configuration.load().get("bsw_env").get("P")
-
-    campaigns = [
-        "${P}/EXAMPLE",
-        "/path/to/CAMPAIGN54/foo2222",
-        "/some/other/path/tmp/foo",
-    ]
+    P = _BSW_ENV.get("P")
     formatted = [f'  "{campaign.replace(P, _P)}"' for campaign in campaigns]
     count = len(campaigns)
     separator = "\n" if count > 1 else ""
     campaigns = "\n".join(formatted)
-
-    parameters = dict(
-        count=count,
-        separator=separator,
-        campaigns=campaigns,
-    )
-
-    print(pkg.campaign_list_template.read_text().format(**parameters))
+    parameters = dict(count=count, separator=separator, campaigns=campaigns)
+    return pkg.campaign_list_template.read_text().format(**parameters)
 
 
-def sources(name: str) -> None:
-    from rich import print
+def add_campaign_to_bsw_menu(path: str | Path) -> None:
+    """
+    Add given campaign path to the list of campaigns in the campaign-menu file
+    in the Bernese installation directory.
 
-    print(c := load(name))
-    from IPython import embed
+    """
+    path = Path(path)
+    if not path.is_dir():
+        raise ValueError(f"Path {path!r} is not a directory ...")
 
-    embed()
-    raise SystemExit
+    # Load existing campaign-menu file
+    raw = _CAMPAIGN_MENU.read_text()
+
+    # Create a backup just as BSW does.
+    _CAMPAIGN_MENU.with_suffix(".bck").write_text(raw)
+
+    # Update the campaign list
+    existing = set(_extract_campaign_list(raw))
+    # Note: We convert the PosixPath to a string, and the make a single-element
+    # set with that string before adding it to the existing list and sorting it.
+    updated = sorted(existing | {f"{path}"})
+
+    # Write the updated and formatted list to the campaign-menu file.
+    _CAMPAIGN_MENU.write_text(build_campaign_menu(updated))
 
 
-# def create(gps_week: GPSWeek, template: str) -> None:
 def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     """
     Create a campaign.
@@ -162,7 +207,7 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
         raise ValueError(msg)
 
     # Does the campaign already exist?
-    campaign_dir = Path(_bsw_env("P")) / f"{name}"
+    campaign_dir = _campaign_dir(name)
     if campaign_dir.is_dir():
         msg = f"Campaign directory {campaign_dir} exists ..."
         log.warn(msg)
@@ -172,11 +217,17 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     log.info(f"Creating campaign directory {campaign_dir} ...")
     campaign_dir.mkdir(parents=True)
 
+    # Update the campaign-menu file in Bernese install directory
+    add_campaign_to_bsw_menu(campaign_dir)
+
     # Create required campaign-directory tree
     log.info(f"Create required campaign-directory tree ...")
-    for directory_info in _required_campaign_directories():
+    for directory_info in _REQUIRED_CAMPAIGN_DIRECTORIES:
+        # We are creating a new directory in an existing one
         path_full = campaign_dir / directory_info.get("name")
         path_full.mkdir()
+
+        # Any specified file paths are copied over to the new directory
         for fname_source in directory_info.get("files", []):
             shutil.copy(fname_source, path_full / Path(fname_source).name)
 
@@ -190,13 +241,27 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
         version=ab.__version__,
         created=dt.datetime.now().isoformat()[:19],
         username=getpass.getuser(),
+        template=template,
         beg=beg.isoformat(),
         end=end.isoformat(),
     )
     header = pkg.campaign_header.read_text().format(**header_data)
-    fname_template_config = _template_dir() / f"{template}.yaml"
+    fname_template_config = _TEMPLATE_DIR / f"{template}.yaml"
     content = f"{header}\n{fname_template_config.read_text()}"
     fname_campaign_config.write_text(content)
+
+
+def load(name: str) -> dict[str, Any]:
+    """
+    TODO: Create a campaign class that contain method and data access in the configuration.
+
+    """
+    ifname = _campaign_dir(name) / "campaign.yaml"
+    if not ifname.is_file():
+        raise RuntimeError(
+            f"Campaign {name} has no campaign-specific configuration file {ifname.name} ..."
+        )
+    return yaml.safe_load(ifname.read_text())
 
 
 # @dataclass
@@ -204,6 +269,6 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 #     beg: dt.date
 #     end: dt.date
 
-#     @property
-#     def gpsweeks(self) -> list[GPSWeek]:
-#         return list(set(doy(d) for d in date_range(self.beg, self.end)))
+#     # @property
+#     # def gpsweeks(self) -> list[GPSWeek]:
+#     #     return list(set(doy(d) for d in date_range(self.beg, self.end)))

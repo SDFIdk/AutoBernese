@@ -17,6 +17,7 @@ class HasFromOrdinal(Protocol):
     is needed.
 
     """
+
     def fromordinal(ordinal: int) -> Any:
         """
         Method that converts a Python integer date.
