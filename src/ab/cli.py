@@ -102,6 +102,7 @@ def logfile() -> None:
 
     except KeyboardInterrupt:
         log.debug(f"Log tail finished ...")
+        print()
 
     finally:
         process.terminate()
