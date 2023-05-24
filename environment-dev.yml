@@ -2,11 +2,12 @@ name: ab-dev
 channels:
 - conda-forge
 dependencies:
-- python=3.11
 - click
+- pip
+- python=3.11
+- pyyaml
 - requests
 - rich
-- pyyaml
 - pip:
   - mkdocs-glightbox
   - mkdocs-kroki-plugin
@@ -15,10 +16,10 @@ dependencies:
 - bandit
 - black
 - coverage
-- mypy
-- mkdocs-material
+- graphviz
 - mkdocs-graphviz
-- grapviz
+- mkdocs-material
+- mypy
 - pytest
 # For MyPy
 - types-pyyaml
