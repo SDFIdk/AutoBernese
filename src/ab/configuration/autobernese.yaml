@@ -1,34 +1,11 @@
-# Bernese GNSS Software [BSW] environment variables available after 'source'ing
-# the shell script `LOADGPS.setvar` in the root of the installation directory.
-bsw_env:
+# AutoBernese runtime environment
+runtime:
 
-  # Installation directory
-  C: &C !ENV [C, .]
+  # Root of the package's runtime files
+  ab: &ab !Path [*env, autobernese]
 
-  # Bernese program panels
-  PAN: &PAN !ENV [PAN, .]
-
-  # Global model files used by Bernese programs
-  MODEL: &MODEL !ENV [MODEL, .]
-
-  # Global configuration file used by Bernese programs
-  CONFIG: &CONFIG !ENV [CONFIG, .]
-
-  # DATAPOOL directory
-  D: &D !ENV [D, .]
-
-  # CAMPAIGN directory
-  P: &P !ENV [P, .]
-
-  # User directory
-  U: &U !ENV [U, .]
-
-# Autobernese runtime environment
-environment:
-  env_root: &env_root !Parent [*C]
-  autobernese: &autobernese !Path [*env_root, autobernese]
   logging:
-    filename: !Path [*autobernese, autobernese.log]
+    filename: !Path [*ab, autobernese.log]
     # Special parameters that can be added here are:
     # `{user}` which adds the username using Python's getpass.getuser().
     format: '%(asctime)s | {user} | %(levelname)s | %(name)s | %(message)s'
@@ -36,7 +13,22 @@ environment:
     style: '%'
     level: DEBUG
 
+  ftp_directory_listings: !Path [*ab, ftp_directory_listings.yaml]
+
+  campaign_templates: !Path [*ab, templates]
+
+  user_config: !Path [*ab, autobernese.yaml]
+
 station:
+
+  # The following key-value pairs are arguments to the sitelog parser and can
+  # not be changed.
+  #
+  # * `sitelogs`
+  # * `indivudually_calibrated`
+  # * `output_sta_file`
+  #
+
   sitelogs: # !Path [*D, sitelogs, '*.log']
   - !Path [*D, sitelogs, esbc*.log]
   - !Path [*D, sitelogs, fer5*.log]
@@ -54,11 +46,12 @@ station:
 
   individually_calibrated: [BUDD, MOJN, RIKO]
 
-  filename_sta: !Path [*D, station, sitelogs.STA]
+  output_sta_file: !Path [*D, station, sitelogs.STA]
 
 campaign:
+
   menu: !Path [*PAN, MENU_CMP.INP]
-  templates: !Path [*autobernese, templates]
+
   directories:
   - name: ATM
   - name: BPE
@@ -75,82 +68,77 @@ campaign:
   - name: SOL
   - name: STA
 
-data:
+sources:
 
-  ftp:
-    list_directory_cache: !Path [*autobernese, list_directory.yaml]
+# Download scenarios:
+#
+# 1) Download specific file on an FTP-server.
+#
+# 2) Download all files (excluding directories) from a given directory on an
+#    FTP server to a given destination directory.
+#
+# 3) Download specific files denoted with complete filenames from a given
+#    source directory on an FTP server. This requires a liste of the filenames
+#    in the directory.
+#
+# 4) Download specific files from an FTP server directory, where filenames are
+#    given with a wildcard, e.g. '*.EPH.Z'.
+#
+# 5) Download specific file URI via HTTP.
 
-  sources:
+# ad.1)
+- !Source
+  name: EUREF STA file
+  url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
+  destination: !Path [*D, station]
 
-  # Download scenarios:
-  #
-  # 1) Download specific file on an FTP-server.
-  #
-  # 2) Download all files (excluding directories) from a given directory on an
-  #    FTP server to a given destination directory.
-  #
-  # 3) Download specific files denoted with complete filenames from a given
-  #    source directory on an FTP server. This requires a liste of the filenames
-  #    in the directory.
-  #
-  # 4) Download specific files from an FTP server directory, where filenames are
-  #    given with a wildcard, e.g. '*.EPH.Z'.
-  #
-  # 5) Download specific file URI via HTTP.
+# # ad.2)
+- !Source
+  name: BSW Model data
+  url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
+  destination: *MODEL
+  # max_age: 1
 
-  # ad.1)
-  - !Source
-    name: EUREF STA file
-    url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
-    destination: !Path [*D, station]
+# ad.2)
+- !Source
+  name: BSW Configuration data
+  url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
+  destination: *CONFIG
+  # max_age: 1
 
-  # # ad.2)
-  - !Source
-    name: BSW Model data
-    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
-    destination: *MODEL
-    # max_age: 1
+# ad.3)
+- !Source
+  name: Universal and BSW-specific antenna files
+  url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
+  destination: !Path [*D, REF54]
+  filenames:
+  - ANTENNA_I14.PCV
+  - ANTENNA_I20.PCV
+  - I14.ATX
+  - I20.ATX
+  # max_age: 1
 
-  # ad.2)
-  - !Source
-    name: BSW Configuration data
-    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
-    destination: *CONFIG
-    # max_age: 1
+# ad.4)
+- !Source
+  name: Ionosphere and satellite-bias files
+  url: ftp://ftp.aiub.unibe.ch/CODE/{year}/
+  destination: !Path [*D, CODE, '{year}']
+  filenames:
+  - '*.ION.gz'
+  - '*.ION.Z'
+  - '*.BIA.gz'
+  - '*.BIA.Z'
+  parameters:
+    year: [2022, 2023]
+  # max_age: 1
 
-  # ad.3)
-  - !Source
-    name: Universal and BSW-specific antenna files
-    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
-    destination: !Path [*D, REF54]
-    filenames:
-    - ANTENNA_I14.PCV
-    - ANTENNA_I20.PCV
-    - I14.ATX
-    - I20.ATX
-    # max_age: 1
-
-  # ad.4)
-  - !Source
-    name: Ionosphere and satellite-bias files
-    url: ftp://ftp.aiub.unibe.ch/CODE/{year}/
-    destination: !Path [*D, CODE, '{year}']
-    filenames:
-    - '*.ION.gz'
-    - '*.ION.Z'
-    - '*.BIA.gz'
-    - '*.BIA.Z'
-    parameters:
-      year: [2022, 2023]
-    # max_age: 1
-
-  # ad.5)
-  - !Source
-    name: TU Wien Vienna Mapping Model 3
-    url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
-    destination: !Path [*D, VMF3, '1x1_OP', '{date.year}']
-    parameters:
-      date: !DateRange
-        beg: 2023-01-01
-        end: 2023-01-02
-      hour: ['00', '06', '12', '18']
+# ad.5)
+- !Source
+  name: TU Wien Vienna Mapping Model 3
+  url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
+  destination: !Path [*D, VMF3, '1x1_OP', '{date.year}']
+  parameters:
+    date: !DateRange
+      beg: 2023-01-01
+      end: 2023-01-02
+    hour: ['00', '06', '12', '18']

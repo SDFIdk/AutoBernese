@@ -39,10 +39,10 @@ def is_directory(ftp: FTP, candidate: str) -> bool:
     return ftp.nlst(candidate) != [candidate]
 
 
-list_directory_cache = (
-    configuration.load().get("data").get("ftp").get("list_directory_cache")
+ifname_directory_listings = (
+    configuration.load().get("runtime").get("ftp_directory_listings")
 )
-_FILENAMES = KeyValueCache(list_directory_cache)
+_FILENAMES = KeyValueCache(ifname_directory_listings)
 
 
 def list_files(ftp: FTP, path: str) -> list[str]:
@@ -62,23 +62,19 @@ def list_files(ftp: FTP, path: str) -> list[str]:
 
 def download(source: Source) -> None:
     """
-    If filenames is set, assume that the given serverpath is a directory.
-    (Or check?)
+    Download paths resolved from a Source instance.
 
-    If no files names given, make a call to the server and check if the last
-    path part is a directory (gets empty list or list of files and
-    directories inside the directory.) or a file to be downloaded.
+    Two cases are handled:
 
-    Cases i can think of, but not necessarily occurring:
+    *   When the last part of the remote path is a directory, all files
+        directory under that directory are downloaded.
 
-    *   What if the filename is parameterised, too?
+    *   When the last part of the remote path is a file, the name is matched
+        against the list of files inside the remote parent directory.
 
-        -   host/path/to/{year}/filename{doy}.ext
-            if host/path/to/{year}/ is resolved first?
-
-        -   So far, it is not.
-
-        -   Since we are using weeks, we need to specify ... ?
+        The reason for this is that filenames can use wildcards (such as `*`)
+        compatible with Python's `fnmatch`. Hence, each file in the remote
+        directory must matched against the given pattern if it is downloaded.
 
     """
 
