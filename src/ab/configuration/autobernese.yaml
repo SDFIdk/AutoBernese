@@ -1,6 +1,3 @@
-# IDEA. NOT IN USE.
-# local: &local __ab__
-
 # Bernese GNSS Software [BSW] environment variables available after 'source'ing
 # the shell script `LOADGPS.setvar` in the root of the installation directory.
 bsw_env:
@@ -29,9 +26,9 @@ bsw_env:
 # Autobernese runtime environment
 environment:
   env_root: &env_root !Parent [*C]
-  ab_root: &ab_root !Path [*env_root, autobernese]
+  autobernese: &autobernese !Path [*env_root, autobernese]
   logging:
-    filename: !Path [*ab_root, autobernese.log]
+    filename: !Path [*autobernese, autobernese.log]
     # Special parameters that can be added here are:
     # `{user}` which adds the username using Python's getpass.getuser().
     format: '%(asctime)s | {user} | %(levelname)s | %(name)s | %(message)s'
@@ -39,43 +36,29 @@ environment:
     style: '%'
     level: DEBUG
 
-  # IDEAS. NOT IN USE.
-  # system_user_root: !Path [*ab_root, system_user]
-  # state: !Path [*ab_root, state.yaml]
-  # datafiles:
-  #   sources: !Path [*ab_root, sources.yaml]
-
-common:
-# TODO: Remove test directory
-- &test !Path [*D, test]
-
-- &sitelogs !Path [*D, sitelogs]
-- &station !Path [*D, station]
-- &vmf_root !Path [*D, test, VMF3_1x1_OP]
-
 station:
-  sitelogs: # !Path [*sitelogs, '*.log']
-  - !Path [*sitelogs, esbc*.log]
-  - !Path [*sitelogs, fer5*.log]
-  - !Path [*sitelogs, fyha*.log]
-  - !Path [*sitelogs, gesr*.log]
-  - !Path [*sitelogs, haby*.log]
-  - !Path [*sitelogs, hirs*.log]
-  - !Path [*sitelogs, tejh*.log]
-  - !Path [*sitelogs, mojn*.log]
-  - !Path [*sitelogs, skej*.log]
-  - !Path [*sitelogs, riko*.log]
-  - !Path [*sitelogs, fyno*.log]
-  - !Path [*sitelogs, esh5*.log]
-  - !Path [*sitelogs, grej*.log]
+  sitelogs: # !Path [*D, sitelogs, '*.log']
+  - !Path [*D, sitelogs, esbc*.log]
+  - !Path [*D, sitelogs, fer5*.log]
+  - !Path [*D, sitelogs, fyha*.log]
+  - !Path [*D, sitelogs, gesr*.log]
+  - !Path [*D, sitelogs, haby*.log]
+  - !Path [*D, sitelogs, hirs*.log]
+  - !Path [*D, sitelogs, tejh*.log]
+  - !Path [*D, sitelogs, mojn*.log]
+  - !Path [*D, sitelogs, skej*.log]
+  - !Path [*D, sitelogs, riko*.log]
+  - !Path [*D, sitelogs, fyno*.log]
+  - !Path [*D, sitelogs, esh5*.log]
+  - !Path [*D, sitelogs, grej*.log]
 
   individually_calibrated: [BUDD, MOJN, RIKO]
 
-  filename_sta: !Path [*station, sitelogs.STA]
+  filename_sta: !Path [*D, station, sitelogs.STA]
 
 campaign:
   menu: !Path [*PAN, MENU_CMP.INP]
-  templates: !Path [*ab_root, templates]
+  templates: !Path [*autobernese, templates]
   directories:
   - name: ATM
   - name: BPE
@@ -95,7 +78,7 @@ campaign:
 data:
 
   ftp:
-    list_directory_cache: !Path [*ab_root, list_directory.yaml]
+    list_directory_cache: !Path [*autobernese, list_directory.yaml]
 
   sources:
 
@@ -119,7 +102,7 @@ data:
   - !Source
     name: EUREF STA file
     url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
-    destination: *station
+    destination: !Path [*D, station]
 
   # # ad.2)
   - !Source
@@ -151,7 +134,7 @@ data:
   - !Source
     name: Ionosphere and satellite-bias files
     url: ftp://ftp.aiub.unibe.ch/CODE/{year}/
-    destination: !Path [*test, CODE, '{year}']
+    destination: !Path [*D, CODE, '{year}']
     filenames:
     - '*.ION.gz'
     - '*.ION.Z'
@@ -165,7 +148,7 @@ data:
   - !Source
     name: TU Wien Vienna Mapping Model 3
     url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
-    destination: !Path [*vmf_root, '{date.year}']
+    destination: !Path [*D, VMF3, '1x1_OP', '{date.year}']
     parameters:
       date: !DateRange
         beg: 2023-01-01
