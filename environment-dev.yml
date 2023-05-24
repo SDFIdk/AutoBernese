@@ -9,6 +9,7 @@ dependencies:
 - pyyaml
 - pip:
   - mkdocs-glightbox
+  - mkdocs-kroki-plugin
   - pyyaml_env_tag
 
 - bandit
@@ -16,6 +17,8 @@ dependencies:
 - coverage
 - mypy
 - mkdocs-material
+- mkdocs-graphviz
+- grapviz
 - pytest
 # For MyPy
 - types-pyyaml

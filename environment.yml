@@ -8,5 +8,4 @@ dependencies:
 - rich
 - pyyaml
 - pip:
-  - mkdocs-glightbox
   - pyyaml_env_tag
