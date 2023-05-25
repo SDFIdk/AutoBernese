@@ -302,8 +302,7 @@ def sources(name: str, verbose: bool = False) -> None:
         join = lambda pairs: "\n".join(f"{p.path_remote} -> {p.fname}" for p in pairs)
         formatted = (
             f"{info}{join(source.resolve())}\n"
-            for (source, info)
-            in zip(sources, formatted)
+            for (source, info) in zip(sources, formatted)
         )
 
     print("\n".join(sorted(formatted)))

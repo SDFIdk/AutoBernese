@@ -13,8 +13,6 @@ runtime:
     style: '%'
     level: DEBUG
 
-  ftp_directory_listings: !Path [*ab, ftp_directory_listings.yaml]
-
   campaign_templates: !Path [*ab, templates]
 
   user_config: !Path [*ab, autobernese.yaml]
@@ -97,6 +95,7 @@ sources:
   name: BSW Model data
   url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
   destination: *MODEL
+  filenames: ['*']
   # max_age: 1
 
 # ad.2)
@@ -104,6 +103,7 @@ sources:
   name: BSW Configuration data
   url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
   destination: *CONFIG
+  filenames: ['*']
   # max_age: 1
 
 # ad.3)

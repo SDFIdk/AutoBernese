@@ -92,9 +92,17 @@ class RemoteLocalPair:
 
     def __post_init__(self) -> None:
         # Assumption: the URI is a path to a file
-        path = Path(urlparse(self.uri).path)
-        self.path_remote: str = str(path.parent)
-        self.fname: str = str(path.name)
+
+        # Code annotated with an example:
+        # Given: uri = 'https://example.com/filename.txt'
+        parsed = urlparse(self.uri)
+        # Then: `parsed.path` will be the full path (without protocol) to
+        # `filename.txt`
+        filepath = Path(parsed.path)
+        # Then filepath is a Path instance, from which we can get the remote
+        # directory path and the filename of the file to download.
+        self.path_remote: str = str(filepath.parent)
+        self.fname: str = str(filepath.name)
 
 
 @dataclass
