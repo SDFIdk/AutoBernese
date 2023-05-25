@@ -170,12 +170,22 @@ def bpe(**bpe_settings: dict[Any, Any]) -> None:
     required=False,
     is_flag=True,
 )
-def download_sources(force: bool = False) -> None:
+@click.option(
+    "-c",
+    "--campaign",
+    help="Download campaign-specific sources as defined in given campaign configuration.",
+    required=False,
+)
+def download_sources(force: bool = False, campaign: str | None = None) -> None:
     """
     Download all sources in the autobernese configuration file.
 
     """
-    sources = configuration.load().get("sources")
+    if campaign is not None:
+        sources = bsw.campaign.load(campaign).get("sources")
+    else:
+        sources = configuration.load().get("sources")
+
     for source in sources:
         msg = f"Download source: {source.name}"
         print(msg)
@@ -208,7 +218,7 @@ def campaign(ctx: click.Context) -> None:
 
 
 @campaign.command
-@click.option("--verbose", "-v", is_flag=True, help="Print details.")
+@click.option("--verbose", "-v", is_flag=True, help="Print more details.")
 def ls(verbose: bool) -> None:
     """
     List existing campaigns
@@ -272,13 +282,31 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 
 @campaign.command
 @click.argument("name", type=str)
-def sources(name: str) -> None:
+@click.option("--verbose", "-v", is_flag=True, help="Print more details.")
+def sources(name: str, verbose: bool = False) -> None:
     """
     Print the campaign-specific sources.
 
     """
     sources = bsw.campaign.load(name).get("sources")
-    print("\n".join(f"{s.name} - {s.url}" for s in sources))
+    formatted = (
+        f"""\
+{source.name=}
+{source.url=}
+{source.destination=}
+"""
+        for source in sources
+    )
+
+    if verbose:
+        join = lambda pairs: "\n".join(f"{p.path_remote} -> {p.fname}" for p in pairs)
+        formatted = (
+            f"{info}{join(source.resolve())}\n"
+            for (source, info)
+            in zip(sources, formatted)
+        )
+
+    print("\n".join(sorted(formatted)))
 
 
 @campaign.command
