@@ -21,6 +21,7 @@ from ab import (
     bsw,
     pkg,
 )
+from ab.bsw import campaign as _campaign
 from ab.data import (
     ftp,
     http,
@@ -50,10 +51,12 @@ def main(ctx: click.Context, show_version: bool) -> None:
 
     1.  Download external data to your local data storage.
 
-    2.  Create and manage Bernese campaigns.
+    2.  Create Bernese campaigns using pre-defined campaign templates.
 
-    3.  Run Bernese Processing Engine [BPE] for campaigns created with
-        AutoBernese.
+    3.  Download campaign-specific data.
+
+    4.  Run the Bernese Processing Engine [BPE] for Bernese campaigns with an
+        AutoBernese campaign configuration.
 
     """
     if show_version:
@@ -153,13 +156,21 @@ def ydoy(year: int, doy: int) -> None:
     print(json.dumps(gps_date.dateinfo(), indent=2))
 
 
-@main.command
-def bpe(**bpe_settings: dict[Any, Any]) -> None:
-    """
-    Stand-alone tool for running the Bernese Processing Engine [BPE].
+# @main.command
+# def bpe(campaign: str
+#     pcf_file: str,
+#     cpu_file: str,
+#     year: str,
+#     session: str,
+#     sysout: str,
+#     status: str,
+#     taskid: str,
+#     ) -> None:
+#     """
+#     Stand-alone tool for running the Bernese Processing Engine [BPE].
 
-    """
-    print("BPE")
+#     """
+#     print("BPE")
 
 
 @main.command
@@ -182,11 +193,11 @@ def download_sources(force: bool = False, campaign: str | None = None) -> None:
 
     """
     if campaign is not None:
-        sources = bsw.campaign.load(campaign).get("sources")
+        config = _campaign.load(campaign)
     else:
-        sources = configuration.load().get("sources")
+        config = configuration.load()
 
-    for source in sources:
+    for source in config.get("sources"):
         msg = f"Download source: {source.name}"
         print(msg)
         log.debug(msg)
@@ -212,7 +223,7 @@ def campaign(ctx: click.Context) -> None:
     Create campaigns and manage campaign-specific sources and run BPE tasks.
 
     """
-    bsw.campaign.init_template_dir()
+    _campaign.init_template_dir()
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
 
@@ -226,7 +237,7 @@ def ls(verbose: bool) -> None:
     """
     log.debug("List existing campaigns ...")
     print("Existing campaigns registered in the BSW campaign list:")
-    print("\n".join(bsw.campaign.ls(verbose)))
+    print("\n".join(_campaign.ls(verbose)))
 
 
 @campaign.command
@@ -238,11 +249,11 @@ def templates(template: str | None) -> None:
     """
     if template is None:
         log.debug("List available campaign templates ...")
-        print("\n".join(bsw.campaign.available_templates()))
+        print("\n".join(_campaign.available_templates()))
 
     else:
         log.debug(f"Show raw template {template!r} ...")
-        print(bsw.campaign.load_template(template))
+        print(_campaign.load_template(template))
 
 
 @campaign.command
@@ -277,7 +288,7 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 
     """
     log.debug(f"Create campaign {name=} using {template=} with {beg=} and {end=} ...")
-    bsw.campaign.create(name, template, beg, end)
+    _campaign.create(name, template, beg, end)
 
 
 @campaign.command
@@ -288,7 +299,7 @@ def sources(name: str, verbose: bool = False) -> None:
     Print the campaign-specific sources.
 
     """
-    sources = bsw.campaign.load(name).get("sources")
+    sources = _campaign.load(name).get("sources")
     formatted = (
         f"""\
 {source.name=}
@@ -312,10 +323,10 @@ def sources(name: str, verbose: bool = False) -> None:
 @click.argument("name", type=str)
 def tasks(name: str) -> None:
     """
-    Show BPE tasks for a campaign.
+    Show tasks for a campaign.
 
     """
-    for task in bsw.campaign.load(name).get("tasks"):
+    for task in _campaign.load(name).get("tasks"):
         print(task)
         print()
 
@@ -327,9 +338,9 @@ def runbpe(name: str) -> None:
     Run the BPE for each tasks in the campaign configuration.
 
     """
-    # c = campaigns...
-    # for task in c.bpe_tasks:
-    #     bsw.runbpe(bpe_settings)
+    for task in _campaign.load(name).get("tasks"):
+        print(task)
+        task.run()
 
 
 @main.group()

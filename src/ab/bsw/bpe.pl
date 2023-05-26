@@ -6,7 +6,7 @@ my $bpe = new startBPE();
 
 $$bpe{PCF_FILE}     = "$ENV{ab_bpe_pcf_file}";
 $$bpe{CPU_FILE}     = "$ENV{ab_bpe_cpu_file}";
-$$bpe{BPE_CAMPAIGN} = "$ENV{ab_bpe_bpe_campaign}";
+$$bpe{BPE_CAMPAIGN} = "$ENV{ab_bpe_campaign}";
 $$bpe{YEAR}         = "$ENV{ab_bpe_year}";
 $$bpe{SESSION}      = "$ENV{ab_bpe_session}";
 $$bpe{SYSOUT}       = "$ENV{ab_bpe_sysout}";

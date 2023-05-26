@@ -11,6 +11,7 @@ import pathlib
 import yaml
 from yaml_env_tag import construct_env_tag
 
+from ab.bsw.bpe import BPETask
 from ab.data.source import Source
 from ab.dates import (
     date_range,
@@ -77,8 +78,13 @@ def date_range_constructor(
     return date_range(d.get("beg"), d.get("end"), transformer=GPSDate)
 
 
+def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> Source:
+    return BPETask(**loader.construct_mapping(node, deep=True))
+
+
 yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
 yaml.SafeLoader.add_constructor("!Path", path_constructor)
 yaml.SafeLoader.add_constructor("!Parent", parent_constructor)
 yaml.SafeLoader.add_constructor("!Source", source_constructor)
 yaml.SafeLoader.add_constructor("!DateRange", date_range_constructor)
+yaml.SafeLoader.add_constructor("!BPETask", bpe_task_constructor)

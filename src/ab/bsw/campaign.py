@@ -242,6 +242,7 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
         created=dt.datetime.now().isoformat()[:19],
         username=getpass.getuser(),
         template=template,
+        campaign=name,
         beg=beg.isoformat(),
         end=end.isoformat(),
     )
@@ -259,6 +260,6 @@ def load(name: str) -> dict[str, Any]:
     ifname = _campaign_configuration(name)
     if not ifname.is_file():
         raise RuntimeError(
-            f"Campaign {name} has no campaign-specific configuration file {ifname.name} ..."
+            f"Campaign {name!r} does not exist or has no campaign-specific configuration file {ifname.name} ..."
         )
     return configuration.with_env(ifname, keep_env=False)

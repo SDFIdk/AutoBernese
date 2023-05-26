@@ -1,26 +1,28 @@
 tasks:
 
-- name: Run PPP for the EXAMPLE campaign
-  task:
-    # !BPETask
+- !BPETask
+  name: Run PPP for the EXAMPLE campaign
+  input:  # TODO: task or specification?
     pcf_file: PPP
-    campaign: EXAMPLE
+    campaign: *campaign
     year: '{date.year}'
     session: '{date.doy:0>3d}0'
-    sysout: PPP
-    status: PPP.RUN
+    sysout: PPP_{date.doy:0>3d}0
+    status: PPP_{date.doy:0>3d}0.RUN
     taskid: PP
-    parameters:
-      date: !DateRange {beg: *beg, end: *end}
+  parameters:
+    date: !DateRange {beg: *beg, end: *end}
 
 sources:
 
 - !Source
   name: RINEX data
   url: ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy}/
-  destination: !Path [!ENV [D, .], RINEX, '{date.gps_week}']
+  destination: !Path [*D, RINEX, '{date.gps_week}']
   filenames:
-  - WSRT00NLD_R_{date.year}{date.doy}0000_01D_30S_MO.crx.gz
-  - WTZR00DEU_R_{date.year}{date.doy}0000_01D_30S_MO.crx.gz
+  - {station}_{date.year}{date.doy}0000_01D_30S_MO.crx.gz
   parameters:
+    station:
+    - WSRT00NLD_R
+    - WTZR00DEU_R
     date: !DateRange {beg: *beg, end: *end}
