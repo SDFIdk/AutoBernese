@@ -15,17 +15,17 @@ def test_as_environment_variables():
         "AB_BPE_FOO": whatever,
         "AB_BPE_BAR": whatever,
     }
-    result = as_environment_variables(**_input)
+    result = as_environment_variables(_input)
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
 
     _input = {
         0: whatever,
     }
     with pytest.raises(TypeError):
-        as_environment_variables(**_input)
+        as_environment_variables(_input)
 
     _input = {
         "foo bar": whatever,
     }
     with pytest.raises(ValueError):
-        as_environment_variables(**_input)
+        as_environment_variables(_input)

@@ -7,7 +7,6 @@ from typing import (
     Mapping,
     Iterable,
     Final,
-    Protocol,
 )
 import os
 import logging
@@ -27,18 +26,20 @@ from ab.parameters import (
 log = logging.getLogger(__name__)
 
 
-class Task(Protocol):
-    """Protocol type for a task."""
-
-    def run(self) -> None:
-        """Run task"""
-
-
 @dataclass
-class BPEInput:
+class BPETaskArguments:
     """
-    When run, the task instance will be updated with the actual details of the
-    session.
+    BPE task arguments contains the input needed for running a BPE task.
+
+    The members can be used as is, e.g.
+
+    ```
+    instance = BPETaskArguments(...)
+    run_bpe(as_environment_variables(asdict(instance)))
+    ```
+
+    Alternatively, each member can be a template string that can be resolved using the
+    method `resolve` and given a dictionary of parameters that fit the template.
 
     """
 
@@ -53,19 +54,18 @@ class BPEInput:
 
     def resolve(self, parameters: dict[str, Iterable[Any]]) -> list[dict[str, str]]:
         """
-        TODO: Clarify
-        Resolve parameters given into possible BPE input used.
+        Returns a list of dictionaries with the class members as keys and their
+        formatted values as each key's values.
 
-        For each possible parameter value each instance variable is formatted.
-
-        Returns a list of dictionaries with the class members as keys and their formatted values as each key's values.
+        Create every possible expansion of any template strings in the
+        instance's members using the given parameters.
 
         """
-        templates = asdict(self)
+        instance_members = asdict(self)
         return [
             {
-                name: template.format(**resolvable(combination, template))
-                for (name, template) in templates.items()
+                member: value.format(**resolvable(combination, value))
+                for (member, value) in instance_members.items()
             }
             for combination in resolved(parameters)
         ]
@@ -76,17 +76,15 @@ class BPETask:
     """ """
 
     name: str
-    spec: BPEInput = "foo"
+    arguments: BPETaskArguments
     parameters: dict[str, Iterable[Any]] = None
 
     def __post_init__(self) -> None:
-        self.spec = BPEInput(**self.spec)
+        self.arguments = BPETaskArguments(**self.arguments)
 
     def run(self) -> None:
-        for bpe_metadata in self.spec.resolve(self.parameters):
-            # print(bpe_metadata)
-            run(as_environment_variables(**bpe_metadata))
-            break
+        for arguments_resolved in self.arguments.resolve(self.parameters):
+            run_bpe(as_environment_variables(arguments_resolved))
 
 
 KEYS_BPE: set[str] = {
@@ -99,11 +97,17 @@ KEYS_BPE: set[str] = {
     "AB_BPE_STATUS",
     "AB_BPE_TASKID",
 }
+"Needed BPE environment variables for the AutoBernese BPE runner"
 
 _PREFIX: Final[str] = "AB_BPE_"
 
 
-def as_environment_variables(**parameters: dict[str, str]) -> dict[str, str]:
+def as_environment_variables(parameters: dict[str, str]) -> dict[str, str]:
+    """
+    Return a dictionary with upper-case keys prefixed to avoid name clash.
+    Values remain unchanged.
+
+    """
     if not all(isinstance(key, str) for key in parameters):
         raise TypeError("Keys must be of type `str` ...")
     if not all(key.replace(" ", "") == key for key in parameters):
@@ -111,19 +115,18 @@ def as_environment_variables(**parameters: dict[str, str]) -> dict[str, str]:
     return {f"{_PREFIX}{key.upper()}": value for (key, value) in parameters.items()}
 
 
-def run(bpe_env: Mapping = None) -> None:
+def run_bpe(bpe_env: Mapping[str, str]) -> None:
     """
-    Start specified Proces Control File with Bernese Processing Engine [BPE].
+    Run Bernese Processing Engine [BPE] using the input arguments given in
+    `bpe_env` as environment variables for the BPE runner script.
 
-    Technically, Python runs Perl-program that initiates and starts BPE with
-    given PCF.
+    Technically, Python runs Perl-program [the BPE runner] that initiates and
+    starts BPE with given PCF and ampaign+session arguments.
 
-    Parameters: {', '.join(SETTINGS_DEFAULT_BPE.keys())}
+    The function aborts if the needed environment variables are not present in
+    the provided dictionary.
 
     """
-    if not bpe_env:
-        log.debug("Use default BPE settings ...")
-
     keys_gotten = set(bpe_env)
     diff = KEYS_BPE - keys_gotten
     if diff:

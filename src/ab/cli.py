@@ -18,11 +18,14 @@ from ab import (
     __version__,
     configuration,
     dates,
-    bsw,
     pkg,
 )
-from ab.bsw import campaign as _campaign
+from ab.bsw import (
+    campaign as _campaign,
+    task as _task,
+)
 from ab.data import (
+    source as _source,
     ftp,
     http,
 )
@@ -64,16 +67,6 @@ def main(ctx: click.Context, show_version: bool) -> None:
         raise SystemExit
     elif ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
-
-
-@main.command
-@click.argument("filename", type=str)
-def test(filename: str) -> None:
-    """
-    Test feature.
-
-    """
-    print(configuration.with_env(filename))
 
 
 @main.command
@@ -197,7 +190,8 @@ def download_sources(force: bool = False, campaign: str | None = None) -> None:
     else:
         config = configuration.load()
 
-    for source in config.get("sources"):
+    source: _source.Source
+    for source in config.get("sources", []):
         msg = f"Download source: {source.name}"
         print(msg)
         log.debug(msg)
@@ -244,7 +238,7 @@ def ls(verbose: bool) -> None:
 @click.argument("template", default=None, type=str, required=False)
 def templates(template: str | None) -> None:
     """
-    List available campaign templates
+    List available campaign templates or show content of given template.
 
     """
     if template is None:
@@ -299,7 +293,7 @@ def sources(name: str, verbose: bool = False) -> None:
     Print the campaign-specific sources.
 
     """
-    sources = _campaign.load(name).get("sources")
+    sources: list[_source.Source] = _campaign.load(name).get("sources")
     formatted = (
         f"""\
 {source.name=}
@@ -326,6 +320,7 @@ def tasks(name: str) -> None:
     Show tasks for a campaign.
 
     """
+    task: _task.Task
     for task in _campaign.load(name).get("tasks"):
         print(task)
         print()
@@ -338,8 +333,8 @@ def runbpe(name: str) -> None:
     Run the BPE for each tasks in the campaign configuration.
 
     """
+    task: _task.Task
     for task in _campaign.load(name).get("tasks"):
-        print(task)
         task.run()
 
 
