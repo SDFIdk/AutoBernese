@@ -4,14 +4,14 @@ use startBPE;
 
 my $bpe = new startBPE();
 
-$$bpe{PCF_FILE}     = "$ENV{ab_bpe_pcf_file}";
-$$bpe{CPU_FILE}     = "$ENV{ab_bpe_cpu_file}";
-$$bpe{BPE_CAMPAIGN} = "$ENV{ab_bpe_campaign}";
-$$bpe{YEAR}         = "$ENV{ab_bpe_year}";
-$$bpe{SESSION}      = "$ENV{ab_bpe_session}";
-$$bpe{SYSOUT}       = "$ENV{ab_bpe_sysout}";
-$$bpe{STATUS}       = "$ENV{ab_bpe_status}";
-$$bpe{TASKID}       = "$ENV{ab_bpe_taskid}";
+$$bpe{PCF_FILE}     = "$ENV{AB_BPE_PCF_FILE}";
+$$bpe{CPU_FILE}     = "$ENV{AB_BPE_CPU_FILE}";
+$$bpe{BPE_CAMPAIGN} = "$ENV{AB_BPE_CAMPAIGN}";
+$$bpe{YEAR}         = "$ENV{AB_BPE_YEAR}";
+$$bpe{SESSION}      = "$ENV{AB_BPE_SESSION}";
+$$bpe{SYSOUT}       = "$ENV{AB_BPE_SYSOUT}";
+$$bpe{STATUS}       = "$ENV{AB_BPE_STATUS}";
+$$bpe{TASKID}       = "$ENV{AB_BPE_TASKID}";
 
 $bpe->resetCPU();
 $bpe->run();
