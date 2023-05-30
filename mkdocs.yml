@@ -8,20 +8,10 @@ repo_url: https://github.com/SDFIdk/AutoBernese
 
 nav:
 - Home: index.md
-- Bernese setup: bernese-setup.md
+- Installation: installation.md
 - System overview: system-overview.md
 - Developer: developer.md
-# - Background:
-#   - GNSS processing: gnss-processing.md
-#   - Processing tools: processing-tools.md
-# - Setup:
-#   - Prerequisites: prerequisites.md
-#   - Installation: installation.md
-# - External tools:
-#   - FIRE: fire.md
-# - Developer:
-#   - Documentation: documentation.md # Herunder structurizr og mkdocs
-#   - Code: code.md
+- References: references.md
 
 theme:
   name: material
@@ -45,9 +35,12 @@ extra_css:
 plugins:
 - search
 - glightbox
+- kroki:
+    FileTypes:
+    - png
+    - svg
 
 markdown_extensions:
-- admonition
 - admonition
 - attr_list
 - footnotes
@@ -83,3 +76,5 @@ markdown_extensions:
     custom_checkbox: true
 - pymdownx.tilde
 - pymdownx.snippets
+
+- mkdocs_graphviz

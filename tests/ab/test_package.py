@@ -7,10 +7,16 @@ def test_version():
 
 
 def test_package_data_exist():
-    assert pkg.bpe_runner.is_file()
+    assert pkg.env.is_file()
     assert pkg.configuration.is_file()
-    assert pkg.sta_template.is_file()
+
     assert pkg.country_codes.is_file()
+
     assert pkg.demo_sitelog.is_file()
-    assert pkg.campaign_template.is_file()
+
+    assert pkg.template_sta_file.is_file()
+
+    assert pkg.bpe_runner.is_file()
+    assert pkg.template_campaign_menu_list.is_file()
+    assert pkg.template_campaign.is_file()
     assert pkg.campaign_header.is_file()

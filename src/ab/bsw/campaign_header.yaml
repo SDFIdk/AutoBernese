@@ -3,5 +3,6 @@ metadata:
   username: &username {username}
   created: &created {created}
   template: &template {template}
+  campaign: &campaign {campaign}
   beg: &beg {beg}
   end: &end {end}

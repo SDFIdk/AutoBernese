@@ -18,10 +18,14 @@ from ab import (
     __version__,
     configuration,
     dates,
-    bsw,
-    organiser,
+    pkg,
+)
+from ab.bsw import (
+    campaign as _campaign,
+    task as _task,
 )
 from ab.data import (
+    source as _source,
     ftp,
     http,
 )
@@ -46,14 +50,16 @@ def date(s: str) -> dt.date:
 @click.pass_context
 def main(ctx: click.Context, show_version: bool) -> None:
     """
-    AutoBernese is a Danish army knife that
+    AutoBernese is a tool that can
 
-    1.  Downloads external data to your local data storage.
+    1.  Download external data to your local data storage.
 
-    2.  Creates and manages Bernese campaigns.
+    2.  Create Bernese campaigns using pre-defined campaign templates.
 
-    3.  Runs Bernese Processing Engine [BPE] for campaigns created with
-        AutoBernese.
+    3.  Download campaign-specific data.
+
+    4.  Run the Bernese Processing Engine [BPE] for Bernese campaigns with an
+        AutoBernese campaign configuration.
 
     """
     if show_version:
@@ -64,19 +70,10 @@ def main(ctx: click.Context, show_version: bool) -> None:
 
 
 @main.command
-def env() -> None:
-    """
-    Show BSW environment loaded into autobernese configuration
-
-    """
-    print(configuration.load().get("bsw_env"))
-
-
-@main.command
-@click.argument("section", default=None, type=str)
+@click.argument("section", default=None, type=str, required=False)
 def config(section: str) -> None:
     """
-    Show specified configuration section or all if no section name given.
+    Show all or specified configuration section(s).
 
     """
     c = configuration.load()
@@ -92,7 +89,8 @@ def logfile() -> None:
     Follow log file (run `tail -f path/to/logfile.log`).
 
     """
-    filename = configuration.load().get("environment").get("logging").get("filename")
+    runtime = configuration.load().get("runtime")
+    filename = runtime.get("logging").get("filename")
     import subprocess as sub
 
     try:
@@ -102,6 +100,7 @@ def logfile() -> None:
 
     except KeyboardInterrupt:
         log.debug(f"Log tail finished ...")
+        print()
 
     finally:
         process.terminate()
@@ -111,7 +110,7 @@ def logfile() -> None:
 @main.group
 def dateinfo() -> None:
     """
-    Date information
+    Print date info on date, year+doy or GPS week.
 
     """
 
@@ -150,23 +149,49 @@ def ydoy(year: int, doy: int) -> None:
     print(json.dumps(gps_date.dateinfo(), indent=2))
 
 
+# @main.command
+# def bpe(campaign: str
+#     pcf_file: str,
+#     cpu_file: str,
+#     year: str,
+#     session: str,
+#     sysout: str,
+#     status: str,
+#     taskid: str,
+#     ) -> None:
+#     """
+#     Stand-alone tool for running the Bernese Processing Engine [BPE].
+
+#     """
+#     print("BPE")
+
+
 @main.command
 @click.option(
     "-f",
     "--force",
-    help="Download files that are already downloaded according to their maximum age.",
+    help="Force the download of files that are already downloaded according to their maximum age.",
     required=False,
     is_flag=True,
 )
-def download_sources(force: bool = False) -> None:
+@click.option(
+    "-c",
+    "--campaign",
+    help="Download campaign-specific sources as defined in given campaign configuration.",
+    required=False,
+)
+def download_sources(force: bool = False, campaign: str | None = None) -> None:
     """
-    Download sources based on souece specification in the configuration file.
-
-    So far a source entry is assumed to be a Source instance.
+    Download all sources in the autobernese configuration file.
 
     """
-    sources = configuration.load().get("data").get("sources")
-    for source in sources:
+    if campaign is not None:
+        config = _campaign.load(campaign)
+    else:
+        config = configuration.load()
+
+    source: _source.Source
+    for source in config.get("sources", []):
         msg = f"Download source: {source.name}"
         print(msg)
         log.debug(msg)
@@ -189,16 +214,16 @@ def download_sources(force: bool = False) -> None:
 @click.pass_context
 def campaign(ctx: click.Context) -> None:
     """
-    Campaign-specific actions.
+    Create campaigns and manage campaign-specific sources and run BPE tasks.
 
     """
-    bsw.campaign.init_template_dir()
+    _campaign.init_template_dir()
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
 
 
 @campaign.command
-@click.option("--verbose", "-v", is_flag=True, help="Print details.")
+@click.option("--verbose", "-v", is_flag=True, help="Print more details.")
 def ls(verbose: bool) -> None:
     """
     List existing campaigns
@@ -206,45 +231,27 @@ def ls(verbose: bool) -> None:
     """
     log.debug("List existing campaigns ...")
     print("Existing campaigns registered in the BSW campaign list:")
-    print("\n".join(bsw.campaign.ls(verbose)))
+    print("\n".join(_campaign.ls(verbose)))
 
 
 @campaign.command
-@click.option(
-    "-n",
-    "--name",
-    type=str,
-    required=True,
-    help=f"The name of the campaign.",
-)
-def sources(name: str) -> None:
+@click.argument("template", default=None, type=str, required=False)
+def templates(template: str | None) -> None:
     """
-    Print campaign-specific sources.
+    List available campaign templates or show content of given template.
 
     """
-    sources = bsw.campaign.load(name).get("sources")
-    print("\n".join(f"{s.name} - {s.url}" for s in sources))
+    if template is None:
+        log.debug("List available campaign templates ...")
+        print("\n".join(_campaign.available_templates()))
+
+    else:
+        log.debug(f"Show raw template {template!r} ...")
+        print(_campaign.load_template(template))
 
 
 @campaign.command
-def templates() -> None:
-    """
-    List available campaign templates
-
-    """
-    # TODO: make separate of renamed command that shows list of existing templates or shows the content of template with given name.
-    log.debug("List available campaign templates ...")
-    print("\n".join(bsw.campaign.available_templates()))
-
-
-@campaign.command
-@click.option(
-    "-n",
-    "--name",
-    type=str,
-    required=True,
-    help=f"The name of the campaign.",
-)
+@click.argument("name", type=str)
 @click.option(
     "-t",
     "--template",
@@ -269,51 +276,77 @@ def templates() -> None:
 )
 def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     """
-    Create a campaign directory based on the specified template and adds the
-    campaign path to the list of available campaigns in the corresponding menu.
+    Create a Bernese campaign with directory content based on the specified
+    template and add campaign path to the list of available campaigns in the BSW
+    campaign menu.
 
     """
     log.debug(f"Create campaign {name=} using {template=} with {beg=} and {end=} ...")
-    bsw.campaign.create(name, template, beg, end)
+    _campaign.create(name, template, beg, end)
 
 
 @campaign.command
-# @click.argument(
-#     "campaign",
-#     type=str,
-#     help="Campaign",
-# )
-def recipes(campaign: str) -> None:
+@click.argument("name", type=str)
+@click.option("--verbose", "-v", is_flag=True, help="Print more details.")
+def sources(name: str, verbose: bool = False) -> None:
     """
-    Show the recipes for the active campaign.
+    Print the campaign-specific sources.
 
     """
-    # active = state.active_campaign()
-    for recipe in bpe.get_recipes():
-        print(recipe)
+    sources: list[_source.Source] = _campaign.load(name).get("sources")
+    formatted = (
+        f"""\
+{source.name=}
+{source.url=}
+{source.destination=}
+"""
+        for source in sources
+    )
+
+    if verbose:
+        join = lambda pairs: "\n".join(f"{p.path_remote} -> {p.fname}" for p in pairs)
+        formatted = (
+            f"{info}{join(source.resolve())}\n"
+            for (source, info) in zip(sources, formatted)
+        )
+
+    print("\n".join(sorted(formatted)))
 
 
-@main.group(invoke_without_command=True)
-@click.pass_context
-def bpe(ctx) -> None:
+@campaign.command
+@click.argument("name", type=str)
+def tasks(name: str) -> None:
     """
-    Tools for the Bernese Processing Engine [BPE].
+    Show tasks for a campaign.
 
     """
-    print("BPE")
+    task: _task.Task
+    for task in _campaign.load(name).get("tasks"):
+        print(task)
+        print()
 
 
-@bpe.command
-def run(**bpe_settings: dict[Any, Any]) -> None:
+@campaign.command
+@click.argument("name", type=str)
+def runbpe(name: str) -> None:
     """
-    Run Bernese Processing Engine [BPE].
+    Run the BPE for each tasks in the campaign configuration.
 
     """
-    # bsw.runbpe(bpe_settings)
-    bsw.runbpe()
+    task: _task.Task
+    for task in _campaign.load(name).get("tasks"):
+        task.run()
 
 
-@main.command
+@main.group()
+def station() -> None:
+    """
+    Stand-alone tools for station data.
+
+    """
+
+
+@station.command
 @click.argument("filename", type=pathlib.Path)
 def parse_sitelog(filename: pathlib.Path) -> None:
     """
@@ -323,7 +356,7 @@ def parse_sitelog(filename: pathlib.Path) -> None:
     print(json.dumps(sitelog.Sitelog(filename).sections_extracted, indent=2))
 
 
-@main.command
+@station.command
 # @click.argument("sitelog_filenames", type=list[pathlib.Path])
 # @click.argument("individually_calibrated", type=list[str])
 # @click.argument("filename", type=pathlib.Path)

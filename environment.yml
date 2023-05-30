@@ -2,11 +2,12 @@ name: ab
 channels:
 - conda-forge
 dependencies:
-- python=3.11
 - click
+- pip
+- python=3.11
+- pyyaml
 - requests
 - rich
-- pyyaml
+
 - pip:
-  - mkdocs-glightbox
   - pyyaml_env_tag

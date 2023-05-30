@@ -451,7 +451,7 @@ def transform_sitelog_records_to_STA_lines(
 def create_sta_file_from_sitelogs(
     sitelogs: list[pathlib.Path | str],
     individually_calibrated: list[str],
-    filename_sta: pathlib.Path | str,
+    output_sta_file: pathlib.Path | str,
     **_: dict[Any, Any],
 ) -> None:
     """
@@ -459,8 +459,8 @@ def create_sta_file_from_sitelogs(
 
     """
     # Output data
-    filename_sta = pathlib.Path(filename_sta)
-    filename_sta.parent.mkdir(parents=True, exist_ok=True)
+    output_sta_file = pathlib.Path(output_sta_file)
+    output_sta_file.parent.mkdir(parents=True, exist_ok=True)
     type_1_rows = []
     type_2_rows = []
 
@@ -484,7 +484,7 @@ def create_sta_file_from_sitelogs(
         type_2_rows.extend(_2)
 
     # Load station data
-    log.info(f"Write output to {filename_sta} ...")
+    log.info(f"Write output to {output_sta_file} ...")
     data = dict(
         created_time=STA_created_timestamp(),
         type_1_rows="\n".join(str(row) for row in type_1_rows),
@@ -494,5 +494,5 @@ def create_sta_file_from_sitelogs(
         type_4_rows="",
         type_5_rows="",
     )
-    content = pkg.sta_template.read_text().format(**data)
-    filename_sta.write_text(content)
+    content = pkg.template_sta_file.read_text().format(**data)
+    output_sta_file.write_text(content)

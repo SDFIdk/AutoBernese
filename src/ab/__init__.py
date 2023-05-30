@@ -11,10 +11,11 @@ from ab import configuration
 
 
 __version__ = metadata.version(ab.__name__)
-env = configuration.load().get("environment")
-env.get("ab_root").mkdir(exist_ok=True)
-env.get("logging").get("filename").touch()
+runtime = configuration.load().get("runtime")
+runtime.get("ab").mkdir(exist_ok=True)
+log_kw = runtime.get("logging")
+log_kw.get("filename").touch()
 replacements = dict(
-    format=env.get("logging").get("format").format(user=getpass.getuser()),
+    format=log_kw.get("format").format(user=getpass.getuser()),
 )
-logging.basicConfig(**{**env.get("logging"), **replacements})
+logging.basicConfig(**{**log_kw, **replacements})
