@@ -3,7 +3,7 @@ Command-line interface
 
 """
 import logging
-import pathlib
+from pathlib import Path
 import json
 import datetime as dt
 from typing import (
@@ -180,7 +180,7 @@ def ydoy(year: int, doy: int) -> None:
     help="Download campaign-specific sources as defined in given campaign configuration.",
     required=False,
 )
-def download_sources(force: bool = False, campaign: str | None = None) -> None:
+def download(force: bool = False, campaign: str | None = None) -> None:
     """
     Download all sources in the autobernese configuration file.
 
@@ -347,29 +347,116 @@ def station() -> None:
 
 
 @station.command
-@click.argument("filename", type=pathlib.Path)
-def parse_sitelog(filename: pathlib.Path) -> None:
+@click.argument("filename", type=Path)
+def parse_sitelog(filename: Path) -> None:
     """
-    Parse sitelog and print it to the screen
+    Parse sitelog and print it to the screen.
+
+    This command was created for debugging and may have some value as it can
+    quickly show the fields that are extracted as part of creating a STA file
+    from site-log files.
+
+    Thus, not all fields from the site-log file are extracted.
 
     """
     print(json.dumps(sitelog.Sitelog(filename).sections_extracted, indent=2))
 
 
 @station.command
-# @click.argument("sitelog_filenames", type=list[pathlib.Path])
-# @click.argument("individually_calibrated", type=list[str])
-# @click.argument("filename", type=pathlib.Path)
+@click.option(
+    "-f",
+    "--config",
+    required=False,
+    default=None,
+    type=Path,
+    help="Path to an input YAML file with the keys `sitelogs`, `individually_calibrated` and `output_sta_file` given.",
+)
+@click.option(
+    "-i",
+    "sitelogs",
+    multiple=True,
+    type=Path,
+    help="One or more paths to site-log files to build the STA-file from.",
+)
+@click.option(
+    "-c",
+    "individually_calibrated",
+    multiple=True,
+    type=str,
+    help="Four-letter ID for each station that is individually calibrated.",
+)
+@click.option(
+    "-o",
+    "output_filename",
+    required=False,
+    type=Path,
+    default=Path(".").resolve() / "sitelogs.STA",
+    help="Path to output filename for the STA file. If none given, the output is saved as ./sitelogs.STA.",
+)
 def sitelogs2sta(
-    # sitelog_filenames: list[pathlib.Path],
-    # individually_calibrated: list[str],
-    # filename: pathlib.Path,
+    config: Path,
+    sitelogs: tuple[Path],
+    individually_calibrated: tuple[str],
+    output_filename: Path,
 ) -> None:
     """
-    Create STA file from sitelogs
+    Create a STA file from sitelogs.
+
+    Choose one of the following ways to run it:
+
+    1.  Supply at least one path to a sitelog and the sitelog will be created
+        for it/these. -   With no ouput path given, create the STA file in the
+        current working directory. -   Names of individually-calibrated stations
+        can be given.
+
+    2.  Supply the same possible options as in 1., but inside a YAML file. The
+        file is loaded with the current Bernese environment, so advanced paths
+        are possible.
+
+    3.  Supply no arguments, and a STA file is created based on the input
+        arguments given in the general or user-supplied configuration file.
 
     """
-    sta.create_sta_file_from_sitelogs(**configuration.load().get("station"))
+    if config is not None:
+        log.info(f"Create STA file from arguments in given input-file.")
+        # raise SystemExit
+        kwargs = configuration.with_env(config)
+
+    elif sitelogs:
+        log.info(f"Create STA file from given arguments.")
+        # raise SystemExit
+        kwargs = dict(
+            sitelogs=list(sitelogs),
+            individually_calibrated=individually_calibrated,
+            output_sta_file=output_filename,
+        )
+
+    elif configuration.load().get("station") is not None:
+        log.info(f"Create STA file from arguments in the configuration.")
+        # raise SystemExit
+        kwargs = configuration.load().get("station")
+
+    sta.create_sta_file_from_sitelogs(**kwargs)
+
+
+@main.group()
+def troposphere() -> None:
+    """
+    Stand-alone tools for troposphere data.
+
+    """
+
+
+@troposphere.command
+# @click.argument("filename", type=Path)
+def concat() -> None:  # filename: Path) -> None:
+    """
+    Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
+
+    """
+    from ab import vmf
+
+    vmf.concat()
 
 
 # @main.command

@@ -30,7 +30,6 @@ _CONF = configuration.load()
 
 # Campaign-management configuration
 _CAMPAIGN_CONF: Final[dict[str, Any]] = _CONF.get("campaign")
-_CAMPAIGN_MENU: Final[Path] = _CAMPAIGN_CONF.get("menu")
 _REQUIRED_CAMPAIGN_DIRECTORIES: Final[list[dict[str, Any]]] = _CAMPAIGN_CONF.get(
     "directories"
 )
@@ -38,6 +37,8 @@ _TEMPLATE_DIR: Final[Path] = _CONF.get("runtime").get("campaign_templates")
 
 # Current Bernese installation environment
 _BSW_ENV: Final[dict[str, Any]] = configuration.load().get("bsw_env")
+_BSW_FILES: Final[dict[str, Any]] = configuration.load().get("bsw_files")
+_CAMPAIGN_MENU: Final[Path] = _BSW_FILES.get("campaign_menu")
 
 # Other
 _P: Final[str] = "${P}"
@@ -118,7 +119,7 @@ def ls(verbose: bool = False) -> list[str]:
             lines.append(fstr.format(**kwargs))
             continue
 
-        campaign = yaml.safe_load(ifname.read_text())
+        campaign = configuration.with_env(ifname)
         meta = campaign.get("metadata")
         lines.append(fstr.format(**{**kwargs, **meta}))
 
