@@ -19,6 +19,7 @@ from ab import (
     configuration,
     dates,
     pkg,
+    vmf,
 )
 from ab.bsw import (
     campaign as _campaign,
@@ -448,15 +449,25 @@ def troposphere() -> None:
 
 
 @troposphere.command
-# @click.argument("filename", type=Path)
-def concat() -> None:  # filename: Path) -> None:
+@click.argument("ipath", type=str)
+@click.argument("opath", type=str)
+def status(ipath: str, opath: str) -> None:
+    """
+    Show status for all possible VMF3 dates.
+
+    """
+    print(vmf.status(ipath, opath))
+
+
+@troposphere.command
+@click.argument("ipath", type=str)
+@click.argument("opath", type=str)
+def build(ipath: str, opath: str) -> None:
     """
     Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
 
     """
-    from ab import vmf
-
-    vmf.concat()
+    vmf.build(ipath, opath)
 
 
 # @main.command
