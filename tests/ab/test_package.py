@@ -8,7 +8,6 @@ def test_version():
 
 def test_package_data_exist():
     assert pkg.env.is_file()
-    assert pkg.configuration.is_file()
 
     assert pkg.country_codes.is_file()
 

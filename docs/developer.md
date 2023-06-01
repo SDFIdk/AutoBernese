@@ -42,7 +42,7 @@ A single [workspace][STRUCTURIZR-WORKSPACE-DSL] contains a collection of
 software systems, the main system's container and their components.
 
 [STRUCTURIZR-WORKSPACE-DSL]:
-    https://github.com/sdfidk/autobernese/workspace/structurizr/workspace.dsl
+    https://github.com/sdfidk/autobernese/blob/main/workspace/structurizr/workspace.dsl
 
 The diagrams are produced using the docker container for [Structurizr
 Lite][STRUCTURIZR-LITE], and the generated images are manually created from the
