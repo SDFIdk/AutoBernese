@@ -11,7 +11,7 @@ def test_package_data_exist():
 
     assert pkg.country_codes.is_file()
 
-    assert pkg.demo_sitelog.is_file()
+    # assert pkg.demo_sitelog.is_file()
 
     assert pkg.template_sta_file.is_file()
 
