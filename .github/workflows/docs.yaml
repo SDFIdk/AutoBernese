@@ -2,7 +2,13 @@ name: Publish docs via GitHub Pages
 on:
   push:
     branches:
-      - main
+    - main
+
+  pull_request:
+    paths:
+    - 'docs/**'
+    - 'mkdocs.yml'
+
 
 jobs:
   build:
@@ -16,5 +22,13 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
-      - run: pip install mkdocs-material mkdocs-glightbox mkdocs-kroki-plugin mkdocs-graphviz
-      - run: mkdocs gh-deploy --force
+      - name: Install MkDocs and dependencies
+        run: pip install mkdocs-material mkdocs-glightbox mkdocs-kroki-plugin mkdocs-graphviz
+
+      - name: Build and deploy documentation to official documentation website
+        if: github.event_name == 'push'
+        run: mkdocs gh-deploy --force
+
+      - name: Build documentation to retrieve artifacts
+        if: github.event_name != 'push'
+        run: mkdocs build
