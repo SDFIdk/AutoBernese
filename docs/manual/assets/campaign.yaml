@@ -1,0 +1,25 @@
+metadata:
+  version: &version 0.1.0
+  username: &username USERNAME
+  created: &created 2023-06-08
+  template: &template example
+  campaign: &campaign EXAMPLE
+  beg: &beg 2019-02-13
+  end: &end 2019-02-14
+
+tasks:
+
+- !BPETask
+  name: Precise-Point Positioning [PPP]
+  arguments:
+    pcf_file: PPP
+    campaign: *campaign
+    year: '{date.year}'
+    session: '{date.doy:0>3d}0'
+    sysout: 'PPP_{date.doy:0>3d}0'
+    status: 'PPP_{date.doy:0>3d}0.RUN'
+    taskid: PP
+  parameters:
+    date: !DateRange {beg: *beg, end: *end}
+
+sources: []

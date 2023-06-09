@@ -1,0 +1,14 @@
+tasks:
+
+- !BPETask
+  name: Run PPP for the EXAMPLE campaign
+  arguments:
+    pcf_file: PPP
+    campaign: *campaign
+    year: '{date.year}'
+    session: '{date.doy:0>3d}0'
+    sysout: 'PPP_{date.doy:0>3d}0'
+    status: 'PPP_{date.doy:0>3d}0.RUN'
+    taskid: PP
+  parameters:
+    date: !DateRange {beg: *beg, end: *end}

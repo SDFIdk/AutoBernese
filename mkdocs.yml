@@ -8,9 +8,16 @@ repo_url: https://github.com/SDFIdk/AutoBernese
 
 nav:
 - Home: index.md
-- Installation: installation.md
-- System overview: system-overview.md
-- Developer: developer.md
+- Manual:
+  - Installation: manual/installation.md
+  - Quick start: manual/quick-start.md
+#   - First steps: manual/first-steps.md
+#   - Downloading sources: manual/downloading-sources.md
+#   - Configuration tips: manual/configuration.md
+#   - Other utilities: manual/other-utilities.md
+- Development:
+  - System overview: dev/system-overview.md
+  - Contributing: dev/contributing.md
 - References: references.md
 
 theme:
@@ -31,6 +38,10 @@ theme:
 
 extra_css:
 - stylesheets/extra.css
+- stylesheets/asciinema-player.css
+
+extra_javascript:
+- javascript/asciinema-player.min.js
 
 plugins:
 - search
@@ -39,6 +50,7 @@ plugins:
     FileTypes:
     - png
     - svg
+# - mkdocs-asciinema
 
 markdown_extensions:
 - admonition
