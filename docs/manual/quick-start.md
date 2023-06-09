@@ -43,9 +43,9 @@ Below is a demonstration of the process above:
 
 <div id="demo"></div>
 
-<script src="/javascript/asciinema-player.min.js"></script>
+<script src="../javascript/asciinema-player.min.js"></script>
 <script>
-    let filename = '/assets/asciicasts/quick-start_run.cast';
+    let filename = '../assets/asciicasts/quick-start_run.cast';
     let element_id = 'demo';
     let options = {
         speed: 2,
