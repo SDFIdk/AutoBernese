@@ -45,7 +45,7 @@ Below is a demonstration of the process above:
 
 <script>
 window.onload = () => {
-    let filename = 'assets/quick-start_run.cast';
+    let filename = '../assets/quick-start_run.cast';
     let element_id = 'demo';
     let options = {
         speed: 2,
