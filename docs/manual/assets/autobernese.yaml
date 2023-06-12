@@ -1,0 +1,28 @@
+station:
+  sitelogs: !Path [*D, sitelogs, '*.log']
+  individually_calibrated: []
+  output_sta_file: !Path [*D, station, sitelogs.STA]
+
+campaign:
+  directories:
+  - name: ATM
+  - name: BPE
+  - name: GEN
+    files:
+    - !Path [*CONFIG, OBSERV.SEL]
+    - !Path [*PAN, SESSIONS.SES]
+  - name: GRD
+  - name: OBS
+  - name: ORB
+  - name: ORX
+  - name: OUT
+  - name: RAW
+  - name: SOL
+  - name: STA
+
+sources:
+
+- !Source
+  name: EUREF STA file
+  url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
+  destination: !Path [*D, station]

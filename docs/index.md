@@ -49,28 +49,98 @@ all the PCF files you need for a given campaign. It does so by automating the
 otherwise manual workflow of selecting a campaign, session and each individual
 PCF file to run.
 
-With its generalised workflow, AutoBernese is prepared, specifically, for a
-multi-user scenario, giving users the ability to easily share ressources such as
-a common configuration and templates for generalised campaign workflow.
-
-For example, AutoBernese also lets you maintain a list of common data sources
-to download in a common configuration file, whereas campaign-specific sources
-and, especially, PCF files to run with BPE, are managed from a campaign-specific
-configuration file.
-
-Another key assumption is that most users do the same things over and over again
-to different data sets. To address this, AutoBernese has a concept of a
-*campaign type*, which is a way to configure a re-usable processing workflow.
-
-Having templates for typical campaign scenarios minimises the time needed to set
-up each campaign. And since the templates are stored as plain-text files in a
-shared directory, they are usable by everyone and easy to maintain and keep a
-history of, e.g. using a version control software.
-
 The same AutoBernese installation can be used for different installations, since
 it integrates, seamlessly, with the given loaded Bernese installation. This may
 be, especially, useful, if you are a user or developer working in more than one
 Bernese installation, e.g. one for either development, testing and production.
+
+<!--
+``` title="asd" linenums="1" hl_lines="1"
+--8<-- "docs/assets/bsw_env_dir_tree"
+```
+-->
+
+``` title="AutoBernese runtime directory is in the parent directory of `$C`"
+/path/to/environment
+├── autobernese     # AutoBernese runtime directory automatically
+│                   # created one level up from Bernese-installation directory
+│
+├── BERN54          # Bernese 5.4 installation directory, a.k.a. `$C`
+└── ...
+```
+
+With its generalised workflow, AutoBernese is prepared, specifically, for a
+multi-user scenario, giving users the ability to easily share ressources such as
+a common configuration and templates for generalised campaign workflow.
+
+``` title="Environment-specific files in the AutoBernese runtime directory"
+/path/to/environment
+├── autobernese
+│   ├── autobernese.log  # Log file with user-separable entries
+│   ├── autobernese.yaml # Users can (and should) add this to configure
+│   │                    # campaign setup and external-data download
+│   │
+│   └── templates        # Directory for user-created templates,
+│       │                # one for each campaign type
+│       │
+│       ├── default.yaml # This default file is used as
+│       │                # template if none specified.
+│       │
+│       └── example.yaml # Example of a user-created template
+│                        # for campaign type named `example`.
+│
+├── BERN54
+└── ...
+```
+
+<!-- === "`ab/configuration/env.yaml`"
+
+    ```yaml title="BSW environment loaded with each configuration" linenums="1" hl_lines="1"
+    --8<-- "src/ab/configuration/env.yaml::24"
+    ``` -->
+
+AutoBernese lets users of a given Bernese installation share a common
+configuration file [see `autobernese.yaml` below], where, for instance, you can
+maintain a list of common data sources to download.
+
+Campaign-specific sources and, especially, PCF files to run with BPE, are
+managed from a campaign-specific configuration file in the root of the Bernese
+campaign directory.
+
+Based on the assumption that most users do the same things over and over again
+to different data sets, and thus to avoid copying-and-pasting recurring
+processing workflow between Bernese campaigns, AutoBernese has the concept of a
+*campaign type* which is defined by a template campaign-configuration file in
+the templates directory of the AutoBernese runtime directory [see `example.yaml`
+below].
+
+
+=== "`autobernese/autobernese.yaml`"
+
+    ```yaml title="Configuration overrides"
+    --8<-- "docs/manual/assets/autobernese.yaml:6"
+    ```
+
+=== "`autobernese/templates/example.yaml`"
+
+    ```yaml title="Configuration used for the EXAMPLE campaign"
+    --8<-- "docs/manual/assets/campaign.yaml:10:"
+    ```
+
+<!--
+Having templates for typical campaign scenarios minimises the time needed to set
+up each campaign. And since the templates are stored as plain-text files in a
+shared directory, they are usable by everyone and easy to maintain and keep a
+history of, e.g. using a version control software.
+-->
+
+Below is a more general view of the overall workflow of AutoBernese with some
+key concepts introduced as well.
+
+If your would rather like to try out the software, go to the
+[Quick-start](manual/quick-start.md) page or go to the [command-line
+interface](manual/commands.md) page to read a complete walk-through of the
+different commands so far available.
 
 
 ## Overall workflow so far

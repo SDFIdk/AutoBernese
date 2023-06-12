@@ -12,7 +12,8 @@ Before proceeding, make sure that you have performed the following steps:
 
 *   [Install AutoBernese](installation.md).
 *   Install the Bernese EXAMPLE campaign [see Bernese manual].
-*   Download [this campaign configuration](assets/campaign.yaml) to the EXAMPLE-campaign directory [`$P/EXAMPLE`].
+*   Download [this campaign configuration](assets/campaign.yaml) to the
+    EXAMPLE-campaign directory [`$P/EXAMPLE`].
 
 What you have now is a configuration file that lets you run the PPP.PCF file for
 the first two days available in the EXAMPLE campaign's interval.
@@ -28,7 +29,7 @@ First, initialise the environments:
 
 ## Run the campaign
 
-To run the PCF file for each speficied day, type the following in the terminal
+To run the PCF file for each specified day, type the following in the terminal
 with the activated environments:
 
 ```sh

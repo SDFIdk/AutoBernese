@@ -11,6 +11,7 @@ nav:
 - Manual:
   - Installation: manual/installation.md
   - Quick start: manual/quick-start.md
+  - Commands: manual/commands.md
 #   - First steps: manual/first-steps.md
 #   - Downloading sources: manual/downloading-sources.md
 #   - Configuration tips: manual/configuration.md
