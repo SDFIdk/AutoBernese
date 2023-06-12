@@ -33,7 +33,7 @@ with the activated environments:
 
 ```sh
 (ab) $ ab campaign run EXAMPLE
-
+# (output) from BPE
 ```
 
 
@@ -43,13 +43,14 @@ Below is a demonstration of the process above:
 
 <div id="demo"></div>
 
-<script src="../javascript/asciinema-player.min.js"></script>
 <script>
-    let filename = '../assets/asciicasts/quick-start_run.cast';
+window.onload = () => {
+    let filename = 'assets/quick-start_run.cast';
     let element_id = 'demo';
     let options = {
         speed: 2,
         idleTimeLimit: 2,
     };
     AsciinemaPlayer.create(filename, document.getElementById(element_id), options);
+}
 </script>
