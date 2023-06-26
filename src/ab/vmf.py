@@ -5,6 +5,7 @@ Module for building .GRD-files for each day.
 from typing import (
     Any,
     Final,
+    Iterable,
 )
 import datetime as dt
 from pathlib import Path
@@ -22,7 +23,8 @@ from ab.parameters import (
 
 log = logging.getLogger(__name__)
 
-# _EARLIEST: Final[dt.date] = dt.date(2008, 1, 1)  # First date with data on the source server.
+# First date with data on the source server.
+# _EARLIEST: Final[dt.date] = dt.date(2008, 1, 1)
 _EARLIEST: Final[dt.date] = dt.date(2023, 1, 1)
 
 _FSTR_IFNAME: Final[str] = "VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
@@ -32,31 +34,6 @@ _FSTR_IFNAME_YEAR_SUBDIR: Final[
 _FSTR_OFNAME: Final[str] = "VMFG_{date.year}{date.doy:03d}0.GRD"
 
 _HOURS: Final[list[str]] = ["00", "06", "12", "18"]
-
-
-def status(ipath: Path | str, opath: Path | str, /) -> list[dt.date]:
-    """
-    Return status for each date for which there should be data available.
-
-    """
-    yesterday = dt.date.today() - dt.timedelta(days=1)
-    data_days = date_range(_EARLIEST, yesterday, transformer=GPSDate)
-    # return len(data_days)
-
-    vmf_files = [VMF3DayFile(date, ipath, opath) for date in data_days]
-    return [vmf_file.status() for vmf_file in vmf_files]
-
-
-def build(ipath: Path | str, opath: Path | str, /) -> list[dt.date]:
-    """
-    Build day file for each date for which there be data available.
-
-    """
-    yesterday = dt.date.today() - dt.timedelta(days=1)
-    data_days = date_range(_EARLIEST, yesterday, transformer=GPSDate)
-    vmf_files = [VMF3DayFile(date, ipath, opath) for date in data_days]
-    for vmf_file in vmf_files:
-        vmf_file.build()
 
 
 def _input_filenames(date: dt.date | dt.datetime, *, year_subdir: bool = True) -> str:
@@ -113,3 +90,36 @@ class VMF3DayFile:
             input_available=self.input_available,
             output_file_exists=self.exists,
         )
+
+
+def _vmf_files(beg: dt.date | None, end: dt.date | None) -> Iterable[VMF3DayFile]:
+    yesterday = dt.date.today() - dt.timedelta(days=1)
+    beg = beg if beg is not None or beg <= _EARLIEST else _EARLIEST
+    end = end if end is not None or end <= yesterday else yesterday
+    log.info(f"VMF3 file interval is set to {beg} to {end} ...")
+    data_days = date_range(beg, end, transformer=GPSDate)
+    return (VMF3DayFile(date, ipath, opath) for date in data_days)
+
+
+def status(
+    ipath: Path | str, opath: Path | str, /, beg: dt.date | None, end: dt.date | None
+) -> Iterable[dict[str, Any]]:
+    """
+    Return status for each date for which there should be data available.
+
+    """
+    log.info(f"Get VMF3 file status for files in chosen interval {beg} to {end} ...")
+    return (vmf_file.status() for vmf_file in _vmf_files(beg, end))
+
+
+def build(
+    ipath: Path | str, opath: Path | str, /, beg: dt.date | None, end: dt.date | None
+) -> None:
+    """
+    Build day file for each date for which there be data available.
+
+    """
+    log.info(f"Build VMF3 files for chosen interval {beg} to {end} ...")
+    for vmf_file in _vmf_files(beg, end):
+        log.info(f"Building {vmf_file.output_file} ...")
+        vmf_file.build()

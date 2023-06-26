@@ -150,23 +150,6 @@ def ydoy(year: int, doy: int) -> None:
     print(json.dumps(gps_date.dateinfo(), indent=2))
 
 
-# @main.command
-# def bpe(campaign: str
-#     pcf_file: str,
-#     cpu_file: str,
-#     year: str,
-#     session: str,
-#     sysout: str,
-#     status: str,
-#     taskid: str,
-#     ) -> None:
-#     """
-#     Stand-alone tool for running the Bernese Processing Engine [BPE].
-
-#     """
-#     print("BPE")
-
-
 @main.command
 @click.option(
     "-f",
@@ -343,21 +326,35 @@ def tasks(name: str) -> None:
     Show tasks for a campaign.
 
     """
-    task: _task.Task
-    for task in _campaign.load(name).get("tasks"):
+    tasks: list[_task.Task] | None = _campaign.load(name).get("tasks")
+
+    if tasks is None:
+        msg = f"No tasks found"
+        print(msg)
+        log.info(msg)
+        return
+
+    for task in tasks:
         print(task)
         print()
 
 
 @campaign.command
 @click.argument("name", type=str)
-def runbpe(name: str) -> None:
+def run(name: str) -> None:
     """
-    Run the BPE for each tasks in the campaign configuration.
+    Resolve campaign tasks and run them all.
 
     """
-    task: _task.Task
-    for task in _campaign.load(name).get("tasks"):
+    tasks: list[_task.Task] | None = _campaign.load(name).get("tasks")
+
+    if tasks is None:
+        msg = f"No tasks found"
+        print(msg)
+        log.info(msg)
+        return
+
+    for task in tasks:
         task.run()
 
 
@@ -423,31 +420,33 @@ def sitelogs2sta(
     output_filename: Path,
 ) -> None:
     """
-    Create a STA file from sitelogs.
+    Create a STA file from sitelogs and other station info.
+
+    -   Site-log filenames are required.
+    -   Four-letter IDs for individually-calibrated stations are optional.
+    -   The path to the output STA file is optional. (If none given, the file
+        will be written to sitelogs.STA in the current working directory.)
 
     Choose one of the following ways to run it:
 
-    1.  Supply at least one path to a sitelog and the sitelog will be created
-        for it/these. -   With no ouput path given, create the STA file in the
-        current working directory. -   Names of individually-calibrated stations
-        can be given.
+    1.  Supply needed and optional arguments on the command line.
 
-    2.  Supply the same possible options as in 1., but inside a YAML file. The
-        file is loaded with the current Bernese environment, so advanced paths
-        are possible.
+    2.  Supply path to a YAML file with the needed and/or optional arguments.
+
+        The file is loaded with the current Bernese environment, so advanced
+        paths are possible, e.g. `!Path [*D, station, sitelogs.STA]`.
 
     3.  Supply no arguments, and a STA file is created based on the input
         arguments given in the general or user-supplied configuration file.
 
     """
+    kwargs: dict[str, Any] | None = None
     if config is not None:
         log.info(f"Create STA file from arguments in given input-file.")
-        # raise SystemExit
         kwargs = configuration.with_env(config)
 
     elif sitelogs:
         log.info(f"Create STA file from given arguments.")
-        # raise SystemExit
         kwargs = dict(
             sitelogs=list(sitelogs),
             individually_calibrated=individually_calibrated,
@@ -456,9 +455,13 @@ def sitelogs2sta(
 
     elif configuration.load().get("station") is not None:
         log.info(f"Create STA file from arguments in the configuration.")
-        # raise SystemExit
         kwargs = configuration.load().get("station")
 
+    if kwargs is None:
+        msg = f"No tasks found"
+        print(msg)
+        log.info(msg)
+        return
     sta.create_sta_file_from_sitelogs(**kwargs)
 
 
@@ -473,47 +476,44 @@ def troposphere() -> None:
 @troposphere.command
 @click.argument("ipath", type=str)
 @click.argument("opath", type=str)
-def status(ipath: str, opath: str) -> None:
+@click.option(
+    "-b",
+    "--beg",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+@click.option(
+    "-e",
+    "--end",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
     Show status for all possible VMF3 dates.
 
     """
-    print(vmf.status(ipath, opath))
+    print(vmf.status(ipath, opath, beg, end))
 
 
 @troposphere.command
 @click.argument("ipath", type=str)
 @click.argument("opath", type=str)
-def build(ipath: str, opath: str) -> None:
+@click.option(
+    "-b",
+    "--beg",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+@click.option(
+    "-e",
+    "--end",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
     Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
 
     """
     vmf.build(ipath, opath)
-
-
-# @main.command
-# def prepare_campaign_data(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-#     """
-#     Organises campaign data
-
-#     """
-#     organiser.prepare_campaign_data(*args, **kwargs)
-
-
-# @main.command
-# def prepare_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-#     """
-#     Organises campaign end products.
-
-#     """
-#     organiser.prepare_end_products(*args, **kwargs)
-
-
-# @main.command
-# def submit_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-#     """
-#     Submits campaign end products.
-
-#     """
-#     organiser.submit_end_products(*args, **kwargs)
