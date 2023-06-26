@@ -41,8 +41,8 @@ software.
 
 If your would rather like to try out the software, go to the
 [Quick-start](manual/quick-start.md) page or go to the [command-line
-interface](manual/commands.md) page to read a complete walk-through of the
-available commands.
+interface](manual/command-reference.md) page to read a complete walk-through of
+the available commands.
 
 
 ## AutoBernese
