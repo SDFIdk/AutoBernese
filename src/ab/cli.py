@@ -18,7 +18,6 @@ from ab import (
     __version__,
     configuration,
     dates,
-    pkg,
     vmf,
 )
 from ab.bsw import (
@@ -26,6 +25,7 @@ from ab.bsw import (
     task as _task,
 )
 from ab.data import (
+    DownloadStatus,
     source as _source,
     ftp,
     http,
@@ -191,9 +191,17 @@ def download(force: bool = False, campaign: str | None = None) -> None:
     else:
         config = configuration.load()
 
+    sources = config.get("sources", [])
+
+    s = 's' if len(sources) else ''
+    msg = f"Resolving {len(sources)} source{s} ..."
+    log.info(msg)
+
     source: _source.Source
-    for source in config.get("sources", []):
-        msg = f"Download source: {source.name}"
+    status_total = DownloadStatus()
+    for source in sources:
+
+        msg = f"Source: {source.name}"
         print(msg)
         log.debug(msg)
 
@@ -202,13 +210,18 @@ def download(force: bool = False, campaign: str | None = None) -> None:
 
         match source.protocol:
             case "ftp":
-                ftp.download(source)
+                status = ftp.download(source)
+                status_total += status
             case "http" | "https":
-                http.download(source)
+                status = http.download(source)
+                status_total += status
+        print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
     else:
-        msg = "Finished downloading sources"
+        msg = "Finished downloading sources ..."
         print(msg)
         log.debug(msg)
+        print(f"Overall status:")
+        print(f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}")
 
 
 @main.group(invoke_without_command=True)

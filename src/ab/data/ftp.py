@@ -21,6 +21,7 @@ import functools
 import logging
 
 from ab import configuration
+from ab.data import DownloadStatus
 from ab.data.source import Source
 from ab.data.stats import already_updated
 
@@ -61,7 +62,7 @@ def list_files(ftp: FTP, path: str, *, ix_column: int = 8) -> list[str]:
         return [line.split()[ix_column] for line in lines if not line.startswith("d")]
 
 
-def download(source: Source) -> None:
+def download(source: Source) -> DownloadStatus:
     """
     Download paths resolved from a Source instance.
 
@@ -75,6 +76,8 @@ def download(source: Source) -> None:
         get all possible files to download based on the given pattern.
 
     """
+
+    status = DownloadStatus()
 
     # Log on to the host first, since we need to probe for files directories
     with FTP(source.host) as ftp:
@@ -123,6 +126,7 @@ def download(source: Source) -> None:
 
                     if already_updated(ofname, max_age=source.max_age):
                         log.debug(f"{ofname.name} already downloaded ...")
+                        status.existing += 1
                         continue
 
                     log.info(f"Downloading {ofname.name} ...")
@@ -141,6 +145,10 @@ def download(source: Source) -> None:
                         log.warn(f"Filename {fname} could not be downloaded ...")
                         log.debug(f"{e}")
 
+                    status.downloaded += 1
+
         except KeyboardInterrupt:
             log.info(f"Interrupted by user. Closing FTP connection ...")
             raise
+
+    return status
