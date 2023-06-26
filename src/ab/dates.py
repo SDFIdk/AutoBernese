@@ -108,10 +108,15 @@ class GPSDate(dt.date):
         return doy(self)
 
     def dateinfo(self) -> dict[str, Any]:
+        gps_week_beg = self.from_gps_week(self.gps_week)
+        gps_week_end = gps_week_beg + dt.timedelta(days=6)
         return dict(
+            weekday=self.strftime("%A"),
             date=self.isoformat(),
             doy=self.doy,
-            gps_week=self.gps_week,
             iso_week=self.isocalendar()[1],
             iso_weekday=self.isocalendar()[2],
+            gps_week=self.gps_week,
+            gps_week_beg=gps_week_beg.isoformat(),
+            gps_week_end=gps_week_end.isoformat(),
         )
