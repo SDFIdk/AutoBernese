@@ -52,7 +52,9 @@ class BPETaskArguments:
     taskid: str
     cpu_file: str = "USER"
 
-    def resolve(self, parameters: dict[str, Iterable[Any]]) -> list[dict[str, str]]:
+    def resolve(
+        self, parameters: dict[str, Iterable[Any]] | None
+    ) -> list[dict[str, str]]:
         """
         Returns a list of dictionaries with the class members as keys and their
         formatted values as each key's values.
@@ -61,6 +63,8 @@ class BPETaskArguments:
         instance's members using the given parameters.
 
         """
+        if parameters is None:
+            return []
         instance_members = asdict(self)
         return [
             {
@@ -76,14 +80,14 @@ class BPETask:
     """ """
 
     name: str
-    arguments: BPETaskArguments
-    parameters: dict[str, Iterable[Any]] = None
+    arguments: dict[str, Any]
+    parameters: dict[str, Iterable[Any]] | None = None
 
     def __post_init__(self) -> None:
-        self.arguments = BPETaskArguments(**self.arguments)
+        self._arguments: BPETaskArguments = BPETaskArguments(**self.arguments)
 
     def run(self) -> None:
-        for arguments_resolved in self.arguments.resolve(self.parameters):
+        for arguments_resolved in self._arguments.resolve(self.parameters):
             run_bpe(as_environment_variables(arguments_resolved))
 
 
@@ -138,6 +142,8 @@ def run_bpe(bpe_env: Mapping[str, str]) -> None:
     sz = max(len(key) for key in bpe_env)
     for key, value in bpe_env.items():
         log.info(f"{key: <{sz}s}: {value}")
+
+    process: sub.Popen | None = None
     try:
         log.debug(f"Run BPE runner ...")
         process = sub.Popen(f"{pkg.bpe_runner}", env={**os.environ, **bpe_env})
@@ -148,5 +154,6 @@ def run_bpe(bpe_env: Mapping[str, str]) -> None:
         log.debug(f"BPE runner killed ...")
 
     finally:
-        process.terminate()
-        process.kill()
+        if process is not None:
+            process.terminate()
+            process.kill()

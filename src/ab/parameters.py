@@ -6,11 +6,12 @@ Module for handling parameters.
 from typing import (
     Any,
     Iterable,
+    Sequence,
 )
 import itertools as it
 
 
-def resolved(parameters: dict[str, tuple[Any]]) -> dict[str, Any]:
+def resolved(parameters: dict[str, Iterable[Any]]) -> list[dict[str, Any]]:
     """
     Parameter expansion for a mapping with at least one key and a sequence of at
     least one value.
@@ -35,7 +36,9 @@ def resolved(parameters: dict[str, tuple[Any]]) -> dict[str, Any]:
     since Python's dict type only takes immutable keys.
 
     """
-    inverted = {tuple(values): key for (key, values) in parameters.items()}
+    inverted: dict[tuple[Any], str] = {
+        tuple(values): key for (key, values) in parameters.items()
+    }
     return [
         {key: value for (key, value) in zip(parameters.keys(), values)}
         for values in it.product(*inverted.keys())

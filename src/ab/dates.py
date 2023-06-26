@@ -13,12 +13,11 @@ from typing import (
 
 class HasFromOrdinal(Protocol):
     """
-    A formal definition of a type that can transform an ordinal date to what
-    is needed.
+    A formal definition of a type that can transform an ordinal date to a date.
 
     """
 
-    def fromordinal(ordinal: int) -> Any:
+    def fromordinal(self, ordinal: int, /) -> Any:
         """
         Method that converts a Python integer date.
 
@@ -70,8 +69,12 @@ def gps_week(date: dt.date | dt.datetime) -> int:
     Calculate GPS-week number for given date.
 
     """
+    if isinstance(date, dt.datetime):
+        date = date.date()
+
     if date < GPS_EPOCH:
         raise ValueError("Date must be on or after first GPS week. Got {date!r} ...")
+
     return (date - GPS_EPOCH).days // 7
 
 

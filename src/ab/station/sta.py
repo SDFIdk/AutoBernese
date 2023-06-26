@@ -25,7 +25,7 @@ import re
 import logging
 from typing import Any
 import datetime as dt
-import pathlib
+from pathlib import Path
 from dataclasses import (
     dataclass,
     asdict,
@@ -216,7 +216,7 @@ def map_to_type_1_row(
     four_character_id: str,
     domes: str,
     date_installed: str,
-    fname: pathlib.Path | str,
+    fname: Path | str,
     **_,
 ) -> dict[str, str]:
     """
@@ -230,7 +230,7 @@ def map_to_type_1_row(
         station_name=station_name(four_character_id, domes),
         date_installed=date_installed,
         name_old=f"{four_character_id}*",
-        filename=pathlib.Path(fname).name,
+        filename=Path(fname).name,
     )
 
 
@@ -449,23 +449,35 @@ def transform_sitelog_records_to_STA_lines(
 
 
 def create_sta_file_from_sitelogs(
-    sitelogs: list[pathlib.Path | str],
-    individually_calibrated: list[str],
-    output_sta_file: pathlib.Path | str,
+    sitelogs: list[Path | str],
+    individually_calibrated: list[str] | None = None,
+    output_sta_file: Path | str | None = None,
     **_: dict[Any, Any],
 ) -> None:
     """
     Combine data from given sitelog files into a STA-file.
 
     """
-    # Output data
-    output_sta_file = pathlib.Path(output_sta_file)
+
+    # Defaults
+    if individually_calibrated is None:
+        individually_calibrated = []
+
+    if output_sta_file is None:
+        output_sta_file = "sitelogs.STA"
+
+    # Coerce
+    _sitelogs: list[Path] = [Path(path) for path in sitelogs]
+
+    output_sta_file = Path(output_sta_file)
     output_sta_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Output data
     type_1_rows = []
     type_2_rows = []
 
     # Handle each site-log file
-    for fname in sorted(sitelogs):
+    for fname in sorted(_sitelogs):
         # Extract sitelog data
         log.info(f"Read {fname.name} ...")
         try:

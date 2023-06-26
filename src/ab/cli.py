@@ -94,6 +94,7 @@ def logfile() -> None:
     filename = runtime.get("logging").get("filename")
     import subprocess as sub
 
+    process: sub.Popen | None = None
     try:
         log.debug(f"Show log tail ...")
         process = sub.Popen(["/usr/bin/tail", "-f", f"{filename}"])
@@ -104,8 +105,9 @@ def logfile() -> None:
         print()
 
     finally:
-        process.terminate()
-        process.kill()
+        if process is not None:
+            process.terminate()
+            process.kill()
 
 
 @main.group
