@@ -161,7 +161,9 @@ def build_campaign_menu(campaigns: list[str]) -> None:
         log.info("No campaign list to format ...")
         return
 
-    formatted = [f'  "{campaign.replace(str(_P), _TEMPLATE_P)}"' for campaign in campaigns]
+    formatted = [
+        f'  "{campaign.replace(str(_P), _TEMPLATE_P)}"' for campaign in campaigns
+    ]
     count = len(campaigns)
     separator = "\n" if count > 1 else ""
     campaigns = "\n".join(formatted)
@@ -198,7 +200,6 @@ def add_campaign_to_bsw_menu(path: str | Path) -> None:
 
 
 def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
-
     campaign_dir = Path(campaign_dir)
     directories = _CONF.get("campaign", {}).get("directories")
 
@@ -210,11 +211,12 @@ def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
     # Create required campaign-directory tree
     log.info(f"Create required campaign-directory tree ...")
     for directory_info in directories:
-
         # Validation
         directory_name = directory_info.get("name")
         if directory_name is None:
-            log.warning(f"No directory name given with directory info {directory_info!r} ...")
+            log.warning(
+                f"No directory name given with directory info {directory_info!r} ..."
+            )
             continue
 
         # We are creating a new directory in an existing one
@@ -233,7 +235,9 @@ def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
             shutil.copy(fname_source, path_full / ifname_source.name)
 
 
-def create_campaign_configuration_file(campaign_dir: Path | str, metadata: MetaData) -> None:
+def create_campaign_configuration_file(
+    campaign_dir: Path | str, metadata: MetaData
+) -> None:
     """
     Create a campaign configuration file with relevant metadata.
 

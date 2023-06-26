@@ -16,9 +16,8 @@ class DownloadStatus:
 
     def __add__(self, other) -> "DownloadStatus":
         return DownloadStatus(
-            self.existing + other.existing,
-            self.downloaded + other.downloaded
-    )
+            self.existing + other.existing, self.downloaded + other.downloaded
+        )
 
     __radd__ = __add__
 

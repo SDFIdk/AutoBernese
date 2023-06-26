@@ -20,8 +20,5 @@ def test_radd_download_statusses():
 
 def test_download_status_repr():
     result = DownloadStatus(3, 3).asdict()
-    expected = {
-        "existing": 3,
-        "downloaded": 3
-    }
+    expected = {"existing": 3, "downloaded": 3}
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."

@@ -178,14 +178,13 @@ def download(force: bool = False, campaign: str | None = None) -> None:
 
     sources = config.get("sources", [])
 
-    s = 's' if len(sources) else ''
+    s = "s" if len(sources) else ""
     msg = f"Resolving {len(sources)} source{s} ..."
     log.info(msg)
 
     source: _source.Source
     status_total = DownloadStatus()
     for source in sources:
-
         msg = f"Source: {source.name}"
         print(msg)
         log.debug(msg)
@@ -206,7 +205,9 @@ def download(force: bool = False, campaign: str | None = None) -> None:
         print(msg)
         log.debug(msg)
         print(f"Overall status:")
-        print(f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}")
+        print(
+            f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
+        )
 
 
 @main.group(invoke_without_command=True)
