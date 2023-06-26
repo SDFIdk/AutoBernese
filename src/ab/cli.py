@@ -282,7 +282,9 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     campaign menu.
 
     """
-    log.debug(f"Create campaign {name=} using {template=} with {beg=} and {end=} ...")
+    msg = f"Create campaign {name=} using {template=} with {beg=} and {end=} ..."
+    print(msg)
+    log.info(msg)
     _campaign.create(name, template, beg, end)
 
 
@@ -294,7 +296,14 @@ def sources(name: str, verbose: bool = False) -> None:
     Print the campaign-specific sources.
 
     """
-    sources: list[_source.Source] = _campaign.load(name).get("sources")
+    sources: list[_source.Source] | None = _campaign.load(name).get("sources")
+
+    if sources is None:
+        msg = f"No sources found"
+        print(msg)
+        log.info(msg)
+        return
+
     formatted = (
         f"""\
 {source.name=}
