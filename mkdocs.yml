@@ -8,21 +8,23 @@ repo_url: https://github.com/SDFIdk/AutoBernese
 
 nav:
 - Home: index.md
-- Manual:
-  - Installation: manual/installation.md
+- User manual:
+  - Install AutoBernese: manual/install-autobernese.md
   - Quick start: manual/quick-start.md
-  - Commands: manual/commands.md
-#   - First steps: manual/first-steps.md
-#   - Downloading sources: manual/downloading-sources.md
-#   - Configuration tips: manual/configuration.md
-#   - Other utilities: manual/other-utilities.md
+  - Command-line reference: manual/command-reference.md
+  - Configuration files: manual/configuration-files.md
+  - Download sources: manual/download-sources.md
 - Development:
+  - Contribute: dev/contribute.md
   - System overview: dev/system-overview.md
-  - Contributing: dev/contributing.md
+- Prerequisites: prerequisites.md
+- Concepts: concepts.md
 - References: references.md
 
 theme:
   name: material
+  logo: assets/logo.png
+  favicon: assets/logo.png
 
   language: en
   features:
@@ -91,3 +93,4 @@ markdown_extensions:
 - pymdownx.snippets
 
 - mkdocs_graphviz
+- md_in_html
