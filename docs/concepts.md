@@ -22,7 +22,7 @@ AutoBernese uses the environment variable `${C}` set in `LOADGPS.setvar` to find
 out where the current activated Bernese environment is.
 
 
-## runtime directory
+## AutoBernese runtime directory
 
 AutoBernese will, automatically, create its *runtime directory* at the same
 level as the BERN54 directory of the *Bernese environment*.
@@ -41,7 +41,7 @@ the runtime directory will be:
 ```
 
 
-## common configuration
+## AutoBernese configuration file or common configuration
 
 
 

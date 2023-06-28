@@ -2,6 +2,20 @@
 This section describes the various ways in which to configure shared AutoBernese
 settings and build templates for campaign-specific configuration files.
 
+
+## Configuration kinds and their locations
+
+The types of configuration are shown in the table below:
+
+| File                   | Location                                 | Purpose                                                                           |
+| ---------------------- | ---------------------------------------- | --------------------------------------------------------------------------------- |
+| `env.yaml`             | Inside the package                       | Integrate with activated Bernese environment and provide default settings.        |
+| `autobernese.yaml`     | AutoBernese runtime directory            | Let users add data sources, campaign-creation setup and station sitelog settings. |
+| `<campaign-type>.yaml` | templates directory in runtime directory | let users have pre-set campaign configuration for campaigns of the same type.     |
+
+The details of each kind is explained below.
+
+
 ## The built-in configuration file
 
 The AutoBernese package comes with a built-in configuration that:
@@ -53,35 +67,11 @@ files, so that the relative paths and other data can be re-used here as well.
         ```
 
 
-## Configuration locations
+## Common user configuration file
 
-### Common user configuration file and templates in the runtime directory
-
-When run, AutoBernese creates a *runtime directory* at the same directory level
-as the Bernese installation directory `BERN54`, i.e .in the parent directory of
-the `$C`.
-
-``` title="AutoBernese runtime directory is in the parent directory of `$C`"
-/path/to/environment
-├── autobernese     # AutoBernese runtime directory automatically
-│                   # created one level up from Bernese-installation directory
-│
-├── BERN54          # Bernese 5.4 installation directory, a.k.a. `$C`
-└── ...
-```
-
-As indicated above, a few sections of the built-in AutoBernese configuration can be overridden with a common user configuration file.
-
-<!-- Adding a file `autobernese.yaml` in the AutoBernese runtime directory, sections `station`,  -->
-
-*   Adding a file `autobernese.yaml` in the AutoBernese runtime directory,
-    users may configure e.g. common sources of external data and the
-    directory structure of a new Bernese campaign.
-
-*   Adding different templates for different campaign scenarios, i.e. campaign
-    types, will speed up the process of creating a new campaign, getting it
-    ready by downloading data, and running the BPE tasks set in the
-    campaign-specific configuration file.
+As mentioned above, a few sections of the built-in AutoBernese configuration can
+be overridden with a common user configuration file `autobernese` in the
+AutoBernese runtime directory.
 
 ``` title="Environment-specific files in the AutoBernese runtime directory"
 /path/to/environment
@@ -90,107 +80,48 @@ As indicated above, a few sections of the built-in AutoBernese configuration can
 │   ├── autobernese.yaml # Users can (and should) add this to configure
 │   │                    # campaign setup and external-data download
 │   │
-│   └── templates        # Directory for user-created templates,
-│       │                # one for each campaign type
-│       │
-│       ├── default.yaml # This default file is used as
-│       │                # template if none specified.
-│       │
-│       └── example.yaml # Example of a user-created template
-│                        # for campaign type named `example`.
+│   └── (...)
 │
 ├── BERN54
-└── ...
+└── (...)
 ```
 
+With this file, users may configure the following:
 
-<!--Additional content that can be added is
+*   Common sources of external data
+*   The directory structure of a new Bernese campaign
+*   Settings for generating a STA-file from station site-log files
 
-*   A configuration file `autobernese.yaml` common to all users that will
-    override some sections of the built-in configuration that comes with the
-    package.
-
-    This file must be added manually by the user(s).
-
-    [TODO: Read more on how to confgure AutoBernese](TODO).
-
-*   A directory `templates` for campaign-configuration template files. [TODO: See more on creating templates below](TODO).
-
-*   In short, the user-defined configuration file that AutoBernese can read must be
-located at the following path [using the set Bernese environment variables]:
-`$C/../autobernese/autobernese.yaml`.
--->
-
-
-<!-- === "`ab/configuration/env.yaml`"
-
-    ```yaml title="BSW environment loaded with each configuration" linenums="1" hl_lines="1"
-    --8<-- "src/ab/configuration/env.yaml::24"
-    ``` -->
-
-AutoBernese lets users of a given Bernese installation share a common
+<!-- AutoBernese lets users of a given Bernese installation share a common
 configuration file [see `autobernese.yaml` below], where, for instance, you can
 maintain the default campaign-directory content as well as a list of common data
-sources to download.
+sources to download. -->
 
 ```yaml title="Configuration overrides in `autobernese/autobernese.yaml`"
 --8<-- "docs/manual/assets/autobernese.yaml:6"
 ```
 
+## Campaign-specific configuration files
+
 Campaign-specific sources and, especially, PCF files to run with BPE, are
-managed from a campaign-specific configuration file in the root of the Bernese
+managed from a campaign-specific configuration file in the root of a Bernese
 campaign directory.
+
+``` title="Environment-specific files in the AutoBernese runtime directory"
+/path/to/CAMPAIGN54
+├── EXAMPLE
+│   ├── (...)
+│   └── campaign.yaml
+│
+└── (...)
+```
+
+Below is an example of the the campaign-configuration file used for the EXAMPLE
+campaign:
 
 ```yaml title="Configuration used for the EXAMPLE campaign in `$P/EXAMPLE/campaign.yaml`"
 --8<-- "docs/manual/assets/campaign.yaml"
 ```
-
-Based on the assumption that most users do the same things over and over again
-to different data sets, and thus to avoid copying-and-pasting recurring
-processing workflow between Bernese campaigns, AutoBernese has the concept of a
-*campaign type* which is defined by a template campaign-configuration file in
-the templates directory of the AutoBernese runtime directory [see `example.yaml`
-below].
-
-```yaml title="Template on which the EXAMPLE-campaign configuration is based on `autobernese/templates/example.yaml`"
---8<-- "docs/manual/assets/campaign.yaml:10:"
-```
-
-As seen above, the difference between a campaign-configuration file and its
-template it the metadata section that is part of the concrete Bernese campaign.
-AutoBernese adds the metadata section automatically, but a user can also ad it
-manually, if the configuration is made for an existing campaign such as the
-EXAMPLE campaign.
-
-Using a campaign-specific configuration file in the root of a Bernese-campaign
-directory, AutoBernese is able to do two things at the campaign level:
-
-1.  Download campaign-specific data from sources specified in the same way as in
-    the general AutoBernese configuration file.
-2.  Run the Bernese Processing Engine for PCF files with campaign-specific
-    settings.
-
-AutoBernese lets a user define configuration templates for common campaign
-scenarios, where the only difference is in the time interval for which a given
-campaign is created and run.
-
-A default campaign template `default.yaml` is added to the `autobernese`
-directory, automatically, when the command `ab campaign` is run. If the file
-already exists, AutoBernese does nothing.
-
-As the user create a campaign with AutoBernese, if no other template name is
-specified, the default campaign template is used. Therefore, this file should be
-edited to suit the most common scenario. Even so, having more than one
-configuration template will make common scenarios faster to setup.
-
-With this template-management system, you only need to set up your Bernese
-campaigns once, or rarely. AS it is only the presence of the configuration file
-that enables AutoBernese to do its work, existing campaigns can be 'runable'
-with AutoBernese by adding a campaign-configuration file to those campaign
-directories.
-
-
----
 
 #### The `metadata` section
 
@@ -253,16 +184,14 @@ tasks:
 
 ```
 
-Here, the YAML alias `&campaign` is referred to with the syntax `*campaign` so
-that, in this case, the name of the campaign directory is inserted, when the
-configuration file is loaded.
+Here, the YAML *anchor* `&campaign` is referred to with the syntax `*campaign`
+[a YAML *alias*] so that, in this case, the name of the campaign directory is
+inserted, when the configuration file is loaded.
 
 Some of the strings given to the other items, e.g. `year` and `session` are
-Python format strings [more on this [below][F-STRINGS]]. The `date` reference
+Python format strings [more on this below]. The `date` reference
 is an AutoBernese GPSDate which has the day-of-year property `doy` that can
 be used inside the strings.
-
-[F-STRINGS]: #how-to-get-things-right-with-pythons-format-strings-f-strings
 
 To use template strings requires that a `parameters` item is included as part
 of the BPETask. The `parameters` dictionary must have items with the keys
@@ -283,91 +212,182 @@ the task specification. IN this case, the BPe will run for each of three days
 that the EXAMPLE campaign stretches over.
 
 
+## Campaign-configuration templates
 
-!!! note "Python format strings"
+Based on the assumption that most users do the same things over and over again
+to different data sets, and thus to avoid copying-and-pasting recurring
+processing workflow between Bernese campaigns, AutoBernese has the concept of a
+*campaign type* which is defined by a template campaign-configuration file in
+the templates directory of the AutoBernese runtime directory.
 
-    The strings using the Python format-string syntax are explicitly written
-    as strings with quotes, since they contain Python syntax for template
-    strings that clash with YAML syntx for dictionaries.
+Adding different templates for different campaign scenarios, i.e. campaign
+types, will speed up the process of creating a new campaign, getting it ready by
+downloading data, and running the BPE tasks set in the campaign-specific
+configuration file.
+
+Campaign-configuration templates can be put in the AutoBernese runtime
+directory:
+
+``` title="Campaign-configuration template location in the AutoBernese runtime directory"
+/path/to/environment
+├── autobernese
+│   ├── (...)
+│   └── templates        # Directory for user-created templates,
+│       │                # one for each campaign type
+│       │
+│       ├── default.yaml # This default file is used as
+│       │                # template if none specified.
+│       │
+│       └── example.yaml # Example of a user-created template
+│                        # for campaign type named `example`.
+│
+├── BERN54
+└── ...
+```
+
+Below is an example of the campaign-configuration template `example.yaml`:
+
+```yaml title="Template based on the EXAMPLE-campaign configuration"
+# /path/to/environment/autobernese/templates/example.yaml
+--8<-- "docs/manual/assets/campaign.yaml:10:"
+```
+
+As seen above, the difference between a campaign-configuration file and its
+template it the metadata section that is part of the concrete Bernese campaign.
+AutoBernese adds the metadata section automatically, but a user can also ad it
+manually, if the configuration is made for an existing campaign such as the
+EXAMPLE campaign.
+
+Using a campaign-specific configuration file in the root of a Bernese-campaign
+directory, AutoBernese is able to do two things at the campaign level:
+
+1.  Download campaign-specific data from sources specified in the same way as in
+    the general AutoBernese configuration file.
+2.  Run the Bernese Processing Engine for PCF files with campaign-specific
+    settings.
+
+AutoBernese lets a user define configuration templates for common campaign
+scenarios, where the only difference is in the time interval for which a given
+campaign is created and run.
+
+A default campaign template `default.yaml` is added to the `autobernese`
+directory, automatically, when the command `ab campaign` is run. If the file
+already exists, AutoBernese does nothing.
+
+As the user create a campaign with AutoBernese, if no other template name is
+specified, the default campaign template is used. Therefore, this file should be
+edited to suit the most common scenario. Even so, having more than one
+configuration template will make common scenarios faster to setup.
+
+With this template-management system, you only need to set up your Bernese
+campaigns once, or rarely. AS it is only the presence of the configuration file
+that enables AutoBernese to do its work, existing campaigns can be 'runable'
+with AutoBernese by adding a campaign-configuration file to those campaign
+directories.
 
 
-## More on campaign tasks
+<!-- ## More on campaign tasks
 
 
 What is runnable are Python-object instances in AutoBernese that has a `run()`
 method. A `BPETask` is such YAML allows users to create tags that can be
 specified by the software that loads the YAML document, and
-
----
-
+ -->
 
 
-## How to get things right with Python's string templates and format strings [`f` strings]
+## Notes on Python-string templates in YAML documents
 
-```python
-import datetime as dt
+Python has multiple ways to work with strings, and many of the string-values
+given in the AutoBernese configuration files have content that requires soe
+knowldge about Python's Template strings. In addition, the format of these
+strings may clash with the YAML syntax, so a few potential problems and
+solutions are shown below.
 
-date = dt.date(2019, 2, 13)
-date.day
-# 13
-f'{date.day}'
-# '13'
-f'{date.day:3d}'
-# ' 13'
-f'{date.day:03d}'
-# '013'
-```
 
-Using string templates, the above would look like this:
+### Difference between Template strings and `f` string syntax
 
-```python
-import datetime as dt
+This example shows the difference in Python syntax between two Python-string
+types:
 
-date = dt.date(2019, 2, 13)
-date.day
-# 13
-'{date.day}'.format(date=date)
-# '13'
-'{date.day:3d}'.format(date=date)
-# ' 13'
-'{date.day:03d}'.format(date=date)
-# '013'
-```
+=== "`f` string"
+
+    ```python
+    import datetime as dt
+
+    date = dt.date(2019, 2, 13)
+    date.day
+    # 13
+    f'{date.day}'
+    # '13'
+    f'{date.day:3d}'
+    # ' 13'
+    f'{date.day:03d}'
+    # '013'
+    ```
+
+=== "String template"
+
+    ```python
+    import datetime as dt
+
+    date = dt.date(2019, 2, 13)
+    date.day
+    # 13
+    '{date.day}'.format(date=date)
+    # '13'
+    '{date.day:3d}'.format(date=date)
+    # ' 13'
+    '{date.day:03d}'.format(date=date)
+    # '013'
+    ```
 
 String templates are used in the YAML files that are used as configuration-file
-format. Note that there is a subtle drawback in clarity, when the string
-template begins with a template part, since it clashes with the YAML syntax for
-a mapping which also begins and ends with `{` and `}`, respectively:
+format.
 
-```python
-import yaml
-s = """\
-some configuration key: a string with {date.day}
-another configuration key: {template} is at the beginning of the string.
-"""
-yaml.safe_load(s)
-# Output:
-# ParserError: while parsing a block mapping
-#   in "<unicode string>", line 1, column 1:
-#     some configuration key: a string ...
-#     ^
-# expected <block end>, but found '<scalar>'
-#   in "<unicode string>", line 2, column 37:
-#     another configuration key: {prefix} is at the beginning of the string.
-```
+### Clash with the the YAML syntax
 
-In these cases, one must, explicitly, put quotes around the string:
+There is a subtle drawback in clarity, when the string template begins with a
+template part, since it clashes with the YAML syntax for a mapping which also
+begins and ends with `{` and `}`, respectively. In these cases, one must,
+explicitly, put quotes around the string:
 
-```python
-import yaml
-s = """\
-some configuration key: a string with {date.day}
-another configuration key: '{template} is at the beginning of the string.'
-"""
-yaml.safe_load(s)
-# Output:
-# {
-#   'some configuration key': 'a string with {date.day}',
-#  'another configuration key': '{template} is at the beginning of the string.'
-# }
-```
+=== "Without explicit quotes"
+
+    ```python title="Example"
+    import yaml
+    s = """\
+    some configuration key: a string with {date.day}
+    another configuration key: {template} is at the beginning of the string.
+    """
+    yaml.safe_load(s)
+    ```
+
+    ``` title="Output"
+    # Output:
+    # ParserError: while parsing a block mapping
+    #   in "<unicode string>", line 1, column 1:
+    #     some configuration key: a string ...
+    #     ^
+    # expected <block end>, but found '<scalar>'
+    #   in "<unicode string>", line 2, column 37:
+    #     another configuration key: {prefix} is at the beginning of the string.
+    ```
+
+=== "With explicit quotes"
+
+    ```python title="Example"
+    import yaml
+    s = """\
+    some configuration key: a string with {date.day}
+    another configuration key: '{template} is at the beginning of the string.'
+    """
+    yaml.safe_load(s)
+    ```
+
+    ``` title="Output"
+    # Output:
+    # {
+    #   'some configuration key': 'a string with {date.day}',
+    #  'another configuration key': '{template} is at the beginning of the string.'
+    # }
+    ```

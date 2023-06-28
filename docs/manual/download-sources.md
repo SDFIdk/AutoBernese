@@ -1,60 +1,64 @@
-## Download common and campaign-specific data
-
-AutoBernese can download external data sources specified in the [common
-configuration file]() or in any campaign configuration [i.e. `campaign.yaml` in
-a campaign directory].
-
-!!! warning "TODO: Add links to section of the documentation where the configuration files are explained"
-
-    *   The configuration format.
-    *   The configuration locations.
-        *   User directory. (common concept) -- autobernese.yaml.
-            *   Should the user also be able to have local configuration?
-        *   The campaign directory root. -- campaign.yaml.
+!!! warning "TODO"
 
     *   How to add a campaign configuration (to an existing campaign)
     *   How to manage campaign-configuration templates for common campaign types.
 
-As examples, AutoBernese comes with a preset list of sources to download from:
+## Download common and campaign-specific data
 
+AutoBernese can download external data sources via FTP and HTTP which are
+specified in either [`autobernese.yaml`](configuration-files.md) or any campaign
+configuration `campaign.yaml` in a campaign directory. Basically, specified
+sources lets you download one or more files from a remote path and put it in a
+directory of your choice.
 
-This approach illustrates the use of the builtin `Source` instance which is also
-available as a YAML tag `!Source`. This lets you download one or more files from
-a remote path and put it in a directory of your choice.
+These examples demonstrate the use of the custom YAML tag `!Source` that
+AutoBernese uses to define sources that users want to download,
+before the campaign is run.
 
-The `max_age` directive is in the unit of whole days and can be used to limit
-how long a given file should be stored locally, before needing an update. This
-is useful, if you run the command daily to update you sources. IN this case, set
-`max_age` to `1`, and the source will be force-downloaded if it is more than one
-day old. The default value is &infin;.
+Sources are specified in the same way in both kinds of configuration, and
+defining their parameters with some of the advanced syntax depends solely on the
+context being either the common AutoBernese configuration or a given campaign
+configuration.
 
-!!! warning ""
+## `Source` parameters
 
-    To deal with remote-path directory structures that depend on time, and in
-    general any other parameter, a `Source` instance can use Python's builtin string
-    templates as input for paramaters that are expanded during runtime to produce
-    the needed combinations of URIs to download from.
+Source:
 
+*   *`name`*
+    -   A string that will be displayed in the terminal, when downloading the
+        source.
+*   *`url`*
+    -   A string or Python `pathlib.Path` that defines the protocol, host and
+        subdirectory to download from. Can contain the filename of a specific
+        file or (FTP only) be a directory from which to download given files
+        from.
+*   *`destination`*
+    -   A string or Python `pathlib.Path` with the path to a *directory* (not a
+        filename) in which to put the downloaded file(s).
+*   *`filenames`*
+    -   A list of filenames to download from given remote directory. For FTP, a
+        wildcard `*` may be used in the filename. To download all files in an
+        FTP directory, use a single filename `*`.
+*   *`parameters`*
+    -   A mapping [Python `dict`] with keys being valid python variable names,
+        and their corresponding values a sequence of possible values that the
+        key will represent in a combination of all possible key-value pairs.
+        (See the examples below.) The key will be resolved if used in the
+        `Source` `url` and filenames.
+*   *`max_age`*
+    -   An integer limit in the unit of whole days which defines how long a
+        given file should be stored locally, before needing an update. This is
+        useful, if you run the command daily to update you sources. IN this
+        case, set `max_age` to `1`, and the source will be force-downloaded if
+        it is more than one day old. The default value is &infin;.
 
-
-
-=== "`autobernese.yaml`"
-
-    ```yaml
-    sources:
-
-    - !Source
-      name: EUREF STA file
-      url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
-      destination: /path/to/DATAPOOL/station
-      max_age: 1
-    ```
-
-=== "`campaign.yaml`"
-
-    TODO
 
 ## Supported scenarios
+
+Each example below demonstrates an internal use-case illustrating both a basic
+approach as well as an advanced approach where the YAML syntax is used to avoid
+repetition.
+
 
 ### FTP: Download specific file
 
@@ -272,36 +276,46 @@ a directory listing from an HTTP URI.
         hour: ['00', '06', '12', '18']
     ```
 
-### Advanced examples
 
-Using Python template strings and AutoBernese parameterisation, you can also
-specifiy sources in the following way:
+## Notes on advanced datatypes and parameters
 
-!!! note "Note"
 
-    Another key difference between the simpler and the more advanced usage examples
-    is that the destination paths use another AutoBernese builtin construct which is
-    a YAML tags `!Path` and `!DateRange`. `!Path` combines a list of path segments
-    to a full Python `pathlib.Path` instance.
+### Custom YAML tags
 
-    The dates used with the `!DateRange` YAML tag are instances of a GPSDate, which
-    is a subclass of Python's `datetime.date` type. GPSDate adds a two useful
-    properties `gps_week` and `doy` to the instance which otherwise acts (and *is*)
-    in all other respects a Python `datetime.date` instance.
+A key difference between the simpler and the more advanced usage examples is
+that the destination paths use another AutoBernese builtin construct which is a
+YAML tags `!Path` and `!DateRange`. `!Path` combines a list of path segments to
+a full Python `pathlib.Path` instance.
 
-    These two properties make it easier to build paths that require these date
-    properties, and this special data type was added to make them available in
-    template strings, since predefined template strings are not able to run
-    arbitrary functions inside them (for security reasons) as is possible with
-    Python's f-strings.
+To deal with remote-path directory structures that depend on time, and in
+general any other parameter, a `Source` instance can use Python's builtin string
+templates as input for parameters that are expanded during runtime to produce
+the needed combinations of URIs to download from.
 
-    The `*D` is a YAML alias that is automatically available in the context that
-    reads the configuration file. This is what makes AutoBernese seamlessly
-    integrate into any loaded Bernese installation [henceforth referred to as a
-    Bernese *environment*]. Essential environment variables set by `LOADGPS.setvar`
-    are loaded and aliased when the configuration file is loaded, and thus `*D` is
-    YAML syntax that, when loaded, replaces the `*D` with value that that the alias
-    `D` refers to, which in this case is the full path to the Bernese DATAPOOL
-    directory as specified in `LOADGPS.setvar`. Thus, with aliases and the `!Path`
-    YAML tag, you may specify paths that, when loaded, become the paths you already
-    have available in your environment, when you are running AutoBernese commands.
+The dates used with the `!DateRange` YAML tag are instances of a GPSDate, which
+is a subclass of Python's `datetime.date` type. GPSDate adds a two useful
+properties `gps_week` and `doy` to the instance which otherwise acts (and *is*)
+in all other respects a Python `datetime.date` instance.
+
+These two properties make it easier to build paths that require these date
+properties, and this special data type was added to make them available in
+template strings, since predefined template strings are not able to run
+arbitrary functions inside them (for security reasons) as is possible with
+Python's f-strings.
+
+
+### YAML aliases
+
+The `*D` is a YAML alias that is automatically available in the context that
+reads the configuration file. This is what makes AutoBernese seamlessly
+integrate into any loaded Bernese environment.
+
+Essential environment variables set by `LOADGPS.setvar` are loaded and aliased
+when the configuration file is loaded, and thus `*D` is YAML syntax that, when
+loaded, replaces the `*D` with value that that the alias `D` refers to, which in
+this case is the full path to the Bernese DATAPOOL directory as specified in
+`LOADGPS.setvar`.
+
+Thus, combining aliases such as `*D` and the custom `!Path` YAML tag, you may
+specify paths that, when loaded, become the paths you already have available in
+your environment, when you are running AutoBernese commands.
