@@ -100,7 +100,9 @@ class VMF3DayFile:
         )
 
 
-def vmf_files(ipath: Path | str, opath: Path | str, beg: dt.date | None, end: dt.date | None) -> Iterable[VMF3DayFile]:
+def vmf_files(
+    ipath: Path | str, opath: Path | str, beg: dt.date | None, end: dt.date | None
+) -> Iterable[VMF3DayFile]:
     yesterday = dt.date.today() - dt.timedelta(days=1)
     beg = beg if beg is not None or beg <= _EARLIEST else _EARLIEST
     end = end if end is not None or end <= yesterday else yesterday

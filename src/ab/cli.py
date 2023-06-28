@@ -578,10 +578,4 @@ def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> 
     msg = f"Get VMF3 file status for files in chosen interval {beg} to {end} ..."
     log.info(msg)
     print(msg)
-    print(
-        [
-            vmf_file.status()
-            for vmf_file
-            in vmf.vmf_files(ipath, opath, beg, end)
-        ]
-    )
+    print([vmf_file.status() for vmf_file in vmf.vmf_files(ipath, opath, beg, end)])
