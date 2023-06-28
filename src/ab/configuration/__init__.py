@@ -39,6 +39,8 @@ def with_env(ifname: Path | str, *, keep_env: bool = False) -> dict[str, Any]:
         combined.pop("bsw_files")
         combined.pop("env")
         combined.pop("runtime")
+        combined.pop("campaign")
+        combined.pop("station")
     return combined
 
 

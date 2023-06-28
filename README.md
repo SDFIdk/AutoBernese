@@ -39,7 +39,10 @@ processes:
     process.
 
 Below the introduction is a more detailed overview of what is possible with the
-software.## AutoBernese
+software.
+
+
+## AutoBernese
 
 With AutoBernese installed, you have a new command `ab` available, which does
 several things behind the scenes for you as it helps you create campaigns in

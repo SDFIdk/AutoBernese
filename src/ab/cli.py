@@ -18,7 +18,6 @@ from ab import (
     __version__,
     configuration,
     dates,
-    pkg,
     vmf,
 )
 from ab.bsw import (
@@ -26,6 +25,7 @@ from ab.bsw import (
     task as _task,
 )
 from ab.data import (
+    DownloadStatus,
     source as _source,
     ftp,
     http,
@@ -70,18 +70,56 @@ def main(ctx: click.Context, show_version: bool) -> None:
         click.echo(ctx.get_help())
 
 
+# @main.command
+# def aliases() -> None:
+#     """
+#     Show YAML anchors in AutoBernese configuration and count the number of times
+#     each one is alias in the environment.
+
+#     """
+#     from ab import pkg
+#     import yaml
+#     import collections as cs
+
+#     parsed = yaml.parse(pkg.env.read_text())
+#     # composed = yaml.compose(pkg.env.read_text())
+#     events = list(parsed)
+#     anchors = {
+#         event.anchor
+#         for event in events
+#         if getattr(event, "anchor", None) is not None
+#         and not isinstance(event, yaml.AliasEvent)
+#     }
+#     counter = cs.Counter({anchor: 0 for anchor in anchors})
+#     aliased = [event.anchor for event in events if isinstance(event, yaml.AliasEvent)]
+#     counter.update(aliased)
+#     print(counter.most_common(10))
+
+#     # from IPython import embed; embed(); raise SystemExit
+
+
 @main.command
 @click.argument("section", default=None, type=str, required=False)
-def config(section: str) -> None:
+@click.option(
+    "-c",
+    "--campaign",
+    help="See specific campaign configuration.",
+    required=False,
+)
+def config(section: str, campaign: str | None = None) -> None:
     """
     Show all or specified configuration section(s).
 
     """
-    c = configuration.load()
-    if section is None:
-        print(c)
+    if campaign is not None:
+        config = _campaign.load(campaign)
     else:
-        print(c.get(section, {}))
+        config = configuration.load()
+
+    if section is None:
+        print(config)
+    else:
+        print(config.get(section, {}))
 
 
 @main.command
@@ -94,6 +132,7 @@ def logfile() -> None:
     filename = runtime.get("logging").get("filename")
     import subprocess as sub
 
+    process: sub.Popen | None = None
     try:
         log.debug(f"Show log tail ...")
         process = sub.Popen(["/usr/bin/tail", "-f", f"{filename}"])
@@ -104,8 +143,9 @@ def logfile() -> None:
         print()
 
     finally:
-        process.terminate()
-        process.kill()
+        if process is not None:
+            process.terminate()
+            process.kill()
 
 
 @main.group
@@ -150,23 +190,6 @@ def ydoy(year: int, doy: int) -> None:
     print(json.dumps(gps_date.dateinfo(), indent=2))
 
 
-# @main.command
-# def bpe(campaign: str
-#     pcf_file: str,
-#     cpu_file: str,
-#     year: str,
-#     session: str,
-#     sysout: str,
-#     status: str,
-#     taskid: str,
-#     ) -> None:
-#     """
-#     Stand-alone tool for running the Bernese Processing Engine [BPE].
-
-#     """
-#     print("BPE")
-
-
 @main.command
 @click.option(
     "-f",
@@ -191,9 +214,16 @@ def download(force: bool = False, campaign: str | None = None) -> None:
     else:
         config = configuration.load()
 
+    sources = config.get("sources", [])
+
+    s = "s" if len(sources) else ""
+    msg = f"Resolving {len(sources)} source{s} ..."
+    log.info(msg)
+
     source: _source.Source
-    for source in config.get("sources", []):
-        msg = f"Download source: {source.name}"
+    status_total = DownloadStatus()
+    for source in sources:
+        msg = f"Source: {source.name}"
         print(msg)
         log.debug(msg)
 
@@ -202,13 +232,20 @@ def download(force: bool = False, campaign: str | None = None) -> None:
 
         match source.protocol:
             case "ftp":
-                ftp.download(source)
+                status = ftp.download(source)
+                status_total += status
             case "http" | "https":
-                http.download(source)
+                status = http.download(source)
+                status_total += status
+        print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
     else:
-        msg = "Finished downloading sources"
+        msg = "Finished downloading sources ..."
         print(msg)
         log.debug(msg)
+        print(f"Overall status:")
+        print(
+            f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
+        )
 
 
 @main.group(invoke_without_command=True)
@@ -282,7 +319,9 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     campaign menu.
 
     """
-    log.debug(f"Create campaign {name=} using {template=} with {beg=} and {end=} ...")
+    msg = f"Create campaign {name=} using {template=} with {beg=} and {end=} ..."
+    print(msg)
+    log.info(msg)
     _campaign.create(name, template, beg, end)
 
 
@@ -294,7 +333,14 @@ def sources(name: str, verbose: bool = False) -> None:
     Print the campaign-specific sources.
 
     """
-    sources: list[_source.Source] = _campaign.load(name).get("sources")
+    sources: list[_source.Source] | None = _campaign.load(name).get("sources")
+
+    if sources is None:
+        msg = f"No sources found"
+        print(msg)
+        log.info(msg)
+        return
+
     formatted = (
         f"""\
 {source.name=}
@@ -321,21 +367,35 @@ def tasks(name: str) -> None:
     Show tasks for a campaign.
 
     """
-    task: _task.Task
-    for task in _campaign.load(name).get("tasks"):
+    tasks: list[_task.Task] | None = _campaign.load(name).get("tasks")
+
+    if tasks is None:
+        msg = f"No tasks found"
+        print(msg)
+        log.info(msg)
+        return
+
+    for task in tasks:
         print(task)
         print()
 
 
 @campaign.command
 @click.argument("name", type=str)
-def runbpe(name: str) -> None:
+def run(name: str) -> None:
     """
-    Run the BPE for each tasks in the campaign configuration.
+    Resolve campaign tasks and run them all.
 
     """
-    task: _task.Task
-    for task in _campaign.load(name).get("tasks"):
+    tasks: list[_task.Task] | None = _campaign.load(name).get("tasks")
+
+    if tasks is None:
+        msg = f"No tasks found"
+        print(msg)
+        log.info(msg)
+        return
+
+    for task in tasks:
         task.run()
 
 
@@ -401,31 +461,33 @@ def sitelogs2sta(
     output_filename: Path,
 ) -> None:
     """
-    Create a STA file from sitelogs.
+    Create a STA file from sitelogs and other station info.
+
+    -   Site-log filenames are required.
+    -   Four-letter IDs for individually-calibrated stations are optional.
+    -   The path to the output STA file is optional. (If none given, the file
+        will be written to sitelogs.STA in the current working directory.)
 
     Choose one of the following ways to run it:
 
-    1.  Supply at least one path to a sitelog and the sitelog will be created
-        for it/these. -   With no ouput path given, create the STA file in the
-        current working directory. -   Names of individually-calibrated stations
-        can be given.
+    1.  Supply needed and optional arguments on the command line.
 
-    2.  Supply the same possible options as in 1., but inside a YAML file. The
-        file is loaded with the current Bernese environment, so advanced paths
-        are possible.
+    2.  Supply path to a YAML file with the needed and/or optional arguments.
+
+        The file is loaded with the current Bernese environment, so advanced
+        paths are possible, e.g. `!Path [*D, station, sitelogs.STA]`.
 
     3.  Supply no arguments, and a STA file is created based on the input
         arguments given in the general or user-supplied configuration file.
 
     """
+    kwargs: dict[str, Any] | None = None
     if config is not None:
         log.info(f"Create STA file from arguments in given input-file.")
-        # raise SystemExit
         kwargs = configuration.with_env(config)
 
     elif sitelogs:
         log.info(f"Create STA file from given arguments.")
-        # raise SystemExit
         kwargs = dict(
             sitelogs=list(sitelogs),
             individually_calibrated=individually_calibrated,
@@ -434,9 +496,13 @@ def sitelogs2sta(
 
     elif configuration.load().get("station") is not None:
         log.info(f"Create STA file from arguments in the configuration.")
-        # raise SystemExit
         kwargs = configuration.load().get("station")
 
+    if kwargs is None:
+        msg = f"No tasks found"
+        print(msg)
+        log.info(msg)
+        return
     sta.create_sta_file_from_sitelogs(**kwargs)
 
 
@@ -451,47 +517,65 @@ def troposphere() -> None:
 @troposphere.command
 @click.argument("ipath", type=str)
 @click.argument("opath", type=str)
-def status(ipath: str, opath: str) -> None:
+@click.option(
+    "-b",
+    "--beg",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+@click.option(
+    "-e",
+    "--end",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
-    Show status for all possible VMF3 dates.
+    Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
+
+    Build day file for each date for which there is data available.
 
     """
-    print(vmf.status(ipath, opath))
+    msg = f"Build VMF3 files for chosen interval {beg} to {end} ..."
+    log.info(msg)
+    print(msg)
+    for vmf_file in vmf.vmf_files(ipath, opath, beg, end):
+        msg = f"Building {vmf_file.output_file} ..."
+        log.info(msg)
+        print(msg, end=" ")
+
+        build_msg = vmf_file.build()
+        if build_msg:
+            print("[red]FAILED[/red]")
+            print(f"  Error: {build_msg}")
+            continue
+
+        print("[green]SUCCESS[/green]")
 
 
 @troposphere.command
 @click.argument("ipath", type=str)
 @click.argument("opath", type=str)
-def build(ipath: str, opath: str) -> None:
+@click.option(
+    "-b",
+    "--beg",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+@click.option(
+    "-e",
+    "--end",
+    type=date,
+    help=f"Format: {DATE_FORMAT}",
+)
+def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
-    Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
+    Show status for possible VMF3 dates.
+
+    Return status for each date for which there should be data available.
 
     """
-    vmf.build(ipath, opath)
-
-
-# @main.command
-# def prepare_campaign_data(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-#     """
-#     Organises campaign data
-
-#     """
-#     organiser.prepare_campaign_data(*args, **kwargs)
-
-
-# @main.command
-# def prepare_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-#     """
-#     Organises campaign end products.
-
-#     """
-#     organiser.prepare_end_products(*args, **kwargs)
-
-
-# @main.command
-# def submit_end_products(*args: list[Any], **kwargs: dict[Any, Any]) -> None:
-#     """
-#     Submits campaign end products.
-
-#     """
-#     organiser.submit_end_products(*args, **kwargs)
+    msg = f"Get VMF3 file status for files in chosen interval {beg} to {end} ..."
+    log.info(msg)
+    print(msg)
+    print([vmf_file.status() for vmf_file in vmf.vmf_files(ipath, opath, beg, end)])
