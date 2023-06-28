@@ -70,18 +70,56 @@ def main(ctx: click.Context, show_version: bool) -> None:
         click.echo(ctx.get_help())
 
 
+# @main.command
+# def aliases() -> None:
+#     """
+#     Show YAML anchors in AutoBernese configuration and count the number of times
+#     each one is alias in the environment.
+
+#     """
+#     from ab import pkg
+#     import yaml
+#     import collections as cs
+
+#     parsed = yaml.parse(pkg.env.read_text())
+#     # composed = yaml.compose(pkg.env.read_text())
+#     events = list(parsed)
+#     anchors = {
+#         event.anchor
+#         for event in events
+#         if getattr(event, "anchor", None) is not None
+#         and not isinstance(event, yaml.AliasEvent)
+#     }
+#     counter = cs.Counter({anchor: 0 for anchor in anchors})
+#     aliased = [event.anchor for event in events if isinstance(event, yaml.AliasEvent)]
+#     counter.update(aliased)
+#     print(counter.most_common(10))
+
+#     # from IPython import embed; embed(); raise SystemExit
+
+
 @main.command
 @click.argument("section", default=None, type=str, required=False)
-def config(section: str) -> None:
+@click.option(
+    "-c",
+    "--campaign",
+    help="See specific campaign configuration.",
+    required=False,
+)
+def config(section: str, campaign: str | None = None) -> None:
     """
     Show all or specified configuration section(s).
 
     """
-    c = configuration.load()
-    if section is None:
-        print(c)
+    if campaign is not None:
+        config = _campaign.load(campaign)
     else:
-        print(c.get(section, {}))
+        config = configuration.load()
+
+    if section is None:
+        print(config)
+    else:
+        print(config.get(section, {}))
 
 
 @main.command
@@ -491,12 +529,28 @@ def troposphere() -> None:
     type=date,
     help=f"Format: {DATE_FORMAT}",
 )
-def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
+def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
-    Show status for all possible VMF3 dates.
+    Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
+
+    Build day file for each date for which there is data available.
 
     """
-    print(vmf.status(ipath, opath, beg, end))
+    msg = f"Build VMF3 files for chosen interval {beg} to {end} ..."
+    log.info(msg)
+    print(msg)
+    for vmf_file in vmf.vmf_files(ipath, opath, beg, end):
+        msg = f"Building {vmf_file.output_file} ..."
+        log.info(msg)
+        print(msg, end=" ")
+
+        build_msg = vmf_file.build()
+        if build_msg:
+            print("[red]FAILED[/red]")
+            print(f"  Error: {build_msg}")
+            continue
+
+        print("[green]SUCCESS[/green]")
 
 
 @troposphere.command
@@ -514,9 +568,20 @@ def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> 
     type=date,
     help=f"Format: {DATE_FORMAT}",
 )
-def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
+def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
-    Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
+    Show status for possible VMF3 dates.
+
+    Return status for each date for which there should be data available.
 
     """
-    vmf.build(ipath, opath)
+    msg = f"Get VMF3 file status for files in chosen interval {beg} to {end} ..."
+    log.info(msg)
+    print(msg)
+    print(
+        [
+            vmf_file.status()
+            for vmf_file
+            in vmf.vmf_files(ipath, opath, beg, end)
+        ]
+    )

@@ -315,4 +315,4 @@ def load(name: str) -> dict[str, Any]:
         raise RuntimeError(
             f"Campaign {name!r} does not exist or has no campaign-specific configuration file {ifname.name} ..."
         )
-    return configuration.with_env(ifname, keep_env=False)
+    return configuration.with_env(ifname)

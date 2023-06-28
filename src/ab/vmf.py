@@ -74,52 +74,36 @@ class VMF3DayFile:
     def exists(self) -> bool:
         return self.output_file.is_file()
 
-    def build(self) -> None:
+    def build(self) -> str:
+        msg = ""
         if not self.input_available:
-            log.warn(f"Missing input files for {self} ...")
-            return
+            msg = f"Missing input files for {self} ..."
+            log.warn(msg)
+            return msg
         ifnames = self.resolve_input_files()
         fstr = "{}\n" * len(ifnames)
         contents = [ifname.read_text() for ifname in ifnames]
         self.output_file.resolve().parent.mkdir(exist_ok=True, parents=True)
         self.output_file.write_text(fstr.format(*contents))
 
+        if not self.exists:
+            msg = f"Failed to create output file {self.output_file} ..."
+
+        return msg
+
     def status(self) -> dict[str, Any]:
         return dict(
             date=self.date.isoformat(),
             input_available=self.input_available,
             output_file_exists=self.exists,
+            output_file=str(self.output_file),
         )
 
 
-def _vmf_files(beg: dt.date | None, end: dt.date | None) -> Iterable[VMF3DayFile]:
+def vmf_files(ipath: Path | str, opath: Path | str, beg: dt.date | None, end: dt.date | None) -> Iterable[VMF3DayFile]:
     yesterday = dt.date.today() - dt.timedelta(days=1)
     beg = beg if beg is not None or beg <= _EARLIEST else _EARLIEST
     end = end if end is not None or end <= yesterday else yesterday
     log.info(f"VMF3 file interval is set to {beg} to {end} ...")
     data_days = date_range(beg, end, transformer=GPSDate)
     return (VMF3DayFile(date, ipath, opath) for date in data_days)
-
-
-def status(
-    ipath: Path | str, opath: Path | str, /, beg: dt.date | None, end: dt.date | None
-) -> Iterable[dict[str, Any]]:
-    """
-    Return status for each date for which there should be data available.
-
-    """
-    log.info(f"Get VMF3 file status for files in chosen interval {beg} to {end} ...")
-    return (vmf_file.status() for vmf_file in _vmf_files(beg, end))
-
-
-def build(
-    ipath: Path | str, opath: Path | str, /, beg: dt.date | None, end: dt.date | None
-) -> None:
-    """
-    Build day file for each date for which there be data available.
-
-    """
-    log.info(f"Build VMF3 files for chosen interval {beg} to {end} ...")
-    for vmf_file in _vmf_files(beg, end):
-        log.info(f"Building {vmf_file.output_file} ...")
-        vmf_file.build()
