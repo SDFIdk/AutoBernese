@@ -18,8 +18,8 @@ If we install Bernese GNSS Software in a directory for production use:
 
 !!! note "Assumption"
 
-AutoBernese uses the environment variable `${C}` set in `LOADGPS.setvar` to find
-out where the current activated Bernese environment is.
+    AutoBernese uses the environment variable `${C}` set in `LOADGPS.setvar` to find
+    out where the current activated Bernese environment is.
 
 
 ## AutoBernese runtime directory
