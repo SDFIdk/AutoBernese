@@ -26,6 +26,17 @@ First, initialise the environments:
 *   Load your Bernese environment as defined in `LOADGPS.setvar`.
 *   Activate the AutoBernese `conda`/`mamba` environment [`ab`]
 
+!!! note "Bernese user environment"
+
+    Make sure that you have configured a Bernese user environment
+    for the active user. Run 
+    
+    ```
+    $EXE/configure.pm
+    ```
+    
+    and select option 3. 
+    AutoBernese will fail without a functional Bernese user environment.
 
 ## Run the campaign
 
