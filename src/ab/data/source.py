@@ -148,7 +148,8 @@ class Source:
 
     """
 
-    name: str
+    identifier: str
+    description: str
     url: str | Path
     destination: str | Path
     filenames: list[str | Path] = None
