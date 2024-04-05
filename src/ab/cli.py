@@ -10,6 +10,7 @@ from typing import (
     Any,
     Final,
 )
+from dataclasses import asdict
 
 import click
 from rich import print
@@ -237,15 +238,17 @@ def download(force: bool = False, campaign: str | None = None) -> None:
             case "http" | "https":
                 status = http.download(source)
                 status_total += status
-        print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
+        # print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
+        print(asdict(status))
     else:
         msg = "Finished downloading sources ..."
         print(msg)
         log.debug(msg)
         print(f"Overall status:")
-        print(
-            f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
-        )
+        # print(
+        #     f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
+        # )
+        print(asdict(status_total))
 
 
 @main.group(invoke_without_command=True)
