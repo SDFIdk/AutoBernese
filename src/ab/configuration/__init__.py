@@ -3,10 +3,14 @@ Configuration
 
 """
 from typing import (
+    Final,
     Any,
     Iterable,
 )
 from pathlib import Path
+import getpass
+import logging
+import os
 
 import yaml
 
@@ -15,6 +19,20 @@ from ab import pkg
 
 
 _CONFIGURATION: dict[str, Any] = None
+_POP: Final = (
+    "bsw_env",
+    "bsw_files",
+    "env",
+    "runtime",
+    "campaign",
+    "station",
+)
+
+
+def clean(config: dict[str, Any]) -> dict[str, Any]:
+    for key in _POP:
+        config.pop(key)
+    return config
 
 
 def merge(*filenames: Iterable[Path | str]) -> str:
@@ -34,17 +52,12 @@ def with_env(ifname: Path | str, *, keep_env: bool = False) -> dict[str, Any]:
 
     """
     combined = yaml.safe_load(merge(pkg.env, ifname))
-    if not keep_env:
-        combined.pop("bsw_env")
-        combined.pop("bsw_files")
-        combined.pop("env")
-        combined.pop("runtime")
-        combined.pop("campaign")
-        combined.pop("station")
-    return combined
+    if keep_env:
+        return combined
+    return clean(combined)
 
 
-def _load() -> Any:
+def _load() -> dict[str, Any]:
     """
     Actual loader of the AutoBernese configuration file.
 
@@ -67,7 +80,7 @@ def _load() -> Any:
     return env
 
 
-def load() -> Any:
+def load() -> dict[str, Any]:
     """
     Load built-in and user-supplied configuration files for AutoBernese.
 
@@ -76,3 +89,59 @@ def load() -> Any:
     if _CONFIGURATION is None:
         _CONFIGURATION = _load()
     return _CONFIGURATION
+
+
+LOADGPS_setvar: Final = (
+    "VERSION",
+    "F_VERS",
+    "F_VERS_LIST",
+    "C",
+    "SRC",
+    "LG",
+    "FG",
+    "XG",
+    "XQ",
+    "SPT",
+    "BPE",
+    "EXE",
+    "SUP",
+    "DOC",
+    "HLP",
+    "PAN",
+    "GLOBAL",
+    "MODEL",
+    "CONFIG",
+    "USR",
+    "OPT",
+    "PCF",
+    "SCR",
+    "BPE_SERVER_HOST",
+    "U",
+    "T",
+    "P",
+    "D",
+    "S",
+    "QTBERN",
+    "OS",
+    "OS_NAME",
+    "CGROUP",
+)
+
+
+def LOADGPS_setvar_sourced() -> bool:
+    for key in LOADGPS_setvar:
+        if key not in os.environ:
+            return False
+    return True
+
+
+def set_up_runtime_environment():
+    """For the command-line application"""
+    runtime = load().get("runtime")
+    runtime.get("ab").mkdir(exist_ok=True)
+    log_kw = runtime.get("logging")
+    log_kw.get("filename").touch()
+    replacements = dict(
+        format=log_kw.get("format").format(user=getpass.getuser()),
+    )
+    logging.basicConfig(**{**log_kw, **replacements})
