@@ -3,6 +3,7 @@ channels:
 - conda-forge
 dependencies:
 - click
+- click-aliases
 - pip
 - python=3.12
 - pyyaml

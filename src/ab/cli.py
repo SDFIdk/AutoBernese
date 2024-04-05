@@ -13,6 +13,7 @@ from typing import (
 from dataclasses import asdict
 
 import click
+from click_aliases import ClickAliasedGroup
 from rich import print
 
 from ab import (
@@ -22,6 +23,7 @@ from ab import (
     vmf,
 )
 from ab.bsw import (
+    get_bsw_release,
     campaign as _campaign,
     task as _task,
 )
@@ -40,35 +42,50 @@ from ab.station import (
 log = logging.getLogger(__name__)
 
 
-DATE_FORMAT: Final[str] = "%Y-%m-%d"
+DATE_FORMAT: Final = "%Y-%m-%d"
 
 
 def date(s: str) -> dt.date:
     return dt.datetime.strptime(s, DATE_FORMAT).date()
 
 
-@click.group(invoke_without_command=True)
+@click.group(cls=ClickAliasedGroup, invoke_without_command=True)
 @click.option("--version", "show_version", is_flag=True, default=False)
+@click.option("--bsw-release", "bsw_release", is_flag=True, default=False)
 @click.pass_context
-def main(ctx: click.Context, show_version: bool) -> None:
+def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
     """
     AutoBernese is a tool that can
 
-    1.  Download external data to your local data storage.
+    1.  Create Bernese campaigns using the built-in template system.
 
-    2.  Create Bernese campaigns using pre-defined campaign templates.
+    2.  Download and organise data for general or campaign-specific use.
 
-    3.  Download campaign-specific data.
+    3.  Run the BPE for campaigns with an AutoBernese configuration.
 
-    4.  Run the Bernese Processing Engine [BPE] for Bernese campaigns with an
-        AutoBernese campaign configuration.
+    4.  Do various other things related to GNSS-data processing.
 
     """
+    if not configuration.LOADGPS_setvar_sourced():
+        msg = "Not all variables in LOADGPS.setvar are set ..."
+        print(f"[white on red]{msg}[/]")
+        raise SystemExit
+
+    configuration.set_up_runtime_environment()
+
     if show_version:
         print(f"{__version__}")
         raise SystemExit
-    elif ctx.invoked_subcommand is None:
+
+    if bsw_release:
+        print(json.dumps(asdict(get_bsw_release()), indent=2))
+        raise SystemExit
+
+    if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
+        raise SystemExit
+
+    print(f"AutoBernese version {__version__}; BSW version {get_bsw_release()}")
 
 
 # @main.command
