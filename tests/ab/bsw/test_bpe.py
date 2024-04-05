@@ -73,8 +73,8 @@ BPE finished at 10-Jan-2024 15:04:14
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
 
     substitutes = dict(
-        P='/home/bsw/dev/data/CAMPAIGN54',
-        U='/home/user/bsw/dev/user',
+        P="/home/bsw/dev/data/CAMPAIGN54",
+        U="/home/user/bsw/dev/user",
     )
     result_substituted = parse_bpe_terminal_output(output_success, substitutes)
     expected_substituted = BPETerminalOutput(
@@ -90,7 +90,9 @@ BPE finished at 10-Jan-2024 15:04:14
         end=dt.datetime(2024, 1, 10, 15, 4, 14),
         ok=True,
     )
-    assert result_substituted == expected_substituted, f"Expected {result!r} to be {expected!r} ..."
+    assert (
+        result_substituted == expected_substituted
+    ), f"Expected {result!r} to be {expected!r} ..."
 
     output_failed = """\
 CPU File ${U}/PAN/USER.CPU has been reset

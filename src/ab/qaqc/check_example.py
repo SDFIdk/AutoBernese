@@ -75,7 +75,9 @@ class LineCRD:
 
     def __sub__(self, other: Self) -> Self:
         if not self.station == other.station:
-            raise RuntimeError(f'Must subtract from the same station. Got {self.station!r} and {other.station!r}')
+            raise RuntimeError(
+                f"Must subtract from the same station. Got {self.station!r} and {other.station!r}"
+            )
         return LineCRD(
             self.station,
             self.x - other.x,

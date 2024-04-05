@@ -137,14 +137,12 @@ class BPETask:
         return [BPETaskRunner(resolved) for resolved in self.resolve()]
 
 
-def parse_bpe_terminal_output(raw: str, substitutes: dict[str, str] | None = None) -> BPETerminalOutput:
+def parse_bpe_terminal_output(
+    raw: str, substitutes: dict[str, str] | None = None
+) -> BPETerminalOutput:
     if substitutes is not None:
         raw = Template(raw).safe_substitute(substitutes)
-    lines = [
-        line.strip()
-        for line in raw.splitlines()
-        if line.strip() != ""
-    ]
+    lines = [line.strip() for line in raw.splitlines() if line.strip() != ""]
     kwargs = {}
     for line in lines:
         if line.startswith("Starting BPE on "):
@@ -273,7 +271,7 @@ def run_bpe(bpe_env: Mapping[str, str]) -> None:
         output = ""
         for line in process.stdout:
             output += line
-            print(line, end='')
+            print(line, end="")
 
         log.debug(f"BPE runner finished ...")
         return parse_bpe_terminal_output(output)

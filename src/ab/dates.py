@@ -101,7 +101,9 @@ class GPSDate(dt.datetime):
 
         """
         if isinstance(date, dt.datetime):
-            return cls(date.year, date.month, date.day, date.hour, date.minute, date.second)
+            return cls(
+                date.year, date.month, date.day, date.hour, date.minute, date.second
+            )
         # It is a date instance without time, so we use midnight as the time
         return cls(date.year, date.month, date.day)
 

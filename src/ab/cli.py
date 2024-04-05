@@ -511,6 +511,7 @@ def tasks(name: str, verbose: bool) -> None:
             print(json.dumps(resolved, indent=2))
             print()
 
+
 @campaign.command
 @click.argument("campaign_name", type=str)
 @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
