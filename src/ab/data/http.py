@@ -2,6 +2,7 @@
 Module for downloading files over HTTP.
 
 """
+
 from pathlib import Path
 import logging
 

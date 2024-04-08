@@ -2,6 +2,7 @@
 Module for building .GRD-files for each day.
 
 """
+
 from typing import (
     Any,
     Final,
@@ -28,9 +29,9 @@ log = logging.getLogger(__name__)
 _EARLIEST: Final[dt.date] = dt.date(2023, 1, 1)
 
 _FSTR_IFNAME: Final[str] = "VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
-_FSTR_IFNAME_YEAR_SUBDIR: Final[
-    str
-] = "{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
+_FSTR_IFNAME_YEAR_SUBDIR: Final[str] = (
+    "{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
+)
 _FSTR_OFNAME: Final[str] = "VMFG_{date.year}{date.doy:03d}0.GRD"
 
 _HOURS: Final[list[str]] = ["00", "06", "12", "18"]

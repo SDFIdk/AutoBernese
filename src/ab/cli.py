@@ -2,6 +2,7 @@
 Command-line interface
 
 """
+
 import logging
 from pathlib import Path
 import json

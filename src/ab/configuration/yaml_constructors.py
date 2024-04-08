@@ -5,6 +5,7 @@ Constructors defined in this module are added to the SafeLoader, which is the
 recommended way to load YAML-files.
 
 """
+
 from pathlib import Path
 
 # import functools

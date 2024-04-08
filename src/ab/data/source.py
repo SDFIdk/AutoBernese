@@ -2,6 +2,7 @@
 Module for handling an external data source.
 
 """
+
 from os.path import join
 from typing import (
     Any,

@@ -2,6 +2,7 @@
 Module for dates.
 
 """
+
 import datetime as dt
 from dataclasses import dataclass
 from typing import (

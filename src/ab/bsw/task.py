@@ -2,6 +2,7 @@
 Module for protocols.
 
 """
+
 from typing import Protocol
 
 

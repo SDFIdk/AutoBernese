@@ -2,6 +2,7 @@
 AutoBernese
 
 """
+
 from importlib import metadata
 
 import ab

@@ -39,6 +39,7 @@ Files of concern:
     -   $S/RNX2SNX/yyyy/FIN_yyyyssss.CRD_REF
 
 """
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
@@ -50,8 +51,7 @@ from ab import configuration
 
 
 class Comparable(Protocol):
-    def __sub__(self, other: Self) -> Self:
-        ...
+    def __sub__(self, other: Self) -> Self: ...
 
     __rsub__ = __sub__
 

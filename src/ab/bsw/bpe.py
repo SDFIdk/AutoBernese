@@ -2,6 +2,7 @@
 Module for running the Bernese Processing Engine [BPE]
 
 """
+
 from typing import (
     Any,
     Mapping,

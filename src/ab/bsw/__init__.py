@@ -2,6 +2,7 @@
 Module for Bernese GNSS Software system interaction.
 
 """
+
 from dataclasses import dataclass
 
 from ab import configuration

@@ -2,6 +2,7 @@
 Configuration
 
 """
+
 from typing import (
     Final,
     Any,

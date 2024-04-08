@@ -2,6 +2,7 @@
 Module for working with campaigns in the current BSW environment.
 
 """
+
 import datetime as dt
 import getpass
 from typing import (
