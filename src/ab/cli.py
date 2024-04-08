@@ -255,7 +255,7 @@ def residuals(
         print()
 
 
-@main.group(aliases=["d"])
+@main.group(aliases=["dt"])
 def dateinfo() -> None:
     """
     Print date info on date, year+doy or GPS week.
@@ -373,7 +373,7 @@ def download(
         print(asdict(status_total))
 
 
-@main.group(invoke_without_command=True)
+@main.group(invoke_without_command=True, aliases=["c"])
 @click.pass_context
 def campaign(ctx: click.Context) -> None:
     """

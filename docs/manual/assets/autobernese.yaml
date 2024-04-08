@@ -23,6 +23,8 @@ campaign:
 sources:
 
 - !Source
-  name: EUREF STA file
+  identifier: EUREF_STA
+  description: EUREF STA file from epncb
   url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
   destination: !Path [*D, station]
+  max_age: 1

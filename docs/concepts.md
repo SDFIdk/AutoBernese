@@ -45,11 +45,22 @@ the runtime directory will be:
 
 
 
-## campaign-specific configuration
+## Campaign-specific configuration
 
-## campaign-specific configuration template
+The AutoBernese configuration file `campaign.yaml` inside a given campaign
+directory.
 
-## campaign type
+
+## Campaign-specific configuration template
+
+The AutoBernese configuration file `template-name.yaml` inside the the
+AutoBernese runtime directory.
+
+
+## Campaign type
+
+In the context of AutoBernese, a campaign type refers to a campaign that is
+created from a given campaign-specific configuration template.
 
 
 ### Campaign templates

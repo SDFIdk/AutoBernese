@@ -296,19 +296,22 @@ is added to the [AutoBernese runtime directory](concepts.md).
     sources:
 
     - !Source
-    name: EUREF STA file
+    identifier: EUREF_STA
+    description: EUREF STA file
     url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
     destination: !Path [*D, station]
 
     - !Source
-    name: BSW Model data
+    identifier: BSW_MODEL
+    description: BSW Model data
     url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
     destination: *MODEL
     filenames: ['*']
     max_age: 1
 
     - !Source
-    name: BSW Configuration data
+    identifier: BSW_CONFIG
+    description: BSW Configuration data
     url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
     destination: *CONFIG
     filenames: ['*']
@@ -324,7 +327,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
     ```python title="Output"
     [
         Source(
-            name='EUREF STA file',
+            identifier='EUREF_STA',
+            description='EUREF STA file',
             url='ftp://epncb.oma.be/pub/station/general/EUREF.STA',
             destination=PosixPath('/home/bsw/prod/data/DATAPOOL/station'),
             filenames=None,
@@ -332,7 +336,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
             max_age=inf
         ),
         Source(
-            name='BSW Model data',
+            identifier='BSW_MODEL',
+            description='BSW Model data',
             url='ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/',
             destination=PosixPath('/home/bsw/prod/BERN54/GLOBAL/MODEL'),
             filenames=['*'],
@@ -340,7 +345,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
             max_age=1
         ),
         Source(
-            name='BSW Configuration data',
+            identifier='BSW_CONFIG',
+            description='BSW Configuration data',
             url='ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/',
             destination=PosixPath('/home/bsw/prod/BERN54/GLOBAL/CONFIG'),
             filenames=['*'],
@@ -400,7 +406,8 @@ campaign. This is explained in more detail in the section [Download sources][DOC
     sources:
 
     - !Source
-    name: RINEX data
+    identifier: RINEX_EPN
+    description: RINEX data
     url: ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy:03d}
     destination: !Path [*D, RINEX, '{date.gps_week}']
     filenames:
@@ -433,7 +440,8 @@ campaign. This is explained in more detail in the section [Download sources][DOC
     ```python title="Output"
     [
         Source(
-            name='RINEX data',
+            identifier='RINEX_EPN',
+            description='RINEX data',
             url='ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy:03d}',
             destination=PosixPath('/home/bsw/dev/data/DATAPOOL/RINEX/{date.gps_week}'),
             filenames=['{station}_{date.year}{date.doy:03d}0000_01D_30S_MO.crx.gz'],
@@ -796,14 +804,14 @@ Commands:
 
     ```json title="Output"
     {
-    "weekday": "Sunday",
-    "date": "2022-08-07",
-    "doy": 219,
-    "iso_week": 31,
-    "iso_weekday": 7,
-    "gps_week": 2222,
-    "gps_week_beg": "2022-08-07",
-    "gps_week_end": "2022-08-13"
+      "weekday": "Sunday",
+      "timestamp": "2022-08-07",
+      "doy": 219,
+      "iso_week": 31,
+      "iso_weekday": 7,
+      "gps_week": 2222,
+      "gps_week_beg": "2022-08-07",
+      "gps_week_end": "2022-08-13"
     }
     ```
 
@@ -815,14 +823,14 @@ Commands:
 
     ```json title="Output"
     {
-    "weekday": "Sunday",
-    "date": "2022-08-07",
-    "doy": 219,
-    "iso_week": 31,
-    "iso_weekday": 7,
-    "gps_week": 2222,
-    "gps_week_beg": "2022-08-07",
-    "gps_week_end": "2022-08-13"
+      "weekday": "Sunday",
+      "timestamp": "2022-08-07",
+      "doy": 219,
+      "iso_week": 31,
+      "iso_weekday": 7,
+      "gps_week": 2222,
+      "gps_week_beg": "2022-08-07",
+      "gps_week_end": "2022-08-13"
     }
     ```
 
@@ -834,21 +842,21 @@ Commands:
 
     ```json title="Output"
     {
-    "weekday": "Sunday",
-    "date": "2022-08-07",
-    "doy": 219,
-    "iso_week": 31,
-    "iso_weekday": 7,
-    "gps_week": 2222,
-    "gps_week_beg": "2022-08-07",
-    "gps_week_end": "2022-08-13"
+      "weekday": "Sunday",
+      "timestamp": "2022-08-07",
+      "doy": 219,
+      "iso_week": 31,
+      "iso_weekday": 7,
+      "gps_week": 2222,
+      "gps_week_beg": "2022-08-07",
+      "gps_week_end": "2022-08-13"
     }
     ```
 
 ## Examine the Logfile to get more verbose output
 
 ```sh title="Command"
-ab logfile
+ab logs
 ```
 
 ``` title="Output"
