@@ -50,19 +50,25 @@ files, so that the relative paths and other data can be re-used here as well.
 
     === "BSW environment variables"
 
-        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="1-30"
+        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="1-33"
+        --8<-- "src/ab/configuration/env.yaml"
+        ```
+
+    === "Files used by AutoBernese"
+
+        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="35-70"
         --8<-- "src/ab/configuration/env.yaml"
         ```
 
     === "Runtime settings"
 
-        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="43-69"
+        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="74-100"
         --8<-- "src/ab/configuration/env.yaml"
         ```
 
     === "Settings overridable"
 
-        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="71-103"
+        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="104-136"
         --8<-- "src/ab/configuration/env.yaml"
         ```
 
@@ -208,8 +214,22 @@ time.
 
 When runnning the tasks, each task is resolved to the concrete set of possible
 values that BPE can receive, and the BPE is run for each concrete given by
-the task specification. IN this case, the BPe will run for each of three days
+the task specification. In this case, the BPE will run for each of three days
 that the EXAMPLE campaign stretches over.
+
+
+### The `sources` section
+
+Campaign-specific sources of external data can be specified in a `sources` section
+in the campaign configuration.
+
+As illustrated in the EXAMPLE-campaign configuration file, a single FTP source
+with two files needed for the built-in process-control file `ITRF.PCF` is
+included so that the data can be downloaded to the DATAPOOL area to be used in
+this (and in this case, other) campaigns.
+
+The purpose of the configuration-specific sources section is that a given
+campaign type may need, well, specific data for that campaign.
 
 
 ## Campaign-configuration templates
