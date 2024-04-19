@@ -2,6 +2,7 @@
 Module for dates.
 
 """
+
 import datetime as dt
 from dataclasses import dataclass
 from typing import (
@@ -82,9 +83,29 @@ def date_from_gps_week(gps_week: str | int) -> dt.date:
     return GPS_EPOCH + dt.timedelta(7 * int(gps_week))
 
 
-class GPSDate(dt.date):
+class GPSDate(dt.datetime):
+    """
+    A GPSDate instance is a Python datetime instance with additional properties
+    and a serialiser of particular data for that date or datetime.
+
+    Both Python date and datetime instances can be wrapped.
+
+    Note: Timezone data are not preserved.
+
+    """
+
     @classmethod
     def from_date(cls, date: dt.date | dt.datetime, /) -> "GPSDate":
+        """
+        Create a GPSDate instance from an existing Python date or datetime
+        instance.
+
+        """
+        if isinstance(date, dt.datetime):
+            return cls(
+                date.year, date.month, date.day, date.hour, date.minute, date.second
+            )
+        # It is a date instance without time, so we use midnight as the time
         return cls(date.year, date.month, date.day)
 
     @classmethod
@@ -99,6 +120,11 @@ class GPSDate(dt.date):
     def date(self) -> dt.date:
         return dt.date(self.year, self.month, self.day)
 
+    def datetime(self) -> dt.datetime:
+        return dt.datetime(
+            self.year, self.month, self.day, self.hour, self.minute, self.second
+        )
+
     @property
     def gps_week(self) -> int:
         return gps_week(self)
@@ -107,16 +133,18 @@ class GPSDate(dt.date):
     def doy(self) -> int:
         return doy(self)
 
-    def dateinfo(self) -> dict[str, Any]:
+    @property
+    def info(self) -> dict[str, Any]:
         gps_week_beg = self.from_gps_week(self.gps_week)
         gps_week_end = gps_week_beg + dt.timedelta(days=6)
         return dict(
             weekday=self.strftime("%A"),
-            date=self.isoformat(),
+            timestamp=self.isoformat()[:10],
             doy=self.doy,
             iso_week=self.isocalendar()[1],
             iso_weekday=self.isocalendar()[2],
             gps_week=self.gps_week,
-            gps_week_beg=gps_week_beg.isoformat(),
-            gps_week_end=gps_week_end.isoformat(),
+            # GPS week corresponds to a specific date without timestamp.
+            gps_week_beg=gps_week_beg.isoformat()[:10],
+            gps_week_end=gps_week_end.isoformat()[:10],
         )

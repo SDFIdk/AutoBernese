@@ -2,6 +2,7 @@
 Package file paths
 
 """
+
 from importlib import resources
 
 import ab
@@ -16,10 +17,6 @@ configuration = base.joinpath("configuration/autobernese.yaml")
 
 # Country codes
 country_codes = base.joinpath("country_code/ISO-3166-1-alpha-3.yaml")
-
-# Demo files
-# TODO: Remove demo files, if not used
-demo_sitelog = base.joinpath("demo/abmf_20211124.log")
 
 # Template for the STA file generated from site-log files.
 template_sta_file = base.joinpath("station/1.03.STA")

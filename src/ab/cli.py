@@ -2,6 +2,7 @@
 Command-line interface
 
 """
+
 import logging
 from pathlib import Path
 import json
@@ -10,8 +11,10 @@ from typing import (
     Any,
     Final,
 )
+from dataclasses import asdict
 
 import click
+from click_aliases import ClickAliasedGroup
 from rich import print
 
 from ab import (
@@ -21,8 +24,12 @@ from ab import (
     vmf,
 )
 from ab.bsw import (
+    get_bsw_release,
     campaign as _campaign,
     task as _task,
+)
+from ab.qaqc import (
+    check_example,
 )
 from ab.data import (
     DownloadStatus,
@@ -39,35 +46,50 @@ from ab.station import (
 log = logging.getLogger(__name__)
 
 
-DATE_FORMAT: Final[str] = "%Y-%m-%d"
+DATE_FORMAT: Final = "%Y-%m-%d"
 
 
 def date(s: str) -> dt.date:
     return dt.datetime.strptime(s, DATE_FORMAT).date()
 
 
-@click.group(invoke_without_command=True)
+@click.group(cls=ClickAliasedGroup, invoke_without_command=True)
 @click.option("--version", "show_version", is_flag=True, default=False)
+@click.option("--bsw-release", "bsw_release", is_flag=True, default=False)
 @click.pass_context
-def main(ctx: click.Context, show_version: bool) -> None:
+def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
     """
     AutoBernese is a tool that can
 
-    1.  Download external data to your local data storage.
+    1.  Create Bernese campaigns using the built-in template system.
 
-    2.  Create Bernese campaigns using pre-defined campaign templates.
+    2.  Download and organise data for general or campaign-specific use.
 
-    3.  Download campaign-specific data.
+    3.  Run the BPE for campaigns with an AutoBernese configuration.
 
-    4.  Run the Bernese Processing Engine [BPE] for Bernese campaigns with an
-        AutoBernese campaign configuration.
+    4.  Do various other things related to GNSS-data processing.
 
     """
+    if not configuration.LOADGPS_setvar_sourced():
+        msg = "Not all variables in LOADGPS.setvar are set ..."
+        print(f"[white on red]{msg}[/]")
+        raise SystemExit
+
+    configuration.set_up_runtime_environment()
+
     if show_version:
         print(f"{__version__}")
         raise SystemExit
-    elif ctx.invoked_subcommand is None:
+
+    if bsw_release:
+        print(json.dumps(asdict(get_bsw_release()), indent=2))
+        raise SystemExit
+
+    if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
+        raise SystemExit
+
+    print(f"AutoBernese version {__version__}; BSW version {get_bsw_release()}")
 
 
 # @main.command
@@ -123,7 +145,7 @@ def config(section: str, campaign: str | None = None) -> None:
 
 
 @main.command
-def logfile() -> None:
+def logs() -> None:
     """
     Follow log file (run `tail -f path/to/logfile.log`).
 
@@ -140,15 +162,100 @@ def logfile() -> None:
 
     except KeyboardInterrupt:
         log.debug(f"Log tail finished ...")
-        print()
 
     finally:
+        print()
         if process is not None:
             process.terminate()
             process.kill()
 
 
 @main.group
+def qc() -> None:
+    """
+    Quality-control measures
+
+    """
+
+
+@qc.command
+@click.option("-s", "substitute", is_flag=True, default=False)
+@click.option(
+    "-r",
+    "replacement",
+    help="Replace zeros with given character.",
+    required=False,
+    default="·",
+)
+@click.option(
+    "-t",
+    "tolerance",
+    help="Minimally-accepted tolerance for any residual in metres.",
+    required=False,
+    default=0.0001,
+)
+@click.option("-w", "show_weighted", is_flag=True, default=False)
+def residuals(
+    substitute: bool, replacement: str, tolerance: float, show_weighted: bool
+) -> None:
+    """
+    Check the installation integrity for Bernese GNSS Software by comparing
+    available results from running the EXAMPlE campaign against the reference
+    files.
+
+    For our purposes, we only need to check the residuals (reference minus
+    result) of the coordinates for the stations that had their coordinates
+    calculated.
+
+    Assumptions include:
+
+    *   The stations available in the reference result files are in the same
+        order and include the same stations that are available in the results we
+        produce ourselves.
+
+    """
+    # Make sure we only use a single character
+    replacement = replacement[0]
+
+    pairs = check_example.get_available_comparables()
+    for pair in pairs:
+        fname_reference = pair.get("reference")
+        fname_result = pair.get("result")
+
+        reference = check_example.extract_coordinates(fname_reference.read_text())
+        result = check_example.extract_coordinates(fname_result.read_text())
+
+        diff = reference - result
+
+        print(f"Reference ({reference.date}): {fname_reference.name}")
+        print(f"Result    ({result.date}): {fname_result.name}")
+        sz = 8
+        header = f"{'ID': <4s} {'Delta x': >{sz}s}  {'Delta y': >{sz}s}  {'Delta z': >{sz}s}  F"
+        print(f"{'Delta = Reference - Result': ^{len(header)}s}")
+        print(f"{f'! marks residuals > {f'{tolerance:.5f}'} m': ^{len(header)}s}")
+        print(header)
+        print("-" * len(header))
+        for line_diff in diff.coordinates:
+            if not show_weighted and line_diff.flag.lower() == "w":
+                continue
+
+            line = (
+                f"{line_diff.station:4s} "
+                f"{line_diff.x: >{sz},.5f}"
+                f"{check_example.flag_if_too_high(line_diff.x, tolerance)} "
+                f"{line_diff.y: >{sz},.5f}"
+                f"{check_example.flag_if_too_high(line_diff.y, tolerance)} "
+                f"{line_diff.z: >{sz},.5f}"
+                f"{check_example.flag_if_too_high(line_diff.z, tolerance)} "
+                f"{line_diff.flag} "
+            )
+            if substitute:
+                line = line.replace("0", replacement)
+            print(line)
+        print()
+
+
+@main.group(aliases=["dt"])
 def dateinfo() -> None:
     """
     Print date info on date, year+doy or GPS week.
@@ -164,7 +271,7 @@ def ymd(date: dt.date) -> None:
 
     """
     gps_date = dates.GPSDate.from_date(date)
-    print(json.dumps(gps_date.dateinfo(), indent=2))
+    print(json.dumps(gps_date.info, indent=2))
 
 
 @dateinfo.command
@@ -175,7 +282,7 @@ def gpsweek(week: int) -> None:
 
     """
     gps_date = dates.GPSDate.from_gps_week(week)
-    print(json.dumps(gps_date.dateinfo(), indent=2))
+    print(json.dumps(gps_date.info, indent=2))
 
 
 @dateinfo.command
@@ -187,10 +294,11 @@ def ydoy(year: int, doy: int) -> None:
 
     """
     gps_date = dates.GPSDate.from_year_doy(year, doy)
-    print(json.dumps(gps_date.dateinfo(), indent=2))
+    print(json.dumps(gps_date.info, indent=2))
 
 
 @main.command
+@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option(
     "-f",
     "--force",
@@ -204,7 +312,9 @@ def ydoy(year: int, doy: int) -> None:
     help="Download campaign-specific sources as defined in given campaign configuration.",
     required=False,
 )
-def download(force: bool = False, campaign: str | None = None) -> None:
+def download(
+    identifier: list[str], force: bool = False, campaign: str | None = None
+) -> None:
     """
     Download all sources in the autobernese configuration file.
 
@@ -214,7 +324,20 @@ def download(force: bool = False, campaign: str | None = None) -> None:
     else:
         config = configuration.load()
 
-    sources = config.get("sources", [])
+    sources: list[_source.Source] = config.get("sources", [])
+    if len(identifier) > 0:
+        sources = [source for source in sources if source.identifier in identifier]
+
+    print("Downloading the following sources")
+    sz = max(len(source.identifier) for source in sources)
+    print(
+        "\n".join(
+            f"{source.identifier: >{sz}s}: {source.description}" for source in sources
+        )
+    )
+    proceed = input("Proceed (y/[n]): ").lower() == "y"
+    if not proceed:
+        raise SystemExit
 
     s = "s" if len(sources) else ""
     msg = f"Resolving {len(sources)} source{s} ..."
@@ -223,9 +346,9 @@ def download(force: bool = False, campaign: str | None = None) -> None:
     source: _source.Source
     status_total = DownloadStatus()
     for source in sources:
-        msg = f"Source: {source.name}"
-        print(msg)
-        log.debug(msg)
+        msg = f"Download: {source.identifier}: {source.description}"
+        print(f"[black on white]{msg}[/]")
+        log.info(msg)
 
         if force:
             source.max_age = 0
@@ -237,18 +360,20 @@ def download(force: bool = False, campaign: str | None = None) -> None:
             case "http" | "https":
                 status = http.download(source)
                 status_total += status
-        print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
+        # print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
+        print(asdict(status))
     else:
         msg = "Finished downloading sources ..."
         print(msg)
         log.debug(msg)
         print(f"Overall status:")
-        print(
-            f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
-        )
+        # print(
+        #     f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
+        # )
+        print(asdict(status_total))
 
 
-@main.group(invoke_without_command=True)
+@main.group(invoke_without_command=True, aliases=["c"])
 @click.pass_context
 def campaign(ctx: click.Context) -> None:
     """
@@ -343,7 +468,7 @@ def sources(name: str, verbose: bool = False) -> None:
 
     formatted = (
         f"""\
-{source.name=}
+{source.identifier=}
 {source.url=}
 {source.destination=}
 """
@@ -362,7 +487,8 @@ def sources(name: str, verbose: bool = False) -> None:
 
 @campaign.command
 @click.argument("name", type=str)
-def tasks(name: str) -> None:
+@click.option("--verbose", "-v", is_flag=True, help="Print realised task data.")
+def tasks(name: str, verbose: bool) -> None:
     """
     Show tasks for a campaign.
 
@@ -375,19 +501,31 @@ def tasks(name: str) -> None:
         log.info(msg)
         return
 
+    if not verbose:
+        for task in tasks:
+            print(task)
+            print()
+        return
+
     for task in tasks:
-        print(task)
-        print()
+        for resolved in task.resolve():
+            print(json.dumps(resolved, indent=2))
+            print()
 
 
 @campaign.command
-@click.argument("name", type=str)
-def run(name: str) -> None:
+@click.argument("campaign_name", type=str)
+@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
+def run(campaign_name: str, identifier: list[str]) -> None:
     """
-    Resolve campaign tasks and run them all.
+    Resolve and run all or specified campaign tasks.
 
     """
-    tasks: list[_task.Task] | None = _campaign.load(name).get("tasks")
+    try:
+        tasks: list[_task.Task] | None = _campaign.load(campaign_name).get("tasks")
+    except RuntimeError as e:
+        print(e)
+        raise SystemExit
 
     if tasks is None:
         msg = f"No tasks found"
@@ -395,8 +533,74 @@ def run(name: str) -> None:
         log.info(msg)
         return
 
+    if len(identifier) > 0:
+        tasks = [task for task in tasks if task.identifier in identifier]
+
+    print("Running the following tasks in the campaign configuration file")
+    sz = max(len(task.identifier) for task in tasks)
+    print(
+        "\n".join(
+            f"{task.identifier: >{sz}s}: {len(task.runners()): >3d} unique combinations"
+            for task in tasks
+        )
+    )
+    proceed = input("Proceed (y/[n]): ").lower() == "y"
+    if not proceed:
+        raise SystemExit
+
+    runner: _task.TaskRunner
     for task in tasks:
-        task.run()
+        msg = f"Running combinations for {type(task).__qualname__} instance with ID {task.identifier!r}"
+        log.info(msg)
+        print(f"[black on white][AutoBernese]: {msg}[/]")
+
+        try:
+            for runner in task.runners():
+                msg = f"BPE task ID: {runner.arguments.get('taskid')}"
+                log.info(msg)
+                print(f"[black on white][AutoBernese]: {msg}[/]")
+                terminal_output = runner.run()
+                print(terminal_output)
+                print("")
+
+        except KeyboardInterrupt:
+            log.info(
+                "Asking user to continue or completely exit from list of campaign tasks."
+            )
+            exit_confirmed = input(
+                "Do you want to exit completely ([y]/n)"
+            ).lower() in ("", "y")
+            if exit_confirmed:
+                log.info(
+                    "User confirmed breaking the execution of the remaining campaign tasks."
+                )
+                break
+
+
+# @campaign.command
+# @click.argument("campaign_name", type=str)
+# @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
+# def clean_bpe_output(campaign_name: str, identifier: list[str]) -> None:
+#     """
+#     Delete content of the BPE directory of the given campaign.
+
+#     """
+#     _dir = _campaign._campaign_dir(campaign_name)
+#     dir_bpe = _dir / "BPE"
+
+#     if len(identifier) > 0:
+#         fnames = []
+#         for ident in identifier:
+#             fnames.extend(list(dir_bpe.glob("{ident}*.*")))
+#     else:
+#         fnames = list(dir_bpe.glob("*.LOG"))
+#         fnames.extend(list(dir_bpe.glob("*.PRT")))
+
+#     print(fnames)
+#     print(len(fnames))
+
+#     # for fname in fnames:
+#     #     fname.unlink()
 
 
 @main.group()
@@ -481,14 +685,14 @@ def sitelogs2sta(
         arguments given in the general or user-supplied configuration file.
 
     """
-    kwargs: dict[str, Any] | None = None
+    arguments: dict[str, Any] | None = None
     if config is not None:
         log.info(f"Create STA file from arguments in given input-file.")
-        kwargs = configuration.with_env(config)
+        arguments = configuration.with_env(config)
 
     elif sitelogs:
         log.info(f"Create STA file from given arguments.")
-        kwargs = dict(
+        arguments = dict(
             sitelogs=list(sitelogs),
             individually_calibrated=individually_calibrated,
             output_sta_file=output_filename,
@@ -496,14 +700,14 @@ def sitelogs2sta(
 
     elif configuration.load().get("station") is not None:
         log.info(f"Create STA file from arguments in the configuration.")
-        kwargs = configuration.load().get("station")
+        arguments = configuration.load().get("station")
 
-    if kwargs is None:
+    if arguments is None:
         msg = f"No tasks found"
         print(msg)
         log.info(msg)
         return
-    sta.create_sta_file_from_sitelogs(**kwargs)
+    sta.create_sta_file_from_sitelogs(**arguments)
 
 
 @main.group()

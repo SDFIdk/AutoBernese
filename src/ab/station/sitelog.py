@@ -8,6 +8,7 @@ Given
     history in a STA-file.
 
 """
+
 import re
 import json
 import logging

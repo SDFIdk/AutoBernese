@@ -3,15 +3,13 @@ from ab import pkg
 
 
 def test_version():
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.3.0"
 
 
 def test_package_data_exist():
     assert pkg.env.is_file()
 
     assert pkg.country_codes.is_file()
-
-    # assert pkg.demo_sitelog.is_file()
 
     assert pkg.template_sta_file.is_file()
 

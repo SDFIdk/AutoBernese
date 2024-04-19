@@ -2,6 +2,7 @@
 Module for downloading files over FTP.
 
 """
+
 import datetime as dt
 from os.path import join
 from pathlib import Path
@@ -116,6 +117,7 @@ def download(source: Source) -> DownloadStatus:
                     log.info(
                         f"Found no files matching {pair.path_remote}/{pair.fname} ..."
                     )
+                    status.not_found += 1
                     continue
 
                 # Finally, download each of the filenames resolved
@@ -144,6 +146,7 @@ def download(source: Source) -> DownloadStatus:
                     except error_perm as e:
                         log.warn(f"Filename {fname} could not be downloaded ...")
                         log.debug(f"{e}")
+                        status.failed += 1
 
                     status.downloaded += 1
 

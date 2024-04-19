@@ -6,7 +6,6 @@ Module for handling parameters.
 from typing import (
     Any,
     Iterable,
-    Sequence,
 )
 import itertools as it
 

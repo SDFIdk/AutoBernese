@@ -19,57 +19,41 @@ application and showing the available sub commands.
 ``` title="Output"
 Usage: ab [OPTIONS] COMMAND [ARGS]...
 
-AutoBernese is a tool that can
+  AutoBernese is a tool that can
 
-1.  Download external data to your local data storage.
+  1.  Create Bernese campaigns using the built-in template system.
 
-2.  Create Bernese campaigns using pre-defined campaign templates.
+  2.  Download and organise data for general or campaign-specific use.
 
-3.  Download campaign-specific data.
+  3.  Run the BPE for campaigns with an AutoBernese configuration.
 
-4.  Run the Bernese Processing Engine [BPE] for Bernese campaigns with an
-AutoBernese campaign configuration.
+  4.  Do various other things related to GNSS-data processing.
 
 Options:
---version
---help     Show this message and exit.
+  --version
+  --bsw-release
+  --help         Show this message and exit.
 
 Commands:
-campaign     Create campaigns and manage campaign-specific sources and...
-config       Show all or specified configuration section(s).
-dateinfo     Print date info on date, year+doy or GPS week.
-download     Download all sources in the autobernese configuration file.
-logfile      Follow log file (run `tail -f path/to/logfile.log`).
-station      Stand-alone tools for station data.
-troposphere  Stand-alone tools for troposphere data.
+  campaign (c)   Create campaigns and manage campaign-specific sources and...
+  config         Show all or specified configuration section(s).
+  dateinfo (dt)  Print date info on date, year+doy or GPS week.
+  download       Download all sources in the autobernese configuration file.
+  logs           Follow log file (run `tail -f path/to/logfile.log`).
+  qc             Quality-control measures
+  station        Stand-alone tools for station data.
+  troposphere    Stand-alone tools for troposphere data.
 ```
 
 **Side Effects**
 
-When run, AutoBernese creates a *runtime directory* at the same directory level
-as the Bernese installation directory `BERN54`, i.e .in the parent directory of
-the `$C`.
-
 The command itself is a script that imports the AutoBernese Python package.
-Whenever the AutoBernese package is imported, the following happens:
 
-<!-- `ab` and runs the corresponding command-line interface API. -->
+When run, it creates a *runtime directory* at the same directory level as the
+Bernese installation directory `BERN54`, i.e. in the parent directory of the
+`$C`.
 
-*   The built-in configuration file is read, and any user-configuration file is
-    loaded and allowed sections override those in the built-in configuration.
-    This combined configuration is the *rendered *AutoBernese configuration*.
-    Its settings are fixed during the entire runtime of any command that is run.
-
-*   The rendered AutoBernese configuration provides the path to directory
-    containing the Bernese-installation directory. This is known as the
-    environment directory.
-
-*   Before any other sub command is run, AutoBernese makes sure that a directory
-    `autobernese` is present in the environment directory. If not, the directory
-    is created, and the AutoBernese log file `autobernese.log` is created.
-
-Below is a diagram showing the directory tree, after AutoBernese has run for the
-first time:
+The directory tree can be seen below:
 
 ``` title="AutoBernese runtime directory is in the parent directory of `$C`"
 /path/to/environment
@@ -81,27 +65,58 @@ first time:
 └── ...
 ```
 
+When running `ab` or any sub command, the following happens:
 
-<!-- <div class="result" markdown>
-</div> -->
+*   The built-in configuration file is read, and any user-configuration file is
+    loaded and allowed sections override those in the built-in configuration.
+    This combined configuration is the *rendered AutoBernese configuration*. Its
+    settings are fixed during the entire runtime of any command that is run.
+
+*   Before any other sub command is run, AutoBernese makes sure that a directory
+    `autobernese` is present in the environment directory. If not, the directory
+    is created, and the AutoBernese log file `autobernese.log` is created.
+
+*   In addition, the command makes sure that all variables exported in
+    `LOADGPS.setvar` exist in the shell environment. If not, a warning is shown,
+    and the program exits.
+
+The rendered AutoBernese configuration thus provides a way to access paths and
+environment variables set by and derived from the exported variables set in the
+LOADGPS.setvar file. These are also available in the user-defined configuration
+files and so allows for a seamless integration with the activated Bernese
+environment.
 
 
 ### `ab --version`
 
-Print the current software version of AutoBernese.
+This command prints the current software version of AutoBernese.
 
 ```sh title="Example"
 (ab) $ ab --version
 ```
 
 ``` title="Output"
-0.2.0
+0.3.0
 ```
-<div class="result" markdown>
-</div>
+
+### `ab --bsw-release`
+
+This command prints the current software version and release of the activated
+Bernese installation in JSON format.
+
+```sh title="Example"
+(ab) $ ab --bsw-release
+```
+
+``` title="Output"
+{
+  "version": "5.4",
+  "release": "2023-10-16"
+}
+```
 
 
-## Show rendered configuration during runtime
+## Show rendered configuration
 
 AutoBernese uses a built-in configuration file to integrate seamlessly into the
 given activated Bernese environment. Most of the functionality of AutoBernese
@@ -109,7 +124,8 @@ relies on some configuration setting.
 
 The configuration format is a YAML whose syntax features make it highly useful.
 These features include re-using content in one place of the YAML document in
-some other part of the same document. Read more about the format and relevant data models on [the configuration-file page][DOCS-CONFIG].
+some other part of the same document. Read more about the format and relevant
+data models on [the configuration-file page][DOCS-CONFIG].
 
 [DOCS-CONFIG]: configuration-files.md
 
@@ -151,31 +167,66 @@ the software uses: -->
     (ab) $ ab config
     ```
 
-    ```python title="Output"
+    ```python title="Example output"
     {
         'bsw_env': {
             'C': '/home/bsw/prod/BERN54',
+            'DOC': '/home/bsw/prod/BERN54/SUPGUI/DOC',
             'PAN': '/home/bsw/prod/BERN54/SUPGUI/PAN',
             'MODEL': '/home/bsw/prod/BERN54/GLOBAL/MODEL',
             'CONFIG': '/home/bsw/prod/BERN54/GLOBAL/CONFIG',
-            'D': '/home/bsw/prod/data/DATAPOOL',
+            'D': '/mnt/refgps/bsw/dev/DATAPOOL',
             'P': '/home/bsw/prod/data/CAMPAIGN54',
-            'S': '/home/bsw/prod/data/SAVEDISK',
-            'U': '/home/USERNAME/bsw/prod/user',
-            'T': '/home/USERNAME/bsw/prod/temp'
+            'S': '/mnt/refgps/bsw/dev/SAVEDISK',
+            'U': '/home/e088195/bsw/dev/user',
+            'T': '/home/e088195/bsw/dev/temp'
         },
         # (...)
     }
     ```
 
-As seen above, you see that not all the variables set in BSW's `LOADGPS.setvar`
-script are included, but this is all that AutoBernese is using for now.
+!!! attention
+
+    As seen above, you see that not all the variables set in BSW's `LOADGPS.setvar`
+    script are included, but this is all that AutoBernese is using for now.
 
 
 ### `ab config <section>`
 
 Adding the name of one of the outer-most keys in the YAML configuration, only
-this *section* will be shown:
+the content of `<section>` will be shown.
+
+Available sections are
+
+```yaml title="Available sections in the rendered configuration"
+# Bernese GNSS Software [BSW] environment variables available after 'source'ing
+# the shell script `LOADGPS.setvar` in the root of the installation directory.
+bsw_env:
+  # (...)
+
+# Specific files in the Bernese environment that we need to access
+bsw_files:
+  # (...)
+
+# We define the environment root directory as the one containing the BSW
+# installation. It is assumed to be a directory that each user can can write to.
+env: &env !Parent [*C]
+
+# AutoBernese runtime environment
+runtime:
+  # (...)
+
+## Default sections that can be overriden by the user
+
+station:
+  # (...)
+
+campaign:
+  # (...)
+
+sources: []
+```
+
 
 **Example**
 
@@ -183,39 +234,33 @@ The following command prints the content of the section [`runtime`] of the
 AutoBernese-configuration file containing the internal settings for the
 AutoBernese runtime directory:
 
-=== "Configuration file segment"
+```yaml title="Configuration file segment" linenums="41"
+# (...)
 
-    ```yaml  linenums="41"
-    # (...)
+--8<-- "src/ab/configuration/env.yaml:76:102"
 
-    --8<-- "src/ab/configuration/env.yaml:43:69"
+# (...)
+```
 
-    # (...)
-    ```
+```sh title="Command to see the rendered runtime configuration"
+(ab) $ ab config runtime
+```
 
-=== "Rendered configuration"
-
-    ```sh title="Example"
-    (ab) $ ab config runtime
-    ```
-
-    ```python title="Output"
-    {
-        'ab': PosixPath('/home/bsw/prod/autobernese'),
-        'logging': {
-            'filename': PosixPath('/home/bsw/prod/autobernese/autobernese.log'),
-            'format': '%(asctime)s | {user} | %(levelname)s | %(name)s | %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
-            'style': '%',
-            'level': 'DEBUG'
-        },
-        'campaign_templates': PosixPath('/home/bsw/prod/autobernese/templates'),
-        'user_config': PosixPath('/home/bsw/prod/autobernese/autobernese.yaml'),
-        'user_sections': ['station', 'campaign', 'sources']
-    }
-    ```
-
-<!-- TODO: ### Given / requirements / configuration -->
+```python title="Rendered configuration"
+{
+    'ab': PosixPath('/home/bsw/prod/autobernese'),
+    'logging': {
+        'filename': PosixPath('/home/bsw/prod/autobernese/autobernese.log'),
+        'format': '%(asctime)s | {user} | %(levelname)s | %(name)s | %(message)s',
+        'datefmt': '%Y-%m-%d %H:%M:%S',
+        'style': '%',
+        'level': 'DEBUG'
+    },
+    'campaign_templates': PosixPath('/home/bsw/prod/autobernese/templates'),
+    'user_config': PosixPath('/home/bsw/prod/autobernese/autobernese.yaml'),
+    'user_sections': ['station', 'campaign', 'sources']
+}
+```
 
 
 ## Download sources
@@ -247,7 +292,7 @@ This downloads data from the sources specified in the rendered AutoBernese
 configuration. Below is the command for downloading sources for a given
 campaign.
 
-The built-in configuration contains no sources, so running the command wothout a
+The built-in configuration contains no sources, so running the command without a
 user-supplied configuration file in the AutoBernese runtime directory, you will
 see the following.
 
@@ -296,23 +341,26 @@ is added to the [AutoBernese runtime directory](concepts.md).
     sources:
 
     - !Source
-    name: EUREF STA file
-    url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
-    destination: !Path [*D, station]
+      identifier: EUREF_STA
+      description: EUREF STA file
+      url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
+      destination: !Path [*D, station]
 
     - !Source
-    name: BSW Model data
-    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
-    destination: *MODEL
-    filenames: ['*']
-    max_age: 1
+      identifier: BSW_MODEL
+      description: BSW Model data
+      url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
+      destination: *MODEL
+      filenames: ['*']
+      max_age: 1
 
     - !Source
-    name: BSW Configuration data
-    url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
-    destination: *CONFIG
-    filenames: ['*']
-    max_age: 1
+      identifier: BSW_CONFIG
+      description: BSW Configuration data
+      url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
+      destination: *CONFIG
+      filenames: ['*']
+      max_age: 1
     ```
 
 === "Rendered configuration"
@@ -324,7 +372,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
     ```python title="Output"
     [
         Source(
-            name='EUREF STA file',
+            identifier='EUREF_STA',
+            description='EUREF STA file',
             url='ftp://epncb.oma.be/pub/station/general/EUREF.STA',
             destination=PosixPath('/home/bsw/prod/data/DATAPOOL/station'),
             filenames=None,
@@ -332,7 +381,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
             max_age=inf
         ),
         Source(
-            name='BSW Model data',
+            identifier='BSW_MODEL',
+            description='BSW Model data',
             url='ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/',
             destination=PosixPath('/home/bsw/prod/BERN54/GLOBAL/MODEL'),
             filenames=['*'],
@@ -340,7 +390,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
             max_age=1
         ),
         Source(
-            name='BSW Configuration data',
+            identifier='BSW_CONFIG',
+            description='BSW Configuration data',
             url='ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/',
             destination=PosixPath('/home/bsw/prod/BERN54/GLOBAL/CONFIG'),
             filenames=['*'],
@@ -400,7 +451,8 @@ campaign. This is explained in more detail in the section [Download sources][DOC
     sources:
 
     - !Source
-    name: RINEX data
+    identifier: RINEX_EPN
+    description: RINEX data
     url: ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy:03d}
     destination: !Path [*D, RINEX, '{date.gps_week}']
     filenames:
@@ -433,9 +485,10 @@ campaign. This is explained in more detail in the section [Download sources][DOC
     ```python title="Output"
     [
         Source(
-            name='RINEX data',
+            identifier='RINEX_EPN',
+            description='RINEX data',
             url='ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy:03d}',
-            destination=PosixPath('/home/bsw/dev/data/DATAPOOL/RINEX/{date.gps_week}'),
+            destination=PosixPath('/home/bsw/prod/data/DATAPOOL/RINEX/{date.gps_week}'),
             filenames=['{station}_{date.year}{date.doy:03d}0000_01D_30S_MO.crx.gz'],
             parameters={
                 'station': [
@@ -796,14 +849,14 @@ Commands:
 
     ```json title="Output"
     {
-    "weekday": "Sunday",
-    "date": "2022-08-07",
-    "doy": 219,
-    "iso_week": 31,
-    "iso_weekday": 7,
-    "gps_week": 2222,
-    "gps_week_beg": "2022-08-07",
-    "gps_week_end": "2022-08-13"
+      "weekday": "Sunday",
+      "timestamp": "2022-08-07",
+      "doy": 219,
+      "iso_week": 31,
+      "iso_weekday": 7,
+      "gps_week": 2222,
+      "gps_week_beg": "2022-08-07",
+      "gps_week_end": "2022-08-13"
     }
     ```
 
@@ -815,14 +868,14 @@ Commands:
 
     ```json title="Output"
     {
-    "weekday": "Sunday",
-    "date": "2022-08-07",
-    "doy": 219,
-    "iso_week": 31,
-    "iso_weekday": 7,
-    "gps_week": 2222,
-    "gps_week_beg": "2022-08-07",
-    "gps_week_end": "2022-08-13"
+      "weekday": "Sunday",
+      "timestamp": "2022-08-07",
+      "doy": 219,
+      "iso_week": 31,
+      "iso_weekday": 7,
+      "gps_week": 2222,
+      "gps_week_beg": "2022-08-07",
+      "gps_week_end": "2022-08-13"
     }
     ```
 
@@ -834,21 +887,21 @@ Commands:
 
     ```json title="Output"
     {
-    "weekday": "Sunday",
-    "date": "2022-08-07",
-    "doy": 219,
-    "iso_week": 31,
-    "iso_weekday": 7,
-    "gps_week": 2222,
-    "gps_week_beg": "2022-08-07",
-    "gps_week_end": "2022-08-13"
+      "weekday": "Sunday",
+      "timestamp": "2022-08-07",
+      "doy": 219,
+      "iso_week": 31,
+      "iso_weekday": 7,
+      "gps_week": 2222,
+      "gps_week_beg": "2022-08-07",
+      "gps_week_end": "2022-08-13"
     }
     ```
 
 ## Examine the Logfile to get more verbose output
 
 ```sh title="Command"
-ab logfile
+ab logs
 ```
 
 ``` title="Output"
@@ -864,4 +917,4 @@ ab logfile
 2023-06-28 13:28:51 | USERNAME | DEBUG | ab.cli | Show log tail ...
 ```
 
-To exit, press <kbd>Ctrl</kbd> + kbd>C</kbd>.
+To exit, press <kbd>Ctrl</kbd> + <kbd>C</kbd>.

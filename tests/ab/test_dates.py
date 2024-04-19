@@ -42,7 +42,6 @@ def test_date_range():
     ],
 )
 def test_gps_week(date, week):
-    print(f"{date=}: {week=}")
     assert gps_week(date) == week
 
 
