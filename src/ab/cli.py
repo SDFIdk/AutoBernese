@@ -664,11 +664,18 @@ def parse_sitelog(filename: Path) -> None:
     default=Path(".").resolve() / "sitelogs.STA",
     help="Path to output filename for the STA file. If none given, the output is saved as ./sitelogs.STA.",
 )
+@click.option(
+    "-C",
+    "--campaign",
+    help="Campaign-specific station data.",
+    required=False,
+)
 def sitelogs2sta(
     config: Path,
     sitelogs: tuple[Path],
     individually_calibrated: tuple[str],
     output_filename: Path,
+    campaign: str | None = None,
 ) -> None:
     """
     Create a STA file from sitelogs and other station info.
@@ -690,6 +697,9 @@ def sitelogs2sta(
     3.  Supply no arguments, and a STA file is created based on the input
         arguments given in the general or user-supplied configuration file.
 
+    4.  Supply campaign name to create a STA file from standard settings in
+        campaign-specific configuration.
+
     """
     arguments: dict[str, Any] | None = None
     if config is not None:
@@ -703,6 +713,10 @@ def sitelogs2sta(
             individually_calibrated=individually_calibrated,
             output_sta_file=output_filename,
         )
+
+    elif campaign is not None:
+        log.info(f"Create STA file from arguments in campaign-specific configuration.")
+        arguments = _campaign.load(campaign).get("station")
 
     elif configuration.load().get("station") is not None:
         log.info(f"Create STA file from arguments in the configuration.")
