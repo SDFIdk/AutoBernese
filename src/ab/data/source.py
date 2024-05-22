@@ -33,6 +33,9 @@ class RemoteLocalPair:
     input to make it easier to handle for a function that makes the actual
     transfer of data from the remote souce and the local destination.
 
+    The post-init method splits uo given URI into to a remote directory path and
+    the filename itself.
+
     """
 
     uri: str
@@ -42,13 +45,16 @@ class RemoteLocalPair:
         # Assumption: the URI is a path to a file
 
         # Code annotated with an example:
+
         # Given: uri = 'https://example.com/filename.txt'
-        parsed = urlparse(self.uri)
+        parsed: ParseResult = urlparse(self.uri)
+
         # Then: `parsed.path` will be the full path (without protocol) to
         # `filename.txt`
-        filepath = Path(parsed.path)
-        # Then filepath is a Path instance, from which we can get the remote
-        # directory path and the filename of the file to download.
+        filepath: Path = Path(parsed.path)
+
+        # From `filepath` we can get the remote directory path and the filename
+        # of the file to download.
         self.path_remote: str = str(filepath.parent)
         self.fname: str = str(filepath.name)
 
@@ -65,7 +71,7 @@ class Source:
 
     *   Parse url, to get the path isolated
     *   Resolve path combinations
-    *   Resolve filenames (hard)
+    *   Resolve filenames
 
     A source is a source and not a downloader. The source can yield a list of
     files to download if any filenames are specified.
@@ -162,11 +168,17 @@ class Source:
         self.destination = Path(self.destination)
 
         # String version for formatting
-        self.destination_ = str(self.destination)
+        self.url_: str = str(self.url)
+        self.destination_: str = str(self.destination)
 
         # Have each component
-        self._parsed: ParseResult = urlparse(self.url)
+        self._parsed: ParseResult = urlparse(self.url_)
         self.protocol: str = self._parsed.scheme
+        # In order to ensure clear API semantics for `self.protocol`, override
+        # default (and correct) result (``) in `ParseResult.scheme`, when the
+        # path is local (begins with `/`).
+        if self.protocol == "" and self.url_.startswith("/"):
+            self.protocol = "file"
         self.host: str = self._parsed.netloc
 
     def resolve(self) -> list[RemoteLocalPair]:
@@ -180,13 +192,13 @@ class Source:
         if self.filenames:
             # Example: ftp://example.com/subdir/{year}/
             #           with filenames: ['filename_*.txt', 'othername_{year}.foo']
-            urls = [join(self.url, filename) for filename in self.filenames]
+            urls = [join(self.url_, filename) for filename in self.filenames]
         else:
             # Example: https://example.com/filename.txt
             # Example: ftp://example.com/filename.txt
             # Example: ftp://example.com/subdir/{pattern}/filename{numbers}.txt ,
             #           given parameters {'pattern': ['a', 'b'], 'numbers': [1, 2]}
-            urls = [self.url]
+            urls = [self.url_]
 
         if self.parameters is None:
             return [RemoteLocalPair(url, self.destination_) for url in urls]

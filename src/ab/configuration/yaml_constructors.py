@@ -23,9 +23,11 @@ from ab.dates import (
 
 def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     """
-    The path constructor can work on fully specified path strings like the
-    following:
+    The path constructor can work on two types of input:
 
+    1) Fully specified path strings like the following:
+
+    *   scheme://uniform/ressource/identifier
     *   /some/path/to/somewhere
     *   /some/path/to/some.file
 
@@ -33,7 +35,13 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     constructor simply returns a Python Path instance of the entire string
     value.
 
-    More complex paths can be constructed by supplying the YAML tag with a
+    ---
+
+    2) A sequence of different components useful, when one or more components
+       are YAML aliases referring to a string somewhere else in the YAML
+       document.
+
+    More complex paths can thus be constructed by supplying the YAML tag with a
     sequence of path elements.
 
     Here, each sequence item can be either a YAML alias for a value elsewhere in
@@ -41,10 +49,15 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
 
     Examples of the sequence syntax are:
 
-    *   [*alias_to_a_base_path, subdirectory, file.txt]
-    *   -   *alias_to_a_base_path
-        -   subdirectory
-        -   file.txt
+    ```yaml
+
+    key1: [*alias_to_a_base_path, subdirectory, file.txt]
+    key2:
+    - *alias_to_a_base_path
+    - subdirectory
+    - file.txt
+
+    ```
 
     Any element in the sequence, except the first element, may use the common
     wildcard `*` to specify any matching files.
@@ -62,10 +75,14 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
 
     if isinstance(node, yaml.ScalarNode):
         return Path(loader.construct_scalar(node)).absolute()
+        # Use PyYAML's default constructor to get initial string ouput
+        # return absolute_path(loader.construct_scalar(node))
 
-    # At this point, we are dealing with a SequenceNode
+    # From hereon, we are dealing with a SequenceNode
 
     # Let the first sequence item be the root of the specified path
+    # We use loader.construct_object, since there may be YAML aliases inside.
+    # Any YAML alias is assumed to resolve into to a string.
     first, *after = [loader.construct_object(v) for v in node.value]
     root = Path(first)
 
@@ -84,6 +101,13 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
 
     # Return the specified path
     return root.joinpath(*after)
+
+
+def path_as_str_constructor(loader: yaml.Loader, node: yaml.Node) -> str | list[str]:
+    paths = path_constructor(loader, node)
+    if isinstance(paths, list):
+        return [str(path) for path in paths]
+    return str(paths)
 
 
 def parent_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | str:
@@ -205,6 +229,7 @@ def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask
 
 yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
 yaml.SafeLoader.add_constructor("!Path", path_constructor)
+yaml.SafeLoader.add_constructor("!PathStr", path_as_str_constructor)
 yaml.SafeLoader.add_constructor("!Parent", parent_constructor)
 yaml.SafeLoader.add_constructor("!Source", source_constructor)
 yaml.SafeLoader.add_constructor("!GPSDate", gps_date_constructor)

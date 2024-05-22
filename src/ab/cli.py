@@ -36,6 +36,7 @@ from ab.data import (
     source as _source,
     ftp,
     http,
+    file,
 )
 from ab.station import (
     sitelog,
@@ -331,26 +332,33 @@ def download(
         config = configuration.load()
 
     sources: list[_source.Source] = config.get("sources", [])
+    if not sources:
+        log.debug(f"No sources found ...")
+        raise SystemExit
+
+    # Filter if asked to
     if len(identifier) > 0:
         sources = [source for source in sources if source.identifier in identifier]
 
-    print("Downloading the following sources")
+    # Print preamble, before asking to proceed
+    preamble = "Downloading the following sources\n"
     sz = max(len(source.identifier) for source in sources)
-    print(
-        "\n".join(
-            f"{source.identifier: >{sz}s}: {source.description}" for source in sources
-        )
+    preamble += "\n".join(
+        f"{source.identifier: >{sz}s}: {source.description}" for source in sources
     )
-    proceed = input("Proceed (y/[n]): ").lower() == "y"
-    if not proceed:
+    print(preamble)
+
+    # Ask
+    if not prompt_proceed():
         raise SystemExit
 
-    s = "s" if len(sources) else ""
+    # Resolve sources
+    s = "s" if len(sources) > 1 else ""
     msg = f"Resolving {len(sources)} source{s} ..."
     log.info(msg)
 
     source: _source.Source
-    status_total = DownloadStatus()
+    status_total: DownloadStatus = DownloadStatus()
     for source in sources:
         msg = f"Download: {source.identifier}: {source.description}"
         print(f"[black on white]{msg}[/]")
@@ -359,23 +367,26 @@ def download(
         if force:
             source.max_age = 0
 
-        match source.protocol:
-            case "ftp":
-                status = ftp.download(source)
-                status_total += status
-            case "http" | "https":
-                status = http.download(source)
-                status_total += status
-        # print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
+        if source.protocol == "ftp":
+            status = ftp.download(source)
+            status_total += status
+
+        elif source.protocol in ("http", "https"):
+            status = http.download(source)
+            status_total += status
+
+        elif source.protocol == "file":
+            status = file.download(source)
+            status_total += status
+
         print(asdict(status))
+
     else:
         msg = "Finished downloading sources ..."
         print(msg)
         log.debug(msg)
+
         print(f"Overall status:")
-        # print(
-        #     f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
-        # )
         print(asdict(status_total))
 
 
@@ -464,9 +475,9 @@ def sources(name: str, verbose: bool = False) -> None:
     Print the campaign-specific sources.
 
     """
-    sources: list[_source.Source] | None = _campaign.load(name).get("sources")
+    sources: list[_source.Source] | None = _campaign.load(name).get("sources", [])
 
-    if sources is None:
+    if not sources:
         msg = f"No sources found"
         print(msg)
         log.info(msg)
@@ -477,6 +488,7 @@ def sources(name: str, verbose: bool = False) -> None:
 {source.identifier=}
 {source.url=}
 {source.destination=}
+{source.protocol=}
 """
         for source in sources
     )
@@ -538,6 +550,8 @@ def run(campaign_name: str, identifier: list[str]) -> None:
         print(msg)
         log.info(msg)
         return
+
+    print_versions()
 
     if len(identifier) > 0:
         tasks = [task for task in tasks if task.identifier in identifier]
