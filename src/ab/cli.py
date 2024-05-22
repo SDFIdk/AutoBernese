@@ -299,6 +299,10 @@ def ydoy(year: int, doy: int) -> None:
     print(json.dumps(gps_date.info, indent=2))
 
 
+def prompt_proceed() -> bool:
+    return input("Proceed (y/[n]): ").lower() == "y"
+
+
 @main.command
 @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option(
