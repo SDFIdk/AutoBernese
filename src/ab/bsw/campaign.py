@@ -31,12 +31,12 @@ log = logging.getLogger(__name__)
 _CONF = configuration.load()
 
 # Campaign-management configuration
-_TEMPLATE_DIR: Final[Path] = _CONF.get("runtime").get("campaign_templates")
+_TEMPLATE_DIR: Final = Path(_CONF.get("runtime").get("campaign_templates"))
 
 # Current Bernese installation environment
-_BSW_ENV: Final[dict[str, Any]] = _CONF.get("bsw_env", {})
-_P: Final[Path | str] = _BSW_ENV.get("P", "")
-_CAMPAIGN_MENU: Final[Path | None] = _CONF.get("bsw_files", {}).get("campaign_menu")
+_BSW_ENV: Final = _CONF.get("bsw_env", {})
+_P: Final = Path(_BSW_ENV.get("P", ""))
+_CAMPAIGN_MENU: Final = Path(_CONF.get("bsw_files", {}).get("campaign_menu"))
 
 # Other
 _TEMPLATE_P: Final[str] = "${P}"
@@ -53,7 +53,7 @@ class MetaData:
     username: str = getpass.getuser()
 
 
-def init_template_dir() -> dict[str, str] | None:
+def init_template_dir() -> None:
     """
     Create a directory for user-defined campaign templates in the autobernese
     directory.
@@ -149,7 +149,7 @@ def _campaign_configuration(name: str) -> Path:
     return _campaign_dir(name) / "campaign.yaml"
 
 
-def build_campaign_menu(campaigns: list[str]) -> None:
+def build_campaign_menu(campaign_list: list[str]) -> str | None:
     """
     Build content for a MENU_CMP.INP file with list of the given campaigns.
 
@@ -158,16 +158,16 @@ def build_campaign_menu(campaigns: list[str]) -> None:
     literals.
 
     """
-    if not campaigns:
+    if not campaign_list:
         log.info("No campaign list to format ...")
         return
 
-    formatted = [
-        f'  "{campaign.replace(str(_P), _TEMPLATE_P)}"' for campaign in campaigns
+    formatted: list[str] = [
+        f'  "{campaign.replace(str(_P), _TEMPLATE_P)}"' for campaign in campaign_list
     ]
-    count = len(campaigns)
-    separator = "\n" if count > 1 else ""
-    campaigns = "\n".join(formatted)
+    count: int = len(campaign_list)
+    separator: str = "\n" if count > 1 else ""
+    campaigns: str = "\n".join(formatted)
     parameters = dict(count=count, separator=separator, campaigns=campaigns)
     return pkg.template_campaign_menu_list.read_text().format(**parameters)
 
@@ -313,7 +313,7 @@ def load(name: str) -> dict[str, Any]:
     """
     ifname = _campaign_configuration(name)
     if not ifname.is_file():
-        raise RuntimeError(
+        raise SystemExit(
             f"Campaign {name!r} does not exist or has no campaign-specific configuration file {ifname.name} ..."
         )
     return configuration.with_env(ifname)
