@@ -53,6 +53,10 @@ def date(s: str) -> dt.date:
     return dt.datetime.strptime(s, DATE_FORMAT).date()
 
 
+def print_versions() -> None:
+    print(f"AutoBernese version {__version__}; BSW version {get_bsw_release()}")
+
+
 @click.group(cls=ClickAliasedGroup, invoke_without_command=True)
 @click.option("--version", "show_version", is_flag=True, default=False)
 @click.option("--bsw-release", "bsw_release", is_flag=True, default=False)
@@ -70,16 +74,16 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
     4.  Do various other things related to GNSS-data processing.
 
     """
+    if show_version:
+        print(f"{__version__}")
+        raise SystemExit
+
     if not configuration.LOADGPS_setvar_sourced():
         msg = "Not all variables in LOADGPS.setvar are set ..."
         print(f"[white on red]{msg}[/]")
         raise SystemExit
 
     configuration.set_up_runtime_environment()
-
-    if show_version:
-        print(f"{__version__}")
-        raise SystemExit
 
     if bsw_release:
         print(json.dumps(asdict(get_bsw_release()), indent=2))
@@ -88,8 +92,6 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
         raise SystemExit
-
-    print(f"AutoBernese version {__version__}; BSW version {get_bsw_release()}")
 
 
 # @main.command
