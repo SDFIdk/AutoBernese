@@ -216,7 +216,12 @@ def date_range_constructor(
 
     """
     d = loader.construct_mapping(node)
-    return date_range(d.get("beg"), d.get("end"), transformer=GPSDate)
+    return date_range(
+        d.get("beg"),
+        d.get("end"),
+        extend_end_by=d.get("extend_end_by", 0),
+        transformer=GPSDate,
+    )
 
 
 def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask:

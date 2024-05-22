@@ -30,8 +30,9 @@ def date_range(
     end: dt.date | dt.datetime,
     /,
     *,
+    extend_end_by: int = 0,
     transformer: HasFromOrdinal = dt.date,
-) -> Iterable[Any]:
+) -> Iterable[HasFromOrdinal]:
     """
     Return a range of dates between and including the given start and end dates.
 
@@ -43,12 +44,14 @@ def date_range(
         beg = beg.date()
     if isinstance(end, dt.datetime):
         end = end.date()
+    if extend_end_by < 0:
+        raise ValueError(f"{extend_end_by=}, but must be zero or greater.")
 
     return [
         transformer.fromordinal(n)
         for n in range(
             beg.toordinal(),
-            end.toordinal() + 1,
+            end.toordinal() + 1 + extend_end_by,
         )
     ]
 
