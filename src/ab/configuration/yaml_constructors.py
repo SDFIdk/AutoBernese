@@ -7,6 +7,7 @@ recommended way to load YAML-files.
 """
 
 from pathlib import Path
+from typing import Iterable
 
 # import functools
 
@@ -19,6 +20,13 @@ from ab.dates import (
     date_range,
     GPSDate,
 )
+
+
+def resolve_wildcards(path: Path) -> Iterable[Path]:
+    if not "*" in str(path):
+        return [path]
+    parts = path.parts[path.is_absolute():]
+    return Path(path.root).glob(str(Path(*parts)))
 
 
 def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
@@ -67,40 +75,28 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     case that single Path instance is returned.
 
     """
-    # Break if the input is unexpected
     if not isinstance(node, (yaml.ScalarNode, yaml.SequenceNode)):
         raise KeyError(
-            f"Must be single string or list of strings. Got {node.value!r} ..."
+            f"Must be single string or list of strings or `Path` instances. Got {node.value!r} ..."
         )
 
     if isinstance(node, yaml.ScalarNode):
-        return Path(loader.construct_scalar(node)).absolute()
-        # Use PyYAML's default constructor to get initial string ouput
-        # return absolute_path(loader.construct_scalar(node))
+        single: str = loader.construct_scalar(node)
+        resolved = list(resolve_wildcards(Path(single)))
 
-    # From hereon, we are dealing with a SequenceNode
+    else:
+        # We use loader.construct_object, since there may be YAML aliases inside.
+        # Any YAML alias is assumed to resolve into to a string.
+        multiple: list[str | Path] = [loader.construct_object(v) for v in node.value]
+        resolved = list(resolve_wildcards(Path(*multiple)))
 
-    # Let the first sequence item be the root of the specified path
-    # We use loader.construct_object, since there may be YAML aliases inside.
-    # Any YAML alias is assumed to resolve into to a string.
-    first, *after = [loader.construct_object(v) for v in node.value]
-    root = Path(first)
+    if not resolved:
+        raise EnvironmentError(f"Path {path!r} could not be resolved.")
 
-    # Case: The user is using a wild card to get at one or many files.
-    if any("*" in element for element in after):
-        # Generate results
-        full_paths = [full_path for full_path in root.glob("/".join(after))]
+    if len(resolved) > 1:
+        return resolved
 
-        # Return only the one item
-        if len(full_paths) == 1:
-            return full_paths[0]
-
-        # Return the entire list of results
-        elif len(full_paths) > 1:
-            return full_paths
-
-    # Return the specified path
-    return root.joinpath(*after)
+    return resolved[0]
 
 
 def path_as_str_constructor(loader: yaml.Loader, node: yaml.Node) -> str | list[str]:
