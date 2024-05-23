@@ -25,7 +25,7 @@ from ab.dates import (
 def resolve_wildcards(path: Path) -> Iterable[Path]:
     if not "*" in str(path):
         return [path]
-    parts = path.parts[path.is_absolute():]
+    parts = path.parts[path.is_absolute() :]
     return Path(path.root).glob(str(Path(*parts)))
 
 
