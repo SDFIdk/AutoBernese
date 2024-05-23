@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 def resolve_filename_wildcards(uri: str) -> Iterable[Path]:
     """
-    Resolve wildcards for filenames
+    Resolve wildcards for filenames only.
 
     """
     path = Path(uri)
