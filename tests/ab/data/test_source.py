@@ -18,7 +18,6 @@ def test_create_Source_using_strings():
         url,
         destination,
     )
-    print(source)
 
     # Assert
     result = source.url_
@@ -49,7 +48,6 @@ def test_create_Source_using_Path_instances():
         url,
         destination,
     )
-    print(source)
 
     # Expected
     url_ = "file:/path/to/file.txt"
