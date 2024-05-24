@@ -28,22 +28,60 @@ from ab import (
 
 log = logging.getLogger(__name__)
 
-_CONF = configuration.load()
+# _CONF = configuration.load()
 
-# Campaign-management configuration
-_TEMPLATE_DIR: Final = Path(_CONF.get("runtime").get("campaign_templates"))
 
-# Current Bernese installation environment
-_BSW_ENV: Final = _CONF.get("bsw_env", {})
-_P: Final = Path(_BSW_ENV.get("P", ""))
-_CAMPAIGN_MENU: Final = Path(_CONF.get("bsw_files", {}).get("campaign_menu"))
+def get_template_dir() -> Path:
+    """
+    Return the Path instance to the directory containing the campaign templates.
 
-# Other
+    """
+    c = configuration.load()
+    return Path(c.get("runtime").get("campaign_templates"))
+
+
+def get_bsw_env() -> dict[str, str | Path]:
+    """
+    Return dictionary with the current Bernese installation environment relevant
+    to AutoBernese.
+
+    """
+    return configuration.load().get("bsw_env", {})
+
+
+def get_campaign_dir() -> Path:
+    """
+    Return Path instance to the campaign directory `$P`.
+
+    """
+    return Path(get_bsw_env().get("P", ""))
+
+
+def get_campaign_menu_file() -> Path:
+    """
+    Return Path instance pointing to the campaign menu inside the Bernese
+    installation.
+
+    """
+    c = configuration.load()
+    return Path(c.get("bsw_files", {}).get("campaign_menu"))
+
+
 _TEMPLATE_P: Final[str] = "${P}"
+"""
+The shell/pearl friendly string representing the environment variable $P used by
+BSW to point to the campaign directory.
+"""
 
 
 @dataclass
 class MetaData:
+    """
+    Model for the metadata section of a concrete campaign-specific configuration
+    file.
+
+    """
+
     campaign: str
     template: str
     beg: str
@@ -64,16 +102,17 @@ def init_template_dir() -> None:
     template is added.
 
     """
-    if _TEMPLATE_DIR.is_dir():
+    template_dir = get_template_dir()
+    if template_dir.is_dir():
         return
 
-    log.info(f"Create campaign-template directory in {_TEMPLATE_DIR} ...")
-    _TEMPLATE_DIR.mkdir(exist_ok=True, parents=True)
+    log.info(f"Create campaign-template directory in {template_dir} ...")
+    template_dir.mkdir(exist_ok=True, parents=True)
 
     log.info(
-        f"Copy default template-campaign configuration {pkg.template_campaign} to {_TEMPLATE_DIR} ..."
+        f"Copy default template-campaign configuration {pkg.template_campaign} to {template_dir} ..."
     )
-    shutil.copy(str(pkg.template_campaign), str(_TEMPLATE_DIR))
+    shutil.copy(str(pkg.template_campaign), str(template_dir))
 
 
 def available_templates() -> list[str]:
@@ -81,13 +120,14 @@ def available_templates() -> list[str]:
     Return list of available campaign templates.
 
     """
-    return [fname.stem for fname in _TEMPLATE_DIR.glob("*.yaml")]
+    template_dir = get_template_dir()
+    return [fname.stem for fname in template_dir.glob("*.yaml")]
 
 
 def load_template(template: Path | str) -> str:
     if not template in available_templates():
         raise ValueError(f"Template {template!r} does not exist ...")
-    ifname = (_TEMPLATE_DIR / template).with_suffix(".yaml")
+    ifname = (get_template_dir() / template).with_suffix(".yaml")
     return ifname.read_text()
 
 
@@ -103,7 +143,7 @@ def _extract_campaign_list(raw: str) -> list[str]:
     meat = meat.split(maxsplit=1)[1].strip()
     lines = [item.strip() for item in meat.splitlines()]
     # Use Template instance to avoid security leaks.
-    return [Template(s).safe_substitute(_BSW_ENV).strip('"') for s in lines]
+    return [Template(s).safe_substitute(get_bsw_env()).strip('"') for s in lines]
 
 
 def ls(verbose: bool = False) -> list[str]:
@@ -111,7 +151,7 @@ def ls(verbose: bool = False) -> list[str]:
     Return list of created campaigns.
 
     """
-    raw = _extract_campaign_list(_CAMPAIGN_MENU.read_text())
+    raw = _extract_campaign_list(get_campaign_menu_file().read_text())
     if not verbose:
         return raw
 
@@ -138,7 +178,7 @@ def _campaign_dir(name: str) -> Path:
     Return the directory path to the campaign `name`.
 
     """
-    return Path(_P) / f"{name}"
+    return get_campaign_dir() / f"{name}"
 
 
 def _campaign_configuration(name: str) -> Path:
@@ -162,8 +202,9 @@ def build_campaign_menu(campaign_list: list[str]) -> str | None:
         log.info("No campaign list to format ...")
         return
 
+    _P = str(get_campaign_dir())
     formatted: list[str] = [
-        f'  "{campaign.replace(str(_P), _TEMPLATE_P)}"' for campaign in campaign_list
+        f'  "{campaign.replace(_P, _TEMPLATE_P)}"' for campaign in campaign_list
     ]
     count: int = len(campaign_list)
     separator: str = "\n" if count > 1 else ""
@@ -184,20 +225,23 @@ def add_campaign_to_bsw_menu(path: str | Path) -> None:
     if not path.is_dir():
         raise ValueError(f"Path {path!r} is not a directory ...")
 
+    campaign_menu = get_campaign_menu_file()
+
     # Load existing campaign-menu file
-    raw = _CAMPAIGN_MENU.read_text()
+    raw = campaign_menu.read_text()
 
     # Create a backup just as BSW does.
-    _CAMPAIGN_MENU.with_suffix(".bck").write_text(raw)
+    campaign_menu.with_suffix(".bck").write_text(raw)
 
     # Update the campaign list
     existing = set(_extract_campaign_list(raw))
-    # Note: We convert the PosixPath to a string, and the make a single-element
-    # set with that string before adding it to the existing list and sorting it.
+
+    # We convert the PosixPath to a string, and the make a single-element set
+    # with that string before adding it to the existing list and sorting it.
     updated = sorted(existing | {f"{path}"})
 
     # Write the updated and formatted list to the campaign-menu file.
-    _CAMPAIGN_MENU.write_text(build_campaign_menu(updated))
+    campaign_menu.write_text(build_campaign_menu(updated))
 
 
 def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
