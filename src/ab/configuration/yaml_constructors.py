@@ -22,8 +22,11 @@ from ab.dates import (
 )
 
 
-def resolve_wildcards(path: Path) -> Iterable[Path]:
+def resolve_wildcards(path: Path | str) -> Iterable[Path]:
+    path = Path(path)
     if not "*" in str(path):
+        # Path.glob will return an empty generator, if there is no wilcard.
+        # Return the given path instead.
         return [path]
     parts = path.parts[path.is_absolute() :]
     return Path(path.root).glob(str(Path(*parts)))
@@ -212,12 +215,13 @@ def date_range_constructor(
 
     """
     d = loader.construct_mapping(node)
-    return date_range(
+    result: list[GPSDate] = date_range(
         d.get("beg"),
         d.get("end"),
         extend_end_by=d.get("extend_end_by", 0),
         transformer=GPSDate,
     )
+    return result
 
 
 def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask:
