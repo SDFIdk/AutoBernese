@@ -15,6 +15,19 @@ The types of configuration are shown in the table below:
 
 The details of each kind is explained below.
 
+### Campaign-configuration templates included in the package
+
+There are also a couple of default campaign templates that come with the package:
+
+*   A default campaign which is empty.
+    *   Usage: Selected by default if none given by the user.
+*   A campaign-template for the example campaign.
+    *   This is a special campaign template that does not use the dates given by
+        the user, but which overrules them with the dates for which there are
+        data in the campaign EXAMPLE that comes with Bernese 5.4.
+    *   Usage: copy this template into the EXAMPLE campaign and add a metadata
+        section.
+
 
 ## The built-in configuration file
 

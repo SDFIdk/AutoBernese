@@ -33,5 +33,5 @@ template_campaign_menu_list = base.joinpath("bsw/MENU_CMP.INP")
 campaign_header = base.joinpath("bsw/campaign_header.yaml")
 
 # Campaign templates included in the package
-# TODO: Make this a section in the documentation
-template_campaign = base.joinpath("bsw/templates/default.yaml")
+template_campaign_default = base.joinpath("bsw/templates/default.yaml")
+template_campaign_example = base.joinpath("bsw/templates/example.yaml")
