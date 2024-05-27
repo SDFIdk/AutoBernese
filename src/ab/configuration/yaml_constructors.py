@@ -32,7 +32,7 @@ def resolve_wildcards(path: Path | str) -> Iterable[Path]:
     return Path(path.root).glob(str(Path(*parts)))
 
 
-def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
+def path_constructor(loader: yaml.Loader, node: yaml.Node) -> None | Path | list[Path]:
     """
     The path constructor can work on two types of input:
 
@@ -84,17 +84,18 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
         )
 
     if isinstance(node, yaml.ScalarNode):
-        single: str = loader.construct_scalar(node)
-        resolved = list(resolve_wildcards(Path(single)))
-
+        path: Path = Path(loader.construct_scalar(node))
     else:
         # We use loader.construct_object, since there may be YAML aliases inside.
         # Any YAML alias is assumed to resolve into to a string.
         multiple: list[str | Path] = [loader.construct_object(v) for v in node.value]
-        resolved = list(resolve_wildcards(Path(*multiple)))
+        path = Path(*multiple)
+
+    resolved = list(resolve_wildcards(path))
 
     if not resolved:
-        raise EnvironmentError(f"Path {path!r} could not be resolved.")
+        # EnvironmentError(f"Path {path} could not be resolved.")
+        return None
 
     if len(resolved) > 1:
         return resolved
