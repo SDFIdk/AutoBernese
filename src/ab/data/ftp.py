@@ -76,8 +76,14 @@ def download(source: Source) -> DownloadStatus:
         matched against the list of files inside the remote parent directory to
         get all possible files to download based on the given pattern.
 
-    """
+    Note:
 
+    *   The assumption for a RemoteLocalPair instance is that the remote path in
+        `path_remote` is a directory in which to find the file denoted `fname`.
+
+        For now, the algorithm does not look inside any directory.
+
+    """
     status = DownloadStatus()
 
     # Log on to the host first, since we need to probe for files directories
@@ -86,12 +92,6 @@ def download(source: Source) -> DownloadStatus:
 
         try:
             for pair in source.resolve():
-                # Note: the assumption for a RemoteLocalPair instance is that
-                # the remote path in `path_remote` is a directory in which to
-                # find the file denoted `fname`.
-
-                # Therefore, we should not bother to care for cases, where we
-                # need to look inside a complete directory. ## TODO: Or do we?
 
                 # Prepare local destination directory
                 destination = Path(pair.path_local)
