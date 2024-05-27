@@ -28,8 +28,6 @@ from ab import (
 
 log = logging.getLogger(__name__)
 
-# _CONF = configuration.load()
-
 
 def get_template_dir() -> Path:
     """
