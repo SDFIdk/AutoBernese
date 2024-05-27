@@ -36,6 +36,7 @@ from ab.data import (
     source as _source,
     ftp,
     http,
+    file,
 )
 from ab.station import (
     sitelog,
@@ -51,6 +52,10 @@ DATE_FORMAT: Final = "%Y-%m-%d"
 
 def date(s: str) -> dt.date:
     return dt.datetime.strptime(s, DATE_FORMAT).date()
+
+
+def print_versions() -> None:
+    print(f"AutoBernese version {__version__}; BSW version {get_bsw_release()}")
 
 
 @click.group(cls=ClickAliasedGroup, invoke_without_command=True)
@@ -70,16 +75,16 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
     4.  Do various other things related to GNSS-data processing.
 
     """
+    if show_version:
+        print(f"{__version__}")
+        raise SystemExit
+
     if not configuration.LOADGPS_setvar_sourced():
         msg = "Not all variables in LOADGPS.setvar are set ..."
         print(f"[white on red]{msg}[/]")
         raise SystemExit
 
     configuration.set_up_runtime_environment()
-
-    if show_version:
-        print(f"{__version__}")
-        raise SystemExit
 
     if bsw_release:
         print(json.dumps(asdict(get_bsw_release()), indent=2))
@@ -88,8 +93,6 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
         raise SystemExit
-
-    print(f"AutoBernese version {__version__}; BSW version {get_bsw_release()}")
 
 
 # @main.command
@@ -297,6 +300,10 @@ def ydoy(year: int, doy: int) -> None:
     print(json.dumps(gps_date.info, indent=2))
 
 
+def prompt_proceed() -> bool:
+    return input("Proceed (y/[n]): ").lower() == "y"
+
+
 @main.command
 @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option(
@@ -325,26 +332,33 @@ def download(
         config = configuration.load()
 
     sources: list[_source.Source] = config.get("sources", [])
+    if not sources:
+        log.debug(f"No sources found ...")
+        raise SystemExit
+
+    # Filter if asked to
     if len(identifier) > 0:
         sources = [source for source in sources if source.identifier in identifier]
 
-    print("Downloading the following sources")
+    # Print preamble, before asking to proceed
+    preamble = "Downloading the following sources\n"
     sz = max(len(source.identifier) for source in sources)
-    print(
-        "\n".join(
-            f"{source.identifier: >{sz}s}: {source.description}" for source in sources
-        )
+    preamble += "\n".join(
+        f"{source.identifier: >{sz}s}: {source.description}" for source in sources
     )
-    proceed = input("Proceed (y/[n]): ").lower() == "y"
-    if not proceed:
+    print(preamble)
+
+    # Ask
+    if not prompt_proceed():
         raise SystemExit
 
-    s = "s" if len(sources) else ""
+    # Resolve sources
+    s = "s" if len(sources) > 1 else ""
     msg = f"Resolving {len(sources)} source{s} ..."
     log.info(msg)
 
     source: _source.Source
-    status_total = DownloadStatus()
+    status_total: DownloadStatus = DownloadStatus()
     for source in sources:
         msg = f"Download: {source.identifier}: {source.description}"
         print(f"[black on white]{msg}[/]")
@@ -353,23 +367,26 @@ def download(
         if force:
             source.max_age = 0
 
-        match source.protocol:
-            case "ftp":
-                status = ftp.download(source)
-                status_total += status
-            case "http" | "https":
-                status = http.download(source)
-                status_total += status
-        # print(f"  Downloaded: {status.downloaded}\n  Existing: {status.existing}")
+        if source.protocol == "ftp":
+            status = ftp.download(source)
+            status_total += status
+
+        elif source.protocol in ("http", "https"):
+            status = http.download(source)
+            status_total += status
+
+        elif source.protocol == "file":
+            status = file.download(source)
+            status_total += status
+
         print(asdict(status))
+
     else:
         msg = "Finished downloading sources ..."
         print(msg)
         log.debug(msg)
+
         print(f"Overall status:")
-        # print(
-        #     f"  Downloaded: {status_total.downloaded}\n  Existing: {status_total.existing}"
-        # )
         print(asdict(status_total))
 
 
@@ -458,9 +475,9 @@ def sources(name: str, verbose: bool = False) -> None:
     Print the campaign-specific sources.
 
     """
-    sources: list[_source.Source] | None = _campaign.load(name).get("sources")
+    sources: list[_source.Source] | None = _campaign.load(name).get("sources", [])
 
-    if sources is None:
+    if not sources:
         msg = f"No sources found"
         print(msg)
         log.info(msg)
@@ -471,6 +488,7 @@ def sources(name: str, verbose: bool = False) -> None:
 {source.identifier=}
 {source.url=}
 {source.destination=}
+{source.protocol=}
 """
         for source in sources
     )
@@ -532,6 +550,8 @@ def run(campaign_name: str, identifier: list[str]) -> None:
         print(msg)
         log.info(msg)
         return
+
+    print_versions()
 
     if len(identifier) > 0:
         tasks = [task for task in tasks if task.identifier in identifier]
@@ -658,11 +678,18 @@ def parse_sitelog(filename: Path) -> None:
     default=Path(".").resolve() / "sitelogs.STA",
     help="Path to output filename for the STA file. If none given, the output is saved as ./sitelogs.STA.",
 )
+@click.option(
+    "-C",
+    "--campaign",
+    help="Campaign-specific station data.",
+    required=False,
+)
 def sitelogs2sta(
     config: Path,
     sitelogs: tuple[Path],
     individually_calibrated: tuple[str],
     output_filename: Path,
+    campaign: str | None = None,
 ) -> None:
     """
     Create a STA file from sitelogs and other station info.
@@ -684,6 +711,9 @@ def sitelogs2sta(
     3.  Supply no arguments, and a STA file is created based on the input
         arguments given in the general or user-supplied configuration file.
 
+    4.  Supply campaign name to create a STA file from standard settings in
+        campaign-specific configuration.
+
     """
     arguments: dict[str, Any] | None = None
     if config is not None:
@@ -697,6 +727,10 @@ def sitelogs2sta(
             individually_calibrated=individually_calibrated,
             output_sta_file=output_filename,
         )
+
+    elif campaign is not None:
+        log.info(f"Create STA file from arguments in campaign-specific configuration.")
+        arguments = _campaign.load(campaign).get("station")
 
     elif configuration.load().get("station") is not None:
         log.info(f"Create STA file from arguments in the configuration.")

@@ -7,6 +7,7 @@ recommended way to load YAML-files.
 """
 
 from pathlib import Path
+from typing import Iterable
 
 # import functools
 
@@ -21,11 +22,23 @@ from ab.dates import (
 )
 
 
-def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
-    """
-    The path constructor can work on fully specified path strings like the
-    following:
+def resolve_wildcards(path: Path | str) -> Iterable[Path]:
+    path = Path(path)
+    if not "*" in str(path):
+        # Path.glob will return an empty generator, if there is no wilcard.
+        # Return the given path instead.
+        return [path]
+    parts = path.parts[path.is_absolute() :]
+    return Path(path.root).glob(str(Path(*parts)))
 
+
+def path_constructor(loader: yaml.Loader, node: yaml.Node) -> None | Path | list[Path]:
+    """
+    The path constructor can work on two types of input:
+
+    1) Fully specified path strings like the following:
+
+    *   scheme://uniform/ressource/identifier
     *   /some/path/to/somewhere
     *   /some/path/to/some.file
 
@@ -33,7 +46,13 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     constructor simply returns a Python Path instance of the entire string
     value.
 
-    More complex paths can be constructed by supplying the YAML tag with a
+    ---
+
+    2) A sequence of different components useful, when one or more components
+       are YAML aliases referring to a string somewhere else in the YAML
+       document.
+
+    More complex paths can thus be constructed by supplying the YAML tag with a
     sequence of path elements.
 
     Here, each sequence item can be either a YAML alias for a value elsewhere in
@@ -41,10 +60,15 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
 
     Examples of the sequence syntax are:
 
-    *   [*alias_to_a_base_path, subdirectory, file.txt]
-    *   -   *alias_to_a_base_path
-        -   subdirectory
-        -   file.txt
+    ```yaml
+
+    key1: [*alias_to_a_base_path, subdirectory, file.txt]
+    key2:
+    - *alias_to_a_base_path
+    - subdirectory
+    - file.txt
+
+    ```
 
     Any element in the sequence, except the first element, may use the common
     wildcard `*` to specify any matching files.
@@ -54,36 +78,36 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     case that single Path instance is returned.
 
     """
-    # Break if the input is unexpected
     if not isinstance(node, (yaml.ScalarNode, yaml.SequenceNode)):
         raise KeyError(
-            f"Must be single string or list of strings. Got {node.value!r} ..."
+            f"Must be single string or list of strings or `Path` instances. Got {node.value!r} ..."
         )
 
     if isinstance(node, yaml.ScalarNode):
-        return Path(loader.construct_scalar(node)).absolute()
+        path: Path = Path(loader.construct_scalar(node))
+    else:
+        # We use loader.construct_object, since there may be YAML aliases inside.
+        # Any YAML alias is assumed to resolve into to a string.
+        multiple: list[str | Path] = [loader.construct_object(v) for v in node.value]
+        path = Path(*multiple)
 
-    # At this point, we are dealing with a SequenceNode
+    resolved = list(resolve_wildcards(path))
 
-    # Let the first sequence item be the root of the specified path
-    first, *after = [loader.construct_object(v) for v in node.value]
-    root = Path(first)
+    if not resolved:
+        # EnvironmentError(f"Path {path} could not be resolved.")
+        return None
 
-    # Case: The user is using a wild card to get at one or many files.
-    if any("*" in element for element in after):
-        # Generate results
-        full_paths = [full_path for full_path in root.glob("/".join(after))]
+    if len(resolved) > 1:
+        return resolved
 
-        # Return only the one item
-        if len(full_paths) == 1:
-            return full_paths[0]
+    return resolved[0]
 
-        # Return the entire list of results
-        elif len(full_paths) > 1:
-            return full_paths
 
-    # Return the specified path
-    return root.joinpath(*after)
+def path_as_str_constructor(loader: yaml.Loader, node: yaml.Node) -> str | list[str]:
+    paths = path_constructor(loader, node)
+    if isinstance(paths, list):
+        return [str(path) for path in paths]
+    return str(paths)
 
 
 def parent_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | str:
@@ -192,7 +216,13 @@ def date_range_constructor(
 
     """
     d = loader.construct_mapping(node)
-    return date_range(d.get("beg"), d.get("end"), transformer=GPSDate)
+    result: list[GPSDate] = date_range(
+        d.get("beg"),
+        d.get("end"),
+        extend_end_by=d.get("extend_end_by", 0),
+        transformer=GPSDate,
+    )
+    return result
 
 
 def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask:
@@ -205,6 +235,7 @@ def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask
 
 yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
 yaml.SafeLoader.add_constructor("!Path", path_constructor)
+yaml.SafeLoader.add_constructor("!PathStr", path_as_str_constructor)
 yaml.SafeLoader.add_constructor("!Parent", parent_constructor)
 yaml.SafeLoader.add_constructor("!Source", source_constructor)
 yaml.SafeLoader.add_constructor("!GPSDate", gps_date_constructor)

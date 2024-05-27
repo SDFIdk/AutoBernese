@@ -3,7 +3,7 @@ from ab import pkg
 
 
 def test_version():
-    assert __version__ == "0.3.0"
+    assert __version__ == "0.3.1"
 
 
 def test_package_data_exist():
@@ -15,5 +15,6 @@ def test_package_data_exist():
 
     assert pkg.bpe_runner.is_file()
     assert pkg.template_campaign_menu_list.is_file()
-    assert pkg.template_campaign.is_file()
+    assert pkg.template_campaign_default.is_file()
+    assert pkg.template_campaign_example.is_file()
     assert pkg.campaign_header.is_file()

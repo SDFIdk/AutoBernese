@@ -1,5 +1,5 @@
 """
-Module for probing local files.
+Probe local files.
 
 """
 

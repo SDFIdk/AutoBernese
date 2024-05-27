@@ -26,7 +26,6 @@ _POP: Final = (
     "env",
     "runtime",
     "campaign",
-    "station",
 )
 
 

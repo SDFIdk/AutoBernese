@@ -1,3 +1,9 @@
+# Custom section for some specific dates not in a range, as the example campaign
+# has data from three two-day periods. The section itself is not used by
+# AutoBernese, so the name 'custom' could be anything. The section just contains
+# a list of dates that, with the added YAML anchor may be referenced elsewhere
+# in the YAML document. This way the dates can be easily edited and re-used in
+# the relevant BPETask sections below.
 custom:
   dates: &dates
   - 2019-02-13
