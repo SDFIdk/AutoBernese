@@ -4,6 +4,7 @@ channels:
 dependencies:
 - click
 - click-aliases
+- humanize
 - pip
 - python=3.12
 - pyyaml
