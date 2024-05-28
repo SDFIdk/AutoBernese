@@ -24,6 +24,7 @@ from ab import (
     pkg,
     configuration,
 )
+from ab.data.stats import dir_size
 
 
 log = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ def get_campaign_menu_file() -> Path:
     return Path(c.get("bsw_files", {}).get("campaign_menu"))
 
 
-_TEMPLATE_P: Final[str] = "${P}"
+_TEMPLATE_P: Final = "${P}"
 """
 The shell/pearl friendly string representing the environment variable $P used by
 BSW to point to the campaign directory.
@@ -108,9 +109,9 @@ def init_template_dir() -> None:
     template_dir.mkdir(exist_ok=True, parents=True)
 
     log.info(
-        f"Copy default template-campaign configuration {pkg.template_campaign} to {template_dir} ..."
+        f"Copy default template-campaign configuration {pkg.template_campaign_default} to {template_dir} ..."
     )
-    shutil.copy(str(pkg.template_campaign), str(template_dir))
+    shutil.copy(str(pkg.template_campaign_default), str(template_dir))
 
 
 def available_templates() -> list[str]:
@@ -144,31 +145,38 @@ def _extract_campaign_list(raw: str) -> list[str]:
     return [Template(s).safe_substitute(get_bsw_env()).strip('"') for s in lines]
 
 
-def ls(verbose: bool = False) -> list[str]:
+@dataclass
+class CampaignInfo:
+    directory: str
+    size: float = 0
+    template: str = ""
+    version: str = ""
+    username: str = ""
+    created: str = ""
+
+
+def ls(verbose: bool = False) -> list[CampaignInfo]:
     """
     Return list of created campaigns.
 
     """
-    raw = _extract_campaign_list(get_campaign_menu_file().read_text())
+    result = [
+        CampaignInfo(path)
+        for path in _extract_campaign_list(get_campaign_menu_file().read_text())
+    ]
     if not verbose:
-        return raw
+        return result
 
-    dirs = [Path(r) for r in raw]
-    lines = []
-    fstr = "{directory} {template} {version} {username} {created}"
-    default = dict(directory="", template="", version="", username="", created="")
-    for d in dirs:
-        kwargs = {**default, **dict(directory=d)}
-        ifname = d / "campaign.yaml"
+    for campaign_info in result:
+        campaign_info.size = dir_size(campaign_info.directory)
+        ifname = Path(campaign_info.directory) / "campaign.yaml"
         if not ifname.is_file():
-            lines.append(fstr.format(**kwargs))
             continue
+        meta = configuration.with_env(ifname).get("metadata", {})
+        for key, value in meta.items():
+            setattr(campaign_info, key, value)
 
-        campaign = configuration.with_env(ifname)
-        meta = campaign.get("metadata", {})
-        lines.append(fstr.format(**{**kwargs, **meta}))
-
-    return lines
+    return result
 
 
 def _campaign_dir(name: str) -> Path:
@@ -196,10 +204,6 @@ def build_campaign_menu(campaign_list: list[str]) -> str | None:
     literals.
 
     """
-    if not campaign_list:
-        log.info("No campaign list to format ...")
-        return
-
     _P = str(get_campaign_dir())
     formatted: list[str] = [
         f'  "{campaign.replace(_P, _TEMPLATE_P)}"' for campaign in campaign_list
@@ -244,7 +248,7 @@ def add_campaign_to_bsw_menu(path: str | Path) -> None:
 
 def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
     campaign_dir = Path(campaign_dir)
-    directories = _CONF.get("campaign", {}).get("directories")
+    directories = configuration.load().get("campaign", {}).get("directories")
 
     if directories is None:
         msg = f"list of campaign directories to create is empty in the user configuration ..."
@@ -298,7 +302,7 @@ def create_campaign_configuration_file(
     )
     # Make parsable YAML
     header = pkg.campaign_header.read_text().format_map(asdict(metadata))
-    fname_template_config = _TEMPLATE_DIR / f"{metadata.template}.yaml"
+    fname_template_config = get_template_dir() / f"{metadata.template}.yaml"
     content = f"{header}\n{fname_template_config.read_text()}"
     fname_campaign_config.write_text(content)
 

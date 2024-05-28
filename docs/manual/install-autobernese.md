@@ -36,7 +36,7 @@ Before installing AutoBernese, you must have the following software installed:
     ```
 
 *   Using the `ab` environment's Python interpreter, install AutoBernese with
-    PIP:
+    `pip`:
 
     ```sh
     (ab) $ python -m pip install .
@@ -55,4 +55,43 @@ when the `ab` mamba environment is activated.
     # .bashrc
     # ...
     mamba activate ab
+    ```
+
+## Update AutoBernese
+
+The package is so far only distributed on GitHub. Updating to a newer version of
+AutoBernese means downloading the latest revision from the main branch and 1)
+update the environment dependencies in `environment.yml` and 2) re-install
+AutoBernese from the Git archive directory:
+
+*   Go to the repository to your machine.
+
+    ```sh
+    (base) $ cd /path/to/AutoBernese
+    ```
+
+*   Pull the latest revisions from GitHub:
+
+    ```sh
+    (base) $ git pull
+    ```
+
+*   Update the package dependencies:
+
+    ```sh
+    (base) $ mamba env update -n ab -f environment.yml
+    ```
+
+*   Activate the environment:
+
+    ```sh
+    (base) $ mamba activate ab
+    (ab) $
+    ```
+
+*   Using the `ab` environment's Python interpreter, update AutoBernese with
+    `pip`:
+
+    ```sh
+    (ab) $ python -m pip install -U .
     ```

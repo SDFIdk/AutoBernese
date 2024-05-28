@@ -3,6 +3,7 @@ Probe local files.
 
 """
 
+import os
 import datetime as dt
 from typing import (
     Any,
@@ -44,3 +45,20 @@ def already_updated(fname: Path, *, max_age: int | float = math.inf) -> bool:
 
     """
     return fname.is_file() and file_age(fname) < max_age
+
+
+def dir_size(start_path: str = ".") -> float:
+    """
+    Return size of files in directory, excluding symbolic links.
+
+    References:
+
+    *   Adapted from https://stackoverflow.com/a/1392549
+
+    """
+    return sum(
+        os.path.getsize(ifname)
+        for (path, _, fnames) in os.walk(start_path)
+        for fname in fnames
+        if not os.path.islink(ifname := os.path.join(path, fname))
+    )

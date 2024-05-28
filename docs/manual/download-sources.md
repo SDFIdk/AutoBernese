@@ -24,7 +24,10 @@ configuration.
 
 Source:
 
-*   *`name`*
+*   *`identifier`*
+    -   A string without spaces that identifies the source and makes it possible
+        to select specific sources to download only. source.
+*   *`description`*
     -   A string that will be displayed in the terminal, when downloading the
         source.
 *   *`url`*
@@ -71,7 +74,8 @@ source. This is put into the given destination directory.
     sources:
 
     - !Source
-      name: EUREF STA file
+      identifier: EUREF_STA
+      description: EUREF STA file
       url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
       destination: /path/to/DATAPOOL/station
       max_age: 1
@@ -83,7 +87,8 @@ source. This is put into the given destination directory.
     sources:
 
     - !Source
-      name: EUREF STA file
+      identifier: EUREF_STA
+      description: EUREF STA file
       url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
       destination: !Path [*D, station]
       max_age: 1
@@ -106,14 +111,16 @@ under the remote path will be downloaded to the destination directory.
     sources:
 
     - !Source
-      name: BSW Model data
+      identifier: BSW_MODEL
+      description: BSW Model data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
       destination: /path/to/BERN54/GLOBAL/MODEL
       filenames: ['*']
       max_age: 1
 
     - !Source
-      name: BSW Configuration data
+      identifier: BSW_CONFIG
+      description: BSW Configuration data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
       destination: /path/to/BERN54/GLOBAL/CONFIG
       filenames: ['*']
@@ -126,14 +133,16 @@ under the remote path will be downloaded to the destination directory.
     sources:
 
     - !Source
-      name: BSW Model data
+      identifier: BSW_MODEL
+      description: BSW Model data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
       destination: *MODEL
       filenames: ['*']
       max_age: 1
 
     - !Source
-      name: BSW Configuration data
+      identifier: BSW_CONFIG
+      description: BSW Configuration data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
       destination: *CONFIG
       filenames: ['*']
@@ -158,7 +167,8 @@ get all files with a given file extension.
     sources:
 
     - !Source
-      name: Universal and BSW-specific antenna files
+      identifier: ANTENNA_FILES
+      description: Universal and BSW-specific antenna files
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
       destination: /path/to/DATAPOOL/REF54
       filenames:
@@ -175,7 +185,8 @@ get all files with a given file extension.
     sources:
 
     - !Source
-      name: Universal and BSW-specific antenna files
+      identifier: ANTENNA_FILES
+      description: Universal and BSW-specific antenna files
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
       destination: !Path [*D, REF54]
       filenames:
@@ -198,7 +209,8 @@ with a wildcard, e.g. `*.EPH.Z`.
     sources:
 
     - !Source
-      name: Ionosphere and satellite-bias files
+      identifier: ION_BIA_2022
+      description: Ionosphere and satellite-bias files
       url: ftp://ftp.aiub.unibe.ch/CODE/2022/
       destination: /path/to/DATAPOOL/CODE/2022
       filenames:
@@ -208,7 +220,8 @@ with a wildcard, e.g. `*.EPH.Z`.
       - '*.BIA.Z'
 
     - !Source
-      name: Ionosphere and satellite-bias files
+      identifier: ION_SAT_2023
+      description: Ionosphere and satellite-bias files
       url: ftp://ftp.aiub.unibe.ch/CODE/2023/
       destination: /path/to/DATAPOOL/CODE/2023
       filenames:
@@ -224,7 +237,8 @@ with a wildcard, e.g. `*.EPH.Z`.
     sources:
 
     - !Source
-      name: Ionosphere and satellite-bias files
+      identifier: ION_SAT
+      description: Ionosphere and satellite-bias files
       url: ftp://ftp.aiub.unibe.ch/CODE/{year}/
       destination: !Path [*D, CODE, '{year}']
       filenames:
@@ -249,7 +263,8 @@ a directory listing from an HTTP URI.
     sources:
 
     - !Source
-      name: TU Wien Vienna Mapping Model 3
+      identifier: VMF3_1x1
+      description: TU Wien Vienna Mapping Model 3
       url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/2023/
       filenames:
       - VMF3_20230101.H00
@@ -266,7 +281,8 @@ a directory listing from an HTTP URI.
     sources:
 
     - !Source
-      name: TU Wien Vienna Mapping Model 3
+      identifier: VMF3_1x1
+      description: TU Wien Vienna Mapping Model 3
       url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
       destination: !Path [*D, VMF3, '1x1_OP', '{date.year}']
       parameters:
