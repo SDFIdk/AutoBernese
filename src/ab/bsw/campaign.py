@@ -108,9 +108,9 @@ def init_template_dir() -> None:
     template_dir.mkdir(exist_ok=True, parents=True)
 
     log.info(
-        f"Copy default template-campaign configuration {pkg.template_campaign} to {template_dir} ..."
+        f"Copy default template-campaign configuration {pkg.template_campaign_default} to {template_dir} ..."
     )
-    shutil.copy(str(pkg.template_campaign), str(template_dir))
+    shutil.copy(str(pkg.template_campaign_default), str(template_dir))
 
 
 def available_templates() -> list[str]:
