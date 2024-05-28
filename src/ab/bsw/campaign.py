@@ -24,6 +24,7 @@ from ab import (
     pkg,
     configuration,
 )
+from ab.data.stats import dir_size
 
 
 log = logging.getLogger(__name__)
@@ -144,31 +145,41 @@ def _extract_campaign_list(raw: str) -> list[str]:
     return [Template(s).safe_substitute(get_bsw_env()).strip('"') for s in lines]
 
 
-def ls(verbose: bool = False) -> list[str]:
+@dataclass
+class CampaignInfo:
+    directory: str
+    size: float = 0
+    template: str = ""
+    version: str = ""
+    username: str = ""
+    created: str = ""
+
+
+def ls(verbose: bool = False) -> list[CampaignInfo]:
     """
     Return list of created campaigns.
 
     """
-    raw = _extract_campaign_list(get_campaign_menu_file().read_text())
+    result = [
+        CampaignInfo(path)
+        for path
+        in _extract_campaign_list(
+            get_campaign_menu_file().read_text()
+        )
+    ]
     if not verbose:
-        return raw
+        return result
 
-    dirs = [Path(r) for r in raw]
-    lines = []
-    fstr = "{directory} {template} {version} {username} {created}"
-    default = dict(directory="", template="", version="", username="", created="")
-    for d in dirs:
-        kwargs = {**default, **dict(directory=d)}
-        ifname = d / "campaign.yaml"
+    for campaign_info in result:
+        campaign_info.size = dir_size(campaign_info.directory)
+        ifname = Path(campaign_info.directory) / "campaign.yaml"
         if not ifname.is_file():
-            lines.append(fstr.format(**kwargs))
             continue
+        meta = configuration.with_env(ifname).get("metadata", {})
+        for (key, value) in meta.items():
+            setattr(campaign_info, key, value)
 
-        campaign = configuration.with_env(ifname)
-        meta = campaign.get("metadata", {})
-        lines.append(fstr.format(**{**kwargs, **meta}))
-
-    return lines
+    return result
 
 
 def _campaign_dir(name: str) -> Path:
