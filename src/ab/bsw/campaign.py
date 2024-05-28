@@ -196,10 +196,6 @@ def build_campaign_menu(campaign_list: list[str]) -> str | None:
     literals.
 
     """
-    if not campaign_list:
-        log.info("No campaign list to format ...")
-        return
-
     _P = str(get_campaign_dir())
     formatted: list[str] = [
         f'  "{campaign.replace(_P, _TEMPLATE_P)}"' for campaign in campaign_list
