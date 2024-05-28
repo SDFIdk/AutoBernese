@@ -244,7 +244,7 @@ def add_campaign_to_bsw_menu(path: str | Path) -> None:
 
 def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
     campaign_dir = Path(campaign_dir)
-    directories = _CONF.get("campaign", {}).get("directories")
+    directories = configuration.load().get("campaign", {}).get("directories")
 
     if directories is None:
         msg = f"list of campaign directories to create is empty in the user configuration ..."
@@ -298,7 +298,7 @@ def create_campaign_configuration_file(
     )
     # Make parsable YAML
     header = pkg.campaign_header.read_text().format_map(asdict(metadata))
-    fname_template_config = _TEMPLATE_DIR / f"{metadata.template}.yaml"
+    fname_template_config = get_template_dir() / f"{metadata.template}.yaml"
     content = f"{header}\n{fname_template_config.read_text()}"
     fname_campaign_config.write_text(content)
 
