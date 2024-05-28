@@ -420,7 +420,7 @@ def ls(verbose: bool) -> None:
     for campaign_info in campaign_infos:
         kwargs = {
             **asdict(campaign_info),
-            **{"size": humanize.naturalsize(campaign_info.size, binary=True)}
+            **{"size": humanize.naturalsize(campaign_info.size, binary=True)},
         }
         lines.append(fstr.format(**kwargs))
     print("\n".join(lines))

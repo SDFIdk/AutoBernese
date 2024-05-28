@@ -162,10 +162,7 @@ def ls(verbose: bool = False) -> list[CampaignInfo]:
     """
     result = [
         CampaignInfo(path)
-        for path
-        in _extract_campaign_list(
-            get_campaign_menu_file().read_text()
-        )
+        for path in _extract_campaign_list(get_campaign_menu_file().read_text())
     ]
     if not verbose:
         return result
@@ -176,7 +173,7 @@ def ls(verbose: bool = False) -> list[CampaignInfo]:
         if not ifname.is_file():
             continue
         meta = configuration.with_env(ifname).get("metadata", {})
-        for (key, value) in meta.items():
+        for key, value in meta.items():
             setattr(campaign_info, key, value)
 
     return result
