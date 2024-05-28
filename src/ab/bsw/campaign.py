@@ -65,7 +65,7 @@ def get_campaign_menu_file() -> Path:
     return Path(c.get("bsw_files", {}).get("campaign_menu"))
 
 
-_TEMPLATE_P: Final[str] = "${P}"
+_TEMPLATE_P: Final = "${P}"
 """
 The shell/pearl friendly string representing the environment variable $P used by
 BSW to point to the campaign directory.
