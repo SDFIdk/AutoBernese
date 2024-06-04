@@ -42,7 +42,9 @@ def get_template_dir() -> Path:
         raise RuntimeError("Configuration must have a `runtime` section ...")
     templates = runtime.get("campaign_templates")
     if not templates:
-        raise ValueError("Configuration section m`runtime` has no value `campaign_templates` ...")
+        raise ValueError(
+            "Configuration section m`runtime` has no value `campaign_templates` ..."
+        )
     return Path(templates)
 
 
@@ -372,7 +374,6 @@ def load(name: str) -> dict[str, Any]:
     return configuration.with_env(ifname)
 
 
-
 def _campaign_subdirectories(name: str) -> dict[str, str]:
     """
     Get actual subdirectories directly beneath campaign directory.
@@ -390,7 +391,7 @@ def _delete_directory_content(path: str) -> None:
     for child in Path(path).iterdir():
         print(f"Deleting {child!r}")
         if child.is_file() or child.is_symlink():
-                child.unlink()
+            child.unlink()
         if child.is_dir():
             shutil.rmtree(child)
 
@@ -411,7 +412,7 @@ def clean(name: str) -> None:
     # Take those selected
     existing_chosen = [path for (name, path) in dirs.items() if name in paths]
 
-    print('\n'.join(existing_chosen))
+    print("\n".join(existing_chosen))
     proceed = input("Proceed (y/[n]): ").lower() == "y"
     if not proceed:
         return
