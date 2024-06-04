@@ -36,7 +36,13 @@ def get_template_dir() -> Path:
 
     """
     c = configuration.load()
-    return Path(c.get("runtime").get("campaign_templates"))
+    runtime = c.get("runtime")
+    if not runtime:
+        raise RuntimeError("Configuration must have a `runtime` section ...")
+    templates = runtime.get("campaign_templates")
+    if not templates:
+        raise ValueError("Configuration section m`runtime` has no value `campaign_templates` ...")
+    return Path(templates)
 
 
 def get_bsw_env() -> dict[str, str | Path]:
