@@ -640,6 +640,26 @@ ab campaign run <campaign-name>
 ``` title="Output"
 ```
 
+## Delete sub directory content in given campaign
+
+Adding [a `clean` section][CONF_CAMPAIGN_CLEAN] to the campaign configuration allows for easy
+cleaning of entire subdirectories in the campaign directory.
+
+[CONF_CAMPAIGN_CLEAN]: configuration-files.md#the-clean-section-not-shown
+
+```sh title="Command"
+ab c clean EXAMPLE
+```
+
+```sh title="Output"
+/home/bsw/prod/data/CAMPAIGN54/EXAMPLE/OUT
+/home/bsw/prod/data/CAMPAIGN54/EXAMPLE/SOL
+Proceed (y/[n]): y
+# List of deleted files
+```
+
+
+
 
 ## Station-related utilities
 
