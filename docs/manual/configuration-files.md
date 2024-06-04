@@ -189,7 +189,8 @@ program. -->
 tasks:
 
 - !BPETask
-  name: Run PPP for the EXAMPLE campaign
+  identifier: PPP
+  description: Run PPP for the EXAMPLE campaign
   arguments:
     pcf_file: PPP
     campaign: *campaign
