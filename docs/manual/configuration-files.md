@@ -75,7 +75,7 @@ files, so that the relative paths and other data can be re-used here as well.
 
     === "Runtime settings"
 
-        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="74-100"
+        ```yaml title="Built-in configuration file `env.yaml`" linenums="1" hl_lines="72-102"
         --8<-- "src/ab/configuration/env.yaml"
         ```
 
@@ -189,7 +189,8 @@ program. -->
 tasks:
 
 - !BPETask
-  name: Run PPP for the EXAMPLE campaign
+  identifier: PPP
+  description: Run PPP for the EXAMPLE campaign
   arguments:
     pcf_file: PPP
     campaign: *campaign
@@ -243,6 +244,23 @@ this (and in this case, other) campaigns.
 
 The purpose of the configuration-specific sources section is that a given
 campaign type may need, well, specific data for that campaign.
+
+
+### The `clean` section [not shown]
+
+Available since: **version `0.3.3`**
+
+With the campaign command `clean`, it is possible to specify directories at the
+root of the campaign directory which will have their entire content deleted, if
+the user grants it when prompted.
+
+To use the `clean` command, add a `clean` section to the campaign (template)
+configuration and provide a list of directories that exist at the root of the
+campaign.
+
+``` title="Example of a `clean` section in a campaign-specific configuration file"
+clean: [SOL, OUT]
+```
 
 
 ## Campaign-configuration templates

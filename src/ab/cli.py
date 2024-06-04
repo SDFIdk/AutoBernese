@@ -96,34 +96,6 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
         raise SystemExit
 
 
-# @main.command
-# def aliases() -> None:
-#     """
-#     Show YAML anchors in AutoBernese configuration and count the number of times
-#     each one is alias in the environment.
-
-#     """
-#     from ab import pkg
-#     import yaml
-#     import collections as cs
-
-#     parsed = yaml.parse(pkg.env.read_text())
-#     # composed = yaml.compose(pkg.env.read_text())
-#     events = list(parsed)
-#     anchors = {
-#         event.anchor
-#         for event in events
-#         if getattr(event, "anchor", None) is not None
-#         and not isinstance(event, yaml.AliasEvent)
-#     }
-#     counter = cs.Counter({anchor: 0 for anchor in anchors})
-#     aliased = [event.anchor for event in events if isinstance(event, yaml.AliasEvent)]
-#     counter.update(aliased)
-#     print(counter.most_common(10))
-
-#     # from IPython import embed; embed(); raise SystemExit
-
-
 @main.command
 @click.argument("section", default=None, type=str, required=False)
 @click.option(
@@ -609,30 +581,14 @@ def run(campaign_name: str, identifier: list[str]) -> None:
                 break
 
 
-# @campaign.command
-# @click.argument("campaign_name", type=str)
-# @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
-# def clean_bpe_output(campaign_name: str, identifier: list[str]) -> None:
-#     """
-#     Delete content of the BPE directory of the given campaign.
+@campaign.command
+@click.argument("campaign_name", type=str)
+def clean(campaign_name: str) -> None:
+    """
+    Clean campaign sub directories specified in the campaign configuration.
 
-#     """
-#     _dir = _campaign._campaign_dir(campaign_name)
-#     dir_bpe = _dir / "BPE"
-
-#     if len(identifier) > 0:
-#         fnames = []
-#         for ident in identifier:
-#             fnames.extend(list(dir_bpe.glob("{ident}*.*")))
-#     else:
-#         fnames = list(dir_bpe.glob("*.LOG"))
-#         fnames.extend(list(dir_bpe.glob("*.PRT")))
-
-#     print(fnames)
-#     print(len(fnames))
-
-#     # for fname in fnames:
-#     #     fname.unlink()
+    """
+    _campaign.clean(campaign_name)
 
 
 @main.group()
