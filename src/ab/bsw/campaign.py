@@ -3,6 +3,7 @@ Module for working with campaigns in the current BSW environment.
 
 """
 
+import os
 import datetime as dt
 import getpass
 from typing import (
@@ -369,3 +370,52 @@ def load(name: str) -> dict[str, Any]:
             f"Campaign {name!r} does not exist or has no campaign-specific configuration file {ifname.name} ..."
         )
     return configuration.with_env(ifname)
+
+
+
+def _campaign_subdirectories(name: str) -> dict[str, str]:
+    """
+    Get actual subdirectories directly beneath campaign directory.
+
+    """
+    root = _campaign_dir(name)
+    return {p.name: p.path for p in os.scandir(root) if p.is_dir()}
+
+
+def _delete_directory_content(path: str) -> None:
+    """
+    Remove all children in a given directory.
+
+    """
+    for child in Path(path).iterdir():
+        print(f"Deleting {child!r}")
+        if child.is_file() or child.is_symlink():
+                child.unlink()
+        if child.is_dir():
+            shutil.rmtree(child)
+
+
+def clean(name: str) -> None:
+    """
+    Clean specified paths inside campaign directory.
+
+    """
+    # Are there any directories specified?
+    c = load(name)
+    paths: list[str] | None = c.get("clean")
+    if not paths:
+        return
+
+    dirs = _campaign_subdirectories(name)
+
+    # Take those selected
+    existing_chosen = [path for (name, path) in dirs.items() if name in paths]
+
+    print('\n'.join(existing_chosen))
+    proceed = input("Proceed (y/[n]): ").lower() == "y"
+    if not proceed:
+        return
+
+    # And delete their contents, but not the directories
+    for path in existing_chosen:
+        _delete_directory_content(path)
