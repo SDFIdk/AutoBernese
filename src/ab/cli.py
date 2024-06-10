@@ -478,7 +478,9 @@ def sources(name: str, verbose: bool = False) -> None:
     )
 
     if verbose:
-        join = lambda pairs: "\n".join(f"{p.path_remote} -> {p.fname}" for p in pairs)
+        join = lambda pairs: "\n".join(
+            f"{p.path_remote} -> {p.path_local}/{p.fname}" for p in pairs
+        )
         formatted = (
             f"{info}{join(source.resolve())}\n"
             for (source, info) in zip(sources, formatted)
@@ -742,15 +744,13 @@ def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> N
     Build day file for each date for which there is data available.
 
     """
-    msg = f"Build VMF3 files for chosen interval {beg} to {end} ..."
-    log.info(msg)
-    print(msg)
-    for vmf_file in vmf.vmf_files(ipath, opath, beg, end):
-        msg = f"Building {vmf_file.output_file} ..."
+    log.info(f"Build VMF3 files for chosen interval {beg} to {end} ...")
+    for builder in vmf.day_file_builders(ipath, opath, beg, end):
+        msg = f"Building {builder.dayfile} ..."
         log.info(msg)
         print(msg, end=" ")
 
-        build_msg = vmf_file.build()
+        build_msg = builder.build()
         if build_msg:
             print("[red]FAILED[/red]")
             print(f"  Error: {build_msg}")
@@ -776,12 +776,13 @@ def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> N
 )
 def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
-    Show status for possible VMF3 dates.
-
-    Return status for each date for which there should be data available.
+    Print status for possible VMF3 day files in selecte interval.
 
     """
-    msg = f"Get VMF3 file status for files in chosen interval {beg} to {end} ..."
-    log.info(msg)
-    print(msg)
-    print([vmf_file.status() for vmf_file in vmf.vmf_files(ipath, opath, beg, end)])
+    log.info(f"Get VMF3 file status for files in chosen interval {beg} to {end} ...")
+    print(
+        [
+            vmf_file.status()
+            for vmf_file in vmf.day_file_builders(ipath, opath, beg, end)
+        ]
+    )
