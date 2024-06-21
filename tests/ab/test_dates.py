@@ -6,6 +6,7 @@ from ab.dates import (
     date_range,
     GPS_EPOCH,
     gps_week,
+    gps_weekday,
     date_from_gps_week,
 )
 
@@ -62,6 +63,25 @@ def test_date_range_extended_end():
 )
 def test_gps_week(date, week):
     assert gps_week(date) == week
+
+
+def test_gps_weekday():
+    test_data = (
+        (dt.date(2023, 10, 28), 6),
+        (dt.date(2023, 10, 29), 0),
+        (dt.date(2023, 10, 30), 1),
+        (dt.date(2023, 10, 31), 2),
+        (dt.date(2023, 11, 1), 3),
+        (dt.date(2023, 11, 2), 4),
+        (dt.date(2023, 11, 3), 5),
+        (dt.date(2023, 11, 4), 6),
+        (dt.date(2023, 11, 5), 0),
+        (dt.date(2023, 11, 6), 1),
+        (dt.date(2023, 11, 7), 2),
+    )
+    for date, expected in test_data:
+        result = gps_weekday(date)
+        assert result == expected, f"Expected {result!r} to be {expected!r} ..."
 
 
 def test_date_from_gps_week():
