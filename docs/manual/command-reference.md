@@ -875,6 +875,7 @@ Commands:
       "iso_week": 31,
       "iso_weekday": 7,
       "gps_week": 2222,
+      "gps_weekday": 0,
       "gps_week_beg": "2022-08-07",
       "gps_week_end": "2022-08-13"
     }
@@ -894,6 +895,7 @@ Commands:
       "iso_week": 31,
       "iso_weekday": 7,
       "gps_week": 2222,
+      "gps_weekday": 0,
       "gps_week_beg": "2022-08-07",
       "gps_week_end": "2022-08-13"
     }
@@ -913,6 +915,7 @@ Commands:
       "iso_week": 31,
       "iso_weekday": 7,
       "gps_week": 2222,
+      "gps_weekday": 0,
       "gps_week_beg": "2022-08-07",
       "gps_week_end": "2022-08-13"
     }

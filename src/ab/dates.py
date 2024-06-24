@@ -82,6 +82,20 @@ def gps_week(date: dt.date | dt.datetime) -> int:
     return (date - GPS_EPOCH).days // 7
 
 
+def gps_weekday(date: dt.date | dt.datetime) -> int:
+    """
+    Return given date's weekday number (zero-based) in GPS date.
+
+    Python date and datetime instances count from Monday starint at zero.
+
+    GPS weeks begin on Sundays and start at zero.
+
+    Thus, the weekday number for GPS is Python date instance + 1 modulus 7.
+
+    """
+    return (date.weekday() + 1) % 7
+
+
 def date_from_gps_week(gps_week: str | int) -> dt.date:
     return GPS_EPOCH + dt.timedelta(7 * int(gps_week))
 
@@ -133,6 +147,10 @@ class GPSDate(dt.datetime):
         return gps_week(self)
 
     @property
+    def gps_weekday(self) -> int:
+        return gps_weekday(self)
+
+    @property
     def doy(self) -> int:
         return doy(self)
 
@@ -147,6 +165,7 @@ class GPSDate(dt.datetime):
             iso_week=self.isocalendar()[1],
             iso_weekday=self.isocalendar()[2],
             gps_week=self.gps_week,
+            gps_weekday=self.gps_weekday,
             # GPS week corresponds to a specific date without timestamp.
             gps_week_beg=gps_week_beg.isoformat()[:10],
             gps_week_end=gps_week_end.isoformat()[:10],
