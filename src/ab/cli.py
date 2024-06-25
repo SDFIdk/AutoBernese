@@ -22,12 +22,12 @@ from ab import (
     __version__,
     configuration,
     dates,
+    task as _task,
     vmf,
 )
 from ab.bsw import (
     get_bsw_release,
     campaign as _campaign,
-    task as _task,
 )
 from ab.qaqc import (
     check_example,
