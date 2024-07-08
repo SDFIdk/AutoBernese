@@ -344,16 +344,14 @@ def download(
             source.max_age = 0
 
         if source.protocol == "ftp":
-            status = ftp.download(source)
-            status_total += status
-
+            agent = ftp
         elif source.protocol in ("http", "https"):
-            status = http.download(source)
-            status_total += status
-
+            agent = http
         elif source.protocol == "file":
-            status = file.download(source)
-            status_total += status
+            agent = file
+
+        status = agent.download(source)
+        status_total += status
 
         print(asdict(status))
 
@@ -379,6 +377,27 @@ def campaign(ctx: click.Context) -> None:
 
 
 @campaign.command
+@click.argument("name", type=str)
+def info(name: str) -> None:
+    """
+    Show campaign info
+
+    """
+    from ab.dates import date_range
+
+    config = _campaign.load(name)
+    metadata = _campaign.MetaData(**config.get("metadata"))
+    print(metadata)
+    epoch = metadata.beg + dt.timedelta((metadata.end - metadata.beg).days // 2)
+    print(f"Dates:")
+    for date in date_range(metadata.beg, metadata.end, transformer=dates.GPSDate):
+        is_epoch = "*" if date.date() == epoch else ""
+        print(
+            f"{is_epoch:1s} {date.isoformat()[:10]} {date.doy:0>3d} {date.gps_week:0>4d} {date.gps_weekday:1d}"
+        )
+
+
+@campaign.command
 @click.option("--verbose", "-v", is_flag=True, help="Print more details.")
 def ls(verbose: bool) -> None:
     """
@@ -393,9 +412,13 @@ def ls(verbose: bool) -> None:
     fstr = "{directory: <40s} {size: >10s} {template} {version} {username} {created}"
     lines = []
     for campaign_info in campaign_infos:
+        if campaign_info.size > 0:
+            size = humanize.naturalsize(campaign_info.size, binary=True)
+        else:
+            size = ""
         kwargs = {
             **asdict(campaign_info),
-            **{"size": humanize.naturalsize(campaign_info.size, binary=True)},
+            **{"size": size},
         }
         lines.append(fstr.format(**kwargs))
     print("\n".join(lines))
