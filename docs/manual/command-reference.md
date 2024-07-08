@@ -921,7 +921,7 @@ See also the description under **Build day files** for possible ways to run the
 command with or without configuration setup.
 
 ```sh title="Command"
-ab troposphere build -b 2023-01-01 -e 2023-01-02
+ab troposphere status -b 2023-01-01 -e 2023-01-02
 ```
 
 ```json title="Output"
