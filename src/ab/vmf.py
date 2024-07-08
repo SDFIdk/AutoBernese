@@ -28,24 +28,22 @@ log = logging.getLogger(__name__)
 _EARLIEST: Final = dt.date(2008, 1, 1)
 _LATEST: Final = dt.date.today() - dt.timedelta(1)
 
-_FSTR_IFNAME: Final = (
-    "{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
-)
-_FSTR_OFNAME: Final = "{date.year}/VMFG_{date.year}{date.doy:03d}0.GRD"
+_FSTR_IFNAME: Final = "VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
+_FSTR_OFNAME: Final = "VMFG_{date.year}{date.doy:03d}0.GRD"
 
 _HOURS: Final = ["00", "06", "12", "18"]
 
 
-def _input_filenames(date: dt.date | dt.datetime) -> list[str]:
+def _input_filepaths(path: Path, date: dt.date | dt.datetime) -> list[Path]:
     """
-    Return filenames ending with H00, H06, H12 and H18 for given date and
+    Return file paths ending with H00, H06, H12 and H18 for given date and
     filename ending with H00 for the following date
 
     """
     parameters = dict(date=[date], hour=_HOURS)
     combinations = resolved(parameters)
     combinations.append(dict(date=date + dt.timedelta(1), hour=_HOURS[0]))
-    return [_FSTR_IFNAME.format(**c) for c in combinations]
+    return [Path(str(path / _FSTR_IFNAME).format(**c)) for c in combinations]
 
 
 def concatenate(*parts: list[str]) -> str:
@@ -61,10 +59,8 @@ class DayFileBuilder:
     def __post_init__(self) -> None:
         self.ipath = Path(self.ipath)
         self.opath = Path(self.opath)
-        self.hour_files: list[Path] = [
-            self.ipath / fname for fname in _input_filenames(self.date)
-        ]
-        self.dayfile: Path = self.opath / _FSTR_OFNAME.format(date=self.date)
+        self.hour_files: list[Path] = _input_filepaths(self.ipath, self.date)
+        self.dayfile: Path = Path(str(self.opath / _FSTR_OFNAME).format(date=self.date))
 
     @property
     def input_available(self):
@@ -88,7 +84,7 @@ class DayFileBuilder:
 
     def status(self) -> dict[str, Any]:
         return dict(
-            date=self.date.isoformat(),
+            date=self.date.isoformat()[:10],
             input_available=self.input_available,
             output_file_exists=self.dayfile.is_file(),
             output_file=str(self.dayfile),

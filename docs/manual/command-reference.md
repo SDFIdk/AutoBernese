@@ -788,7 +788,7 @@ The above, gives the same result as with the arguments given in the special
 `.yaml` document.
 
 
-## Combine troposphere hour files to day
+## Combine troposphere hour files to day files
 
 ```sh title="Command"
 ab troposphere
@@ -797,44 +797,127 @@ ab troposphere
 ``` title="Output"
 Usage: ab troposphere [OPTIONS] COMMAND [ARGS]...
 
-  Stand-alone tools for troposphere data.
+  Stand-alone tools for troposphere-delay model data (VMF3).
 
 Options:
   --help  Show this message and exit.
 
 Commands:
-  build   Concatenate hour files (`H%H`) with troposphere delay model...
-  status  Show status for all possible VMF3 dates.
+  build   Concatenate hour files (`H%H`) into dayfiles.
+  status  Print availability of hour and day files in selected interval.
 ```
 
-### Build dayfiles
+The two sub commands `status` and `build` provide a status on the availability
+of input files (six-hour interval model data) and the existence of the output
+file storing the concatenated content of a complete day from midnight to
+midnight (both midnights included).
 
-Build dayfiles from previously-downloaded hour files for the given interval.
+The tool needs locations for the downloaded data and the output files as well as
+the interval dates so it can examine (`status`) the input and output or produce
+(`build`) the output files.
+
+The `status` and `build` commands have the same call signature with the following logic:
+
+*   Specify input path, output path and start and end dates to see status or build output.
+
+*   If either of (or both) the input path `ipath` or the output path `opath` are
+    not given, look for them in the common user configuration
+    (`autobernese.yaml`), where they should be defined in the following way
+    (using our path scheme, yours may differ):
+
+    ```yaml title="`autobernese.yaml`"
+    # (...)
+    troposphere:
+      ipath: /path/to/your/DATAPOOL/VMF3/1x1_OP_H/{date.year}
+      opath: /path/to/your/DATAPOOL/VMF3/1x1_OP_GRD/{date.year}
+    # (...)
+    ```
+
+    Or even so, using the AutoBernese YAML aliases:
+
+
+    ```yaml title="`autobernese.yaml`"
+    # (...)
+    troposphere:
+      ipath: !Path [*D, VMF3, '1x1_OP_H', '{date.year}']
+      opath: !Path [*D, VMF3, '1x1_OP_GRD', '{date.year}']
+    # (...)
+    ```
+
+
+### Build day files
+
+Build day files from previously-downloaded hour files for the given interval.
 
 ```sh title="Command"
-(ab) $ ab troposphere status $D/VMF3/grid/1x1/OP/ $D/VMF3/GRD/ -b 2023-01-01 -e 2023-01-02
+ab troposphere build -i $D/VMF3/1x1_OP_H/2022 -o $D/VMF3/1x1_OP_GRD/2022 -b 2023-01-01 -e 2023-01-02
 ```
 
 ``` title="Output"
 Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
-Building /home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230010.GRD ... SUCCESS
-Building /home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230020.GRD ... FAILED
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
+  Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
+```
+
+Under the hood, the actual full file paths to the input and output files are reated in the same way as you would define them in a AutoBernese `Source` configuration in your common or campaign-specific configuration file. The filepaths are thus created from a template path, where each filename is generated from an input date. Now, the name of the date instances is `date`.
+
+With this information, a user is able to use this in the input path given as the command-line input in the following way:
+
+```sh title="Command"
+ab troposphere build -i "${D}/VMF3/1x1_OP_H/{date.year}" -o "${D}/VMF3/1x1_OP_GRD/{date.year}" -b 2023-01-01 -e 2023-01-02
+```
+
+``` title="Output"
+Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
+  Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
+```
+
+Typing in the paths in this command is cumbersome, so it is more efficient to
+encode your path convention into the common user configuration file under its
+own section `troposphere`, like shown above.
+
+The same command would then look like this:
+
+```sh title="Command"
+ab troposphere build -b 2023-01-01 -e 2023-01-02
+```
+
+``` title="Output"
+Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
   Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
 ```
 
 
 ### Status
 
-Show the status of dayfiles and input they are based on for the given interval.
+Show the status of day files and input they are based on for the given interval.
+
+See also the description under **Build day files** for possible ways to run the
+command with or without configuration setup.
 
 ```sh title="Command"
-(ab) $ ab troposphere status $D/VMF3/grid/1x1/OP/ $D/VMF3/GRD/ -b 2023-01-01 -e 2023-01-02
+ab troposphere build -b 2023-01-01 -e 2023-01-02
 ```
 
 ```json title="Output"
 [
-    {'date': '2023-01-01', 'input_available': True, 'output_file_exists': True, 'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230010.GRD'},
-    {'date': '2023-01-02', 'input_available': False, 'output_file_exists': False, 'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230020.GRD'}
+  {
+    'date': '2023-01-01',
+    'input_available': True,
+    'output_file_exists': True,
+    'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD'
+  },
+  {
+    'date': '2023-01-02',
+    'input_available': False,
+    'output_file_exists': False,
+    'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD'
+  }
 ]
 ```
 

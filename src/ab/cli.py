@@ -11,7 +11,10 @@ from typing import (
     Any,
     Final,
 )
-from dataclasses import asdict
+from dataclasses import (
+    dataclass,
+    asdict,
+)
 
 import click
 from click_aliases import ClickAliasedGroup
@@ -714,17 +717,69 @@ def sitelogs2sta(
     sta.create_sta_file_from_sitelogs(**arguments)
 
 
-@main.group()
+@main.group(aliases=["vmf"])
 def troposphere() -> None:
     """
-    Stand-alone tools for troposphere data.
+    Stand-alone tools for troposphere-delay model data (VMF3).
 
     """
+
+
+@dataclass
+class CLITroposphereInput:
+    ipath: Path
+    opath: Path
+    beg: dt.date
+    end: dt.date
+
+
+def __get_troposphere_args(
+    ipath: Path | None, opath: Path | None, beg: dt.date | None, end: dt.date | None
+) -> CLITroposphereInput:
+    if ipath is None:
+        c_tro = configuration.load().get("troposphere")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing section `troposphere` from common configuration."
+            )
+        ipath = c_tro.get("ipath")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing input-path section `ipath` from `troposphere` section."
+            )
+
+    if opath is None:
+        c_tro = configuration.load().get("troposphere")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing section `troposphere` from common configuration."
+            )
+        opath = c_tro.get("opath")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing output-path section `opath` from `troposphere` section."
+            )
+
+    if beg is None:
+        beg = dt.date.today()
+
+    if end is None:
+        end = beg + dt.timedelta(days=1)
+
+    return CLITroposphereInput(ipath, opath, beg, end)
 
 
 @troposphere.command
-@click.argument("ipath", type=str)
-@click.argument("opath", type=str)
+@click.option(
+    "-i",
+    "--ipath",
+    type=str,
+)
+@click.option(
+    "-o",
+    "--opath",
+    type=str,
+)
 @click.option(
     "-b",
     "--beg",
@@ -737,31 +792,40 @@ def troposphere() -> None:
     type=date,
     help=f"Format: {DATE_FORMAT}",
 )
-def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
+def build(
+    ipath: str | None, opath: str | None, beg: dt.date | None, end: dt.date | None
+) -> None:
     """
-    Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
+    Concatenate hour files (`H%H`) into dayfiles.
 
     Build day file for each date for which there is data available.
 
     """
-    log.info(f"Build VMF3 files for chosen interval {beg} to {end} ...")
-    for builder in vmf.day_file_builders(ipath, opath, beg, end):
+    args = __get_troposphere_args(ipath, opath, beg, end)
+    log.info(f"Build VMF3 files for chosen interval {args.beg} to {args.end} ...")
+    for builder in vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end):
         msg = f"Building {builder.dayfile} ..."
         log.info(msg)
         print(msg, end=" ")
-
         build_msg = builder.build()
         if build_msg:
             print("[red]FAILED[/red]")
             print(f"  Error: {build_msg}")
             continue
-
         print("[green]SUCCESS[/green]")
 
 
 @troposphere.command
-@click.argument("ipath", type=str)
-@click.argument("opath", type=str)
+@click.option(
+    "-i",
+    "--ipath",
+    type=str,
+)
+@click.option(
+    "-o",
+    "--opath",
+    type=str,
+)
 @click.option(
     "-b",
     "--beg",
@@ -776,13 +840,18 @@ def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> N
 )
 def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
-    Print status for possible VMF3 day files in selecte interval.
+    Print availability of hour and day files in selected interval.
 
     """
-    log.info(f"Get VMF3 file status for files in chosen interval {beg} to {end} ...")
+    args = __get_troposphere_args(ipath, opath, beg, end)
+    log.info(
+        f"Get VMF3 file status for files in chosen interval {args.beg} to {args.end} ..."
+    )
     print(
         [
             vmf_file.status()
-            for vmf_file in vmf.day_file_builders(ipath, opath, beg, end)
+            for vmf_file in vmf.day_file_builders(
+                args.ipath, args.opath, args.beg, args.end
+            )
         ]
     )
