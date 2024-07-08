@@ -204,7 +204,7 @@ def _campaign_configuration(name: str) -> Path:
     return _campaign_dir(name) / "campaign.yaml"
 
 
-def build_campaign_menu(campaign_list: list[str]) -> str | None:
+def build_campaign_menu(campaign_list: list[str]) -> str:
     """
     Build content for a MENU_CMP.INP file with list of the given campaigns.
 
