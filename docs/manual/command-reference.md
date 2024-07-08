@@ -12,8 +12,8 @@ described below.
 Prints out help text to the terminal, describing the core themes of the
 application and showing the available sub commands.
 
-```sh title="Example"
-(ab) $ ab
+```sh title="Command"
+ab
 ```
 
 ``` title="Output"
@@ -91,8 +91,8 @@ environment.
 
 This command prints the current software version of AutoBernese.
 
-```sh title="Example"
-(ab) $ ab --version
+```sh title="Command"
+ab --version
 ```
 
 ``` title="Output"
@@ -104,8 +104,8 @@ This command prints the current software version of AutoBernese.
 This command prints the current software version and release of the activated
 Bernese installation in JSON format.
 
-```sh title="Example"
-(ab) $ ab --bsw-release
+```sh title="Command"
+ab --bsw-release
 ```
 
 ``` title="Output"
@@ -164,10 +164,10 @@ the software uses: -->
 === "Rendered configuration"
 
     ```sh title="Command"
-    (ab) $ ab config
+    ab config
     ```
 
-    ```python title="Example output"
+    ```python title="Output"
     {
         'bsw_env': {
             'C': '/home/bsw/prod/BERN54',
@@ -243,7 +243,7 @@ AutoBernese runtime directory:
 ```
 
 ```sh title="Command to see the rendered runtime configuration"
-(ab) $ ab config runtime
+ab config runtime
 ```
 
 ```python title="Rendered configuration"
@@ -308,8 +308,8 @@ see the following.
 
 === "Rendered configuration"
 
-    ```sh title="Example"
-    (ab) $ ab config sources
+    ```sh title="Command"
+    ab config sources
     ```
 
     ```python title="Output"
@@ -318,8 +318,8 @@ see the following.
 
 === "Command output"
 
-    ```sh title="Example"
-    (ab) $ ab download
+    ```sh title="Command"
+    ab download
     ```
 
     ``` title="Output"
@@ -333,7 +333,7 @@ see the following.
 
 This example illustrates the case, where a manually adding the AutoBernese
 configuration file `autobernese.yaml` with some entries in the `source` section
-is added to the [AutoBernese runtime directory](concepts.md).
+is added to the [AutoBernese runtime directory](../concepts.md).
 
 === "Configuration file segment"
 
@@ -365,8 +365,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
 
 === "Rendered configuration"
 
-    ```sh title="Example"
-    (ab) $ ab config sources
+    ```sh title="Command"
+    ab config sources
     ```
 
     ```python title="Output"
@@ -403,8 +403,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
 
 === "Command output"
 
-    ```sh title="Example"
-    (ab) $ ab download
+    ```sh title="Command"
+    ab download
     ```
 
     ``` title="Output"
@@ -478,8 +478,8 @@ campaign. This is explained in more detail in the section [Download sources][DOC
 
 === "Rendered configuration"
 
-    ```sh title="Example"
-    (ab) $ ab config -c <campaign-name> sources
+    ```sh title="Command"
+    ab config -c <campaign-name> sources
     ```
 
     ```python title="Output"
@@ -509,8 +509,8 @@ campaign. This is explained in more detail in the section [Download sources][DOC
 
 === "Command output"
 
-    ```sh title="Example"
-    (ab) $ ab download -c <campaign-name>
+    ```sh title="Command"
+    ab download -c <campaign-name>
     ```
 
     ``` title="Output"
