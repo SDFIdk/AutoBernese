@@ -468,7 +468,8 @@ def create_sta_file_from_sitelogs(
         output_sta_file = "sitelogs.STA"
 
     # Coerce
-    _sitelogs: list[Path] = [Path(path) for path in sitelogs]
+    assert None not in sitelogs
+    _sitelogs: list[Path] = [Path(path) for path in sitelogs if path is not None]
 
     output_sta_file = Path(output_sta_file)
     output_sta_file.parent.mkdir(parents=True, exist_ok=True)

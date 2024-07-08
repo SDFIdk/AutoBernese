@@ -688,7 +688,7 @@ This command shows what is extracted from a site-log file, when creating a
 STA-file with the other command.
 
 ```sh title="Command"
-(ab) $ ab station parse-sitelog $D/sitelogs/budp00dnk_20221113.log
+ab station parse-sitelog $D/sitelogs/budp00dnk_20221113.log
 ```
 
 ```json title="Output"
@@ -725,23 +725,26 @@ STA-file with the other command.
 As part of our internal pre-processing, we create a single STA-file from
 relevant site-log files.
 
-This can be done in three different ways depending on the input the command
+This can be done in four different ways depending on the input the command
 receives.
 
-#### Without any arguments, the command:
+
+#### No arguments
+
+Running the command with no arguments:
 
 ```sh title="Command"
 ab station sitelogs2sta
 ```
 
-Creates a STA file with the settings obtained from the `station` section of the
+creates a STA file with the settings obtained from the `station` section of the
 rendered AutoBernese configuration file.
 
 The default settings in the built-in configuration file are:
 
 
 ```yaml title="`station` section of the built-in configuration file"
---8<-- "src/ab/configuration/env.yaml:73:84"
+--8<-- "src/ab/configuration/env.yaml:107:117"
 ```
 
 In this case, the sitelogs to use will be all the `.log` files in `$D/sitelogs`,
@@ -749,43 +752,60 @@ with no individually-calibrated instrumentation, and the output file
 `sitelogs.STA` is placed in the directory `$D/station`.
 
 
+#### Using campaign-specific settings
+
+You may add the same section in your campaign-specific configuration file and provide the name of the campaign to the command in order to use this as your input.
+
+```yaml title="`campaign.yaml`"
+station:
+  sitelogs:
+  - !Path [*D, sitelogs, 'sta1*.log'
+  - !Path [*D, sitelogs, 'sta2*.log'
+  - !Path [*D, sitelogs, 'sta3*.log'
+  individually_calibrated: [sta1]
+  output_sta_file: !Path [*P, *campaign*, STA, campaign.STA]
+```
+
+This has the implications that you may use the YAML aliases available in the
+campaign configuration as well as thos in the common configuration.
+
+As seen in the example configuration above, you may then create the STA file
+directly inside your campaing's STA directory. If your campaign has the name
+`CAMPAIGN`, the command you type will then be:
+
+```sh title="Command"
+ab station sitelogs2sta -c CAMPAIGN
+```
+
+
 #### Create stations.STA from custom configuration file
 
-This example demonstrates how to build a STA file to the directory from which
-you run the command.
-
-Given a configuration file of the format:
+Thirdly, as this example demonstrates, you can build a STA file with a custom input YAML file located anywhere available on the filesystem. The following example also shows that the output file can be saved to your current working directory if not specific path is specified:
 
 ```yaml title="station.yaml"
 sitelogs:
 - BLAH00DNK_20230101.log
 - BLUH00DNK_20220101.log
-
 individually_calibrated: [BLUH]
-
 output_sta_file: sitelogs.STA
 ```
-
-The command:
 
 ```sh title="Command"
 ab station sitelogs2sta -f station.yaml
 ```
 
-Creates the file.
 
+#### Create stations.STA from command-line arguments
 
-### Create stations.STA from command-line arguments
-
-It is also possible to give all the settings to the command as command-line
-arguments:
+finally, it is also possible to give all the settings to the command as
+command-line arguments:
 
 ```sh title="Command"
-ab station sitelogs2sta -i BLAH00DNK_20230101.log -i BLUH00DNK_20220101.log -c BLUH -o sitelogs.STA
+ab station sitelogs2sta -i BLAH00DNK_20230101.log -i BLUH00DNK_20220101.log -k BLUH -o sitelogs.STA
 ```
 
 The above, gives the same result as with the arguments given in the special
-`.yaml` document.
+`station.yaml` file.
 
 
 ## Combine troposphere hour files to day files
