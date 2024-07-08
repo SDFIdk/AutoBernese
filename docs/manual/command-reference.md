@@ -12,8 +12,8 @@ described below.
 Prints out help text to the terminal, describing the core themes of the
 application and showing the available sub commands.
 
-```sh title="Example"
-(ab) $ ab
+```sh title="Command"
+ab
 ```
 
 ``` title="Output"
@@ -91,8 +91,8 @@ environment.
 
 This command prints the current software version of AutoBernese.
 
-```sh title="Example"
-(ab) $ ab --version
+```sh title="Command"
+ab --version
 ```
 
 ``` title="Output"
@@ -104,8 +104,8 @@ This command prints the current software version of AutoBernese.
 This command prints the current software version and release of the activated
 Bernese installation in JSON format.
 
-```sh title="Example"
-(ab) $ ab --bsw-release
+```sh title="Command"
+ab --bsw-release
 ```
 
 ``` title="Output"
@@ -164,10 +164,10 @@ the software uses: -->
 === "Rendered configuration"
 
     ```sh title="Command"
-    (ab) $ ab config
+    ab config
     ```
 
-    ```python title="Example output"
+    ```python title="Output"
     {
         'bsw_env': {
             'C': '/home/bsw/prod/BERN54',
@@ -243,7 +243,7 @@ AutoBernese runtime directory:
 ```
 
 ```sh title="Command to see the rendered runtime configuration"
-(ab) $ ab config runtime
+ab config runtime
 ```
 
 ```python title="Rendered configuration"
@@ -308,8 +308,8 @@ see the following.
 
 === "Rendered configuration"
 
-    ```sh title="Example"
-    (ab) $ ab config sources
+    ```sh title="Command"
+    ab config sources
     ```
 
     ```python title="Output"
@@ -318,8 +318,8 @@ see the following.
 
 === "Command output"
 
-    ```sh title="Example"
-    (ab) $ ab download
+    ```sh title="Command"
+    ab download
     ```
 
     ``` title="Output"
@@ -333,7 +333,7 @@ see the following.
 
 This example illustrates the case, where a manually adding the AutoBernese
 configuration file `autobernese.yaml` with some entries in the `source` section
-is added to the [AutoBernese runtime directory](concepts.md).
+is added to the [AutoBernese runtime directory](../concepts.md).
 
 === "Configuration file segment"
 
@@ -365,8 +365,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
 
 === "Rendered configuration"
 
-    ```sh title="Example"
-    (ab) $ ab config sources
+    ```sh title="Command"
+    ab config sources
     ```
 
     ```python title="Output"
@@ -403,8 +403,8 @@ is added to the [AutoBernese runtime directory](concepts.md).
 
 === "Command output"
 
-    ```sh title="Example"
-    (ab) $ ab download
+    ```sh title="Command"
+    ab download
     ```
 
     ``` title="Output"
@@ -478,8 +478,8 @@ campaign. This is explained in more detail in the section [Download sources][DOC
 
 === "Rendered configuration"
 
-    ```sh title="Example"
-    (ab) $ ab config -c <campaign-name> sources
+    ```sh title="Command"
+    ab config -c <campaign-name> sources
     ```
 
     ```python title="Output"
@@ -509,8 +509,8 @@ campaign. This is explained in more detail in the section [Download sources][DOC
 
 === "Command output"
 
-    ```sh title="Example"
-    (ab) $ ab download -c <campaign-name>
+    ```sh title="Command"
+    ab download -c <campaign-name>
     ```
 
     ``` title="Output"
@@ -688,7 +688,7 @@ This command shows what is extracted from a site-log file, when creating a
 STA-file with the other command.
 
 ```sh title="Command"
-(ab) $ ab station parse-sitelog $D/sitelogs/budp00dnk_20221113.log
+ab station parse-sitelog $D/sitelogs/budp00dnk_20221113.log
 ```
 
 ```json title="Output"
@@ -725,23 +725,26 @@ STA-file with the other command.
 As part of our internal pre-processing, we create a single STA-file from
 relevant site-log files.
 
-This can be done in three different ways depending on the input the command
+This can be done in four different ways depending on the input the command
 receives.
 
-#### Without any arguments, the command:
+
+#### No arguments
+
+Running the command with no arguments:
 
 ```sh title="Command"
 ab station sitelogs2sta
 ```
 
-Creates a STA file with the settings obtained from the `station` section of the
+creates a STA file with the settings obtained from the `station` section of the
 rendered AutoBernese configuration file.
 
 The default settings in the built-in configuration file are:
 
 
 ```yaml title="`station` section of the built-in configuration file"
---8<-- "src/ab/configuration/env.yaml:73:84"
+--8<-- "src/ab/configuration/env.yaml:107:117"
 ```
 
 In this case, the sitelogs to use will be all the `.log` files in `$D/sitelogs`,
@@ -749,46 +752,63 @@ with no individually-calibrated instrumentation, and the output file
 `sitelogs.STA` is placed in the directory `$D/station`.
 
 
+#### Using campaign-specific settings
+
+You may add the same section in your campaign-specific configuration file and provide the name of the campaign to the command in order to use this as your input.
+
+```yaml title="`campaign.yaml`"
+station:
+  sitelogs:
+  - !Path [*D, sitelogs, 'sta1*.log'
+  - !Path [*D, sitelogs, 'sta2*.log'
+  - !Path [*D, sitelogs, 'sta3*.log'
+  individually_calibrated: [sta1]
+  output_sta_file: !Path [*P, *campaign*, STA, campaign.STA]
+```
+
+This has the implications that you may use the YAML aliases available in the
+campaign configuration as well as thos in the common configuration.
+
+As seen in the example configuration above, you may then create the STA file
+directly inside your campaing's STA directory. If your campaign has the name
+`CAMPAIGN`, the command you type will then be:
+
+```sh title="Command"
+ab station sitelogs2sta -c CAMPAIGN
+```
+
+
 #### Create stations.STA from custom configuration file
 
-This example demonstrates how to build a STA file to the directory from which
-you run the command.
-
-Given a configuration file of the format:
+Thirdly, as this example demonstrates, you can build a STA file with a custom input YAML file located anywhere available on the filesystem. The following example also shows that the output file can be saved to your current working directory if not specific path is specified:
 
 ```yaml title="station.yaml"
 sitelogs:
 - BLAH00DNK_20230101.log
 - BLUH00DNK_20220101.log
-
 individually_calibrated: [BLUH]
-
 output_sta_file: sitelogs.STA
 ```
-
-The command:
 
 ```sh title="Command"
 ab station sitelogs2sta -f station.yaml
 ```
 
-Creates the file.
 
+#### Create stations.STA from command-line arguments
 
-### Create stations.STA from command-line arguments
-
-It is also possible to give all the settings to the command as command-line
-arguments:
+finally, it is also possible to give all the settings to the command as
+command-line arguments:
 
 ```sh title="Command"
-ab station sitelogs2sta -i BLAH00DNK_20230101.log -i BLUH00DNK_20220101.log -c BLUH -o sitelogs.STA
+ab station sitelogs2sta -i BLAH00DNK_20230101.log -i BLUH00DNK_20220101.log -k BLUH -o sitelogs.STA
 ```
 
 The above, gives the same result as with the arguments given in the special
-`.yaml` document.
+`station.yaml` file.
 
 
-## Combine troposphere hour files to day
+## Combine troposphere hour files to day files
 
 ```sh title="Command"
 ab troposphere
@@ -797,44 +817,127 @@ ab troposphere
 ``` title="Output"
 Usage: ab troposphere [OPTIONS] COMMAND [ARGS]...
 
-  Stand-alone tools for troposphere data.
+  Stand-alone tools for troposphere-delay model data (VMF3).
 
 Options:
   --help  Show this message and exit.
 
 Commands:
-  build   Concatenate hour files (`H%H`) with troposphere delay model...
-  status  Show status for all possible VMF3 dates.
+  build   Concatenate hour files (`H%H`) into dayfiles.
+  status  Print availability of hour and day files in selected interval.
 ```
 
-### Build dayfiles
+The two sub commands `status` and `build` provide a status on the availability
+of input files (six-hour interval model data) and the existence of the output
+file storing the concatenated content of a complete day from midnight to
+midnight (both midnights included).
 
-Build dayfiles from previously-downloaded hour files for the given interval.
+The tool needs locations for the downloaded data and the output files as well as
+the interval dates so it can examine (`status`) the input and output or produce
+(`build`) the output files.
+
+The `status` and `build` commands have the same call signature with the following logic:
+
+*   Specify input path, output path and start and end dates to see status or build output.
+
+*   If either of (or both) the input path `ipath` or the output path `opath` are
+    not given, look for them in the common user configuration
+    (`autobernese.yaml`), where they should be defined in the following way
+    (using our path scheme, yours may differ):
+
+    ```yaml title="`autobernese.yaml`"
+    # (...)
+    troposphere:
+      ipath: /path/to/your/DATAPOOL/VMF3/1x1_OP_H/{date.year}
+      opath: /path/to/your/DATAPOOL/VMF3/1x1_OP_GRD/{date.year}
+    # (...)
+    ```
+
+    Or even so, using the AutoBernese YAML aliases:
+
+
+    ```yaml title="`autobernese.yaml`"
+    # (...)
+    troposphere:
+      ipath: !Path [*D, VMF3, '1x1_OP_H', '{date.year}']
+      opath: !Path [*D, VMF3, '1x1_OP_GRD', '{date.year}']
+    # (...)
+    ```
+
+
+### Build day files
+
+Build day files from previously-downloaded hour files for the given interval.
 
 ```sh title="Command"
-(ab) $ ab troposphere status $D/VMF3/grid/1x1/OP/ $D/VMF3/GRD/ -b 2023-01-01 -e 2023-01-02
+ab troposphere build -i $D/VMF3/1x1_OP_H/2022 -o $D/VMF3/1x1_OP_GRD/2022 -b 2023-01-01 -e 2023-01-02
 ```
 
 ``` title="Output"
 Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
-Building /home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230010.GRD ... SUCCESS
-Building /home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230020.GRD ... FAILED
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
+  Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
+```
+
+Under the hood, the actual full file paths to the input and output files are reated in the same way as you would define them in a AutoBernese `Source` configuration in your common or campaign-specific configuration file. The filepaths are thus created from a template path, where each filename is generated from an input date. Now, the name of the date instances is `date`.
+
+With this information, a user is able to use this in the input path given as the command-line input in the following way:
+
+```sh title="Command"
+ab troposphere build -i "${D}/VMF3/1x1_OP_H/{date.year}" -o "${D}/VMF3/1x1_OP_GRD/{date.year}" -b 2023-01-01 -e 2023-01-02
+```
+
+``` title="Output"
+Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
+  Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
+```
+
+Typing in the paths in this command is cumbersome, so it is more efficient to
+encode your path convention into the common user configuration file under its
+own section `troposphere`, like shown above.
+
+The same command would then look like this:
+
+```sh title="Command"
+ab troposphere build -b 2023-01-01 -e 2023-01-02
+```
+
+``` title="Output"
+Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
   Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
 ```
 
 
 ### Status
 
-Show the status of dayfiles and input they are based on for the given interval.
+Show the status of day files and input they are based on for the given interval.
+
+See also the description under **Build day files** for possible ways to run the
+command with or without configuration setup.
 
 ```sh title="Command"
-(ab) $ ab troposphere status $D/VMF3/grid/1x1/OP/ $D/VMF3/GRD/ -b 2023-01-01 -e 2023-01-02
+ab troposphere build -b 2023-01-01 -e 2023-01-02
 ```
 
 ```json title="Output"
 [
-    {'date': '2023-01-01', 'input_available': True, 'output_file_exists': True, 'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230010.GRD'},
-    {'date': '2023-01-02', 'input_available': False, 'output_file_exists': False, 'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/GRD/VMFG_20230020.GRD'}
+  {
+    'date': '2023-01-01',
+    'input_available': True,
+    'output_file_exists': True,
+    'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD'
+  },
+  {
+    'date': '2023-01-02',
+    'input_available': False,
+    'output_file_exists': False,
+    'output_file': '/home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD'
+  }
 ]
 ```
 

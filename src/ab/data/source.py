@@ -159,8 +159,8 @@ class Source:
     description: str
     url: str | Path
     destination: str | Path
-    filenames: list[str | Path] = None
-    parameters: dict[str, Iterable[Any]] = None
+    filenames: list[str | Path] | None = None
+    parameters: dict[str, Iterable[Any]] | None = None
     max_age: int | float = math.inf
 
     def __post_init__(self):

@@ -17,7 +17,7 @@ class ReleaseInfo:
         return f"{self.version} ({self.release})"
 
 
-def get_bsw_release() -> dict[str, str]:
+def get_bsw_release() -> ReleaseInfo | None:
     config = configuration.load()
     fname = config.get("bsw_files", {}).get("release_info")
     if fname is None:

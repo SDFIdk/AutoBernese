@@ -11,7 +11,10 @@ from typing import (
     Any,
     Final,
 )
-from dataclasses import asdict
+from dataclasses import (
+    dataclass,
+    asdict,
+)
 
 import click
 from click_aliases import ClickAliasedGroup
@@ -22,12 +25,12 @@ from ab import (
     __version__,
     configuration,
     dates,
+    task as _task,
     vmf,
 )
 from ab.bsw import (
     get_bsw_release,
     campaign as _campaign,
-    task as _task,
 )
 from ab.qaqc import (
     check_example,
@@ -341,16 +344,14 @@ def download(
             source.max_age = 0
 
         if source.protocol == "ftp":
-            status = ftp.download(source)
-            status_total += status
-
+            agent = ftp
         elif source.protocol in ("http", "https"):
-            status = http.download(source)
-            status_total += status
-
+            agent = http
         elif source.protocol == "file":
-            status = file.download(source)
-            status_total += status
+            agent = file
+
+        status = agent.download(source)
+        status_total += status
 
         print(asdict(status))
 
@@ -376,6 +377,27 @@ def campaign(ctx: click.Context) -> None:
 
 
 @campaign.command
+@click.argument("name", type=str)
+def info(name: str) -> None:
+    """
+    Show campaign info
+
+    """
+    from ab.dates import date_range
+
+    config = _campaign.load(name)
+    metadata = _campaign.MetaData(**config.get("metadata"))
+    print(metadata)
+    epoch = metadata.beg + dt.timedelta((metadata.end - metadata.beg).days // 2)
+    print(f"Dates:")
+    for date in date_range(metadata.beg, metadata.end, transformer=dates.GPSDate):
+        is_epoch = "*" if date.date() == epoch else ""
+        print(
+            f"{is_epoch:1s} {date.isoformat()[:10]} {date.doy:0>3d} {date.gps_week:0>4d} {date.gps_weekday:1d}"
+        )
+
+
+@campaign.command
 @click.option("--verbose", "-v", is_flag=True, help="Print more details.")
 def ls(verbose: bool) -> None:
     """
@@ -390,9 +412,13 @@ def ls(verbose: bool) -> None:
     fstr = "{directory: <40s} {size: >10s} {template} {version} {username} {created}"
     lines = []
     for campaign_info in campaign_infos:
+        if campaign_info.size > 0:
+            size = humanize.naturalsize(campaign_info.size, binary=True)
+        else:
+            size = ""
         kwargs = {
             **asdict(campaign_info),
-            **{"size": humanize.naturalsize(campaign_info.size, binary=True)},
+            **{"size": size},
         }
         lines.append(fstr.format(**kwargs))
     print("\n".join(lines))
@@ -478,7 +504,9 @@ def sources(name: str, verbose: bool = False) -> None:
     )
 
     if verbose:
-        join = lambda pairs: "\n".join(f"{p.path_remote} -> {p.fname}" for p in pairs)
+        join = lambda pairs: "\n".join(
+            f"{p.path_remote} -> {p.path_local}/{p.fname}" for p in pairs
+        )
         formatted = (
             f"{info}{join(source.resolve())}\n"
             for (source, info) in zip(sources, formatted)
@@ -617,12 +645,20 @@ def parse_sitelog(filename: Path) -> None:
 
 @station.command
 @click.option(
+    "-c",
+    "--campaign",
+    required=False,
+    default=None,
+    type=str,
+    help="Campaign-specific station data.",
+)
+@click.option(
     "-f",
     "--config",
     required=False,
     default=None,
     type=Path,
-    help="Path to an input YAML file with the keys `sitelogs`, `individually_calibrated` and `output_sta_file` given.",
+    help="Path to an input YAML file with valid `station`.",
 )
 @click.option(
     "-i",
@@ -632,7 +668,7 @@ def parse_sitelog(filename: Path) -> None:
     help="One or more paths to site-log files to build the STA-file from.",
 )
 @click.option(
-    "-c",
+    "-k",
     "individually_calibrated",
     multiple=True,
     type=str,
@@ -642,50 +678,90 @@ def parse_sitelog(filename: Path) -> None:
     "-o",
     "output_filename",
     required=False,
-    type=Path,
     default=Path(".").resolve() / "sitelogs.STA",
-    help="Path to output filename for the STA file. If none given, the output is saved as ./sitelogs.STA.",
-)
-@click.option(
-    "-C",
-    "--campaign",
-    help="Campaign-specific station data.",
-    required=False,
+    type=Path,
+    help="Path to optional output path and filename for the STA file.",
 )
 def sitelogs2sta(
+    campaign: str,
     config: Path,
     sitelogs: tuple[Path],
     individually_calibrated: tuple[str],
     output_filename: Path,
-    campaign: str | None = None,
 ) -> None:
     """
-    Create a STA file from sitelogs and other station info.
-
-    -   Site-log filenames are required.
-    -   Four-letter IDs for individually-calibrated stations are optional.
-    -   The path to the output STA file is optional. (If none given, the file
-        will be written to sitelogs.STA in the current working directory.)
+    Create a STA file from sitelogs and optional station information.
 
     Choose one of the following ways to run it:
 
-    1.  Supply needed and optional arguments on the command line.
+    1.  No arguments: Use input provided in common user configuration
+        (`autobernese.yaml`).
 
-    2.  Supply path to a YAML file with the needed and/or optional arguments.
+    2.  Use the flag `-c` to suppply a name for a campaign whose configuration
+        (`campaign.yaml`) contains to create a STA file from standard settings
+        in campaign-specific configuration.
 
-        The file is loaded with the current Bernese environment, so advanced
-        paths are possible, e.g. `!Path [*D, station, sitelogs.STA]`.
+    2.  Use the flag `-f` to supply a path to a custom path to a YAML file with
+        arguments.
 
-    3.  Supply no arguments, and a STA file is created based on the input
-        arguments given in the general or user-supplied configuration file.
+    4.  Use flags `-i`, `-k` and `-o` to supply needed and optional arguments on
+        the command line.
 
-    4.  Supply campaign name to create a STA file from standard settings in
-        campaign-specific configuration.
+
+    The following arguments are possible:
+
+    \b
+    *   Site-log filenames are required.
+    *   Four-letter IDs for individually-calibrated stations are optional.
+    *   The path to the output STA file is optional. (Default: `sitelogs.STA`)
+
+    These arguments can be provided in a configuration file which has the
+    following structure:
+
+    \b
+    ```yaml
+    station:
+      sitelogs: [sta1.log, sta2.log]
+      individually_calibrated: [sta1]
+      output_sta_file: /path/to/output.STA
+    ```
+
+    Provided configuration files are loaded with the current Bernese
+    environment, so advanced paths are possible, e.g.
+
+    \b
+    ```yaml
+    sitelogs: !Path [*D, sitelogs, '*.log']
+    ```
+
+    which will give a sequence of all the files ending with `log` in the given
+    directory.
+
+    \b
+    ```yaml
+    sitelogs:
+    - !Path [*D, sitelogs, 'sta1*.log']
+    - !Path [*D, sitelogs, 'sta2*.log']
+    - !Path [*D, sitelogs, 'sta3*.log']
+    ```
+
+    which will let you create the sequence of filenames yourself when you want
+    to specifiy specific stations. The wildcard `*` lets you avoid having to
+    look up the date, when the file was last updated.
+
+    For the output STA file, you can also write the following:
+
+    \b
+    ```yaml
+    output_sta_file: `!Path [*D, station, sitelogs.STA]`
+    ```
 
     """
     arguments: dict[str, Any] | None = None
     if config is not None:
-        log.info(f"Create STA file from arguments in given input-file.")
+        msg = f"Create STA file with arguments in file {config.absolute()}."
+        log.info(msg)
+        print(msg)
         arguments = configuration.with_env(config)
 
     elif sitelogs:
@@ -697,11 +773,17 @@ def sitelogs2sta(
         )
 
     elif campaign is not None:
-        log.info(f"Create STA file from arguments in campaign-specific configuration.")
+        msg = (
+            f"Create STA file from arguments in configuration for campaing {campaign}."
+        )
+        log.info(msg)
+        print(msg)
         arguments = _campaign.load(campaign).get("station")
 
     elif configuration.load().get("station") is not None:
-        log.info(f"Create STA file from arguments in the configuration.")
+        msg = f"Create STA file from arguments in the common user configuration `autobernese.yaml`."
+        log.info(msg)
+        print(msg)
         arguments = configuration.load().get("station")
 
     if arguments is None:
@@ -709,20 +791,73 @@ def sitelogs2sta(
         print(msg)
         log.info(msg)
         return
+
     sta.create_sta_file_from_sitelogs(**arguments)
 
 
-@main.group()
+@main.group(aliases=["vmf"])
 def troposphere() -> None:
     """
-    Stand-alone tools for troposphere data.
+    Stand-alone tools for troposphere-delay model data (VMF3).
 
     """
+
+
+@dataclass
+class CLITroposphereInput:
+    ipath: Path
+    opath: Path
+    beg: dt.date
+    end: dt.date
+
+
+def __get_troposphere_args(
+    ipath: Path | None, opath: Path | None, beg: dt.date | None, end: dt.date | None
+) -> CLITroposphereInput:
+    if ipath is None:
+        c_tro = configuration.load().get("troposphere")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing section `troposphere` from common configuration."
+            )
+        ipath = c_tro.get("ipath")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing input-path section `ipath` from `troposphere` section."
+            )
+
+    if opath is None:
+        c_tro = configuration.load().get("troposphere")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing section `troposphere` from common configuration."
+            )
+        opath = c_tro.get("opath")
+        if c_tro is None:
+            raise SystemExit(
+                f"Missing output-path section `opath` from `troposphere` section."
+            )
+
+    if beg is None:
+        beg = dt.date.today()
+
+    if end is None:
+        end = beg + dt.timedelta(days=1)
+
+    return CLITroposphereInput(ipath, opath, beg, end)
 
 
 @troposphere.command
-@click.argument("ipath", type=str)
-@click.argument("opath", type=str)
+@click.option(
+    "-i",
+    "--ipath",
+    type=str,
+)
+@click.option(
+    "-o",
+    "--opath",
+    type=str,
+)
 @click.option(
     "-b",
     "--beg",
@@ -735,33 +870,40 @@ def troposphere() -> None:
     type=date,
     help=f"Format: {DATE_FORMAT}",
 )
-def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
+def build(
+    ipath: str | None, opath: str | None, beg: dt.date | None, end: dt.date | None
+) -> None:
     """
-    Concatenate hour files (`H%H`) with troposphere delay model into dayfiles.
+    Concatenate hour files (`H%H`) into dayfiles.
 
     Build day file for each date for which there is data available.
 
     """
-    msg = f"Build VMF3 files for chosen interval {beg} to {end} ..."
-    log.info(msg)
-    print(msg)
-    for vmf_file in vmf.vmf_files(ipath, opath, beg, end):
-        msg = f"Building {vmf_file.output_file} ..."
+    args = __get_troposphere_args(ipath, opath, beg, end)
+    log.info(f"Build VMF3 files for chosen interval {args.beg} to {args.end} ...")
+    for builder in vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end):
+        msg = f"Building {builder.dayfile} ..."
         log.info(msg)
         print(msg, end=" ")
-
-        build_msg = vmf_file.build()
+        build_msg = builder.build()
         if build_msg:
             print("[red]FAILED[/red]")
             print(f"  Error: {build_msg}")
             continue
-
         print("[green]SUCCESS[/green]")
 
 
 @troposphere.command
-@click.argument("ipath", type=str)
-@click.argument("opath", type=str)
+@click.option(
+    "-i",
+    "--ipath",
+    type=str,
+)
+@click.option(
+    "-o",
+    "--opath",
+    type=str,
+)
 @click.option(
     "-b",
     "--beg",
@@ -776,12 +918,18 @@ def build(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> N
 )
 def status(ipath: str, opath: str, beg: dt.date | None, end: dt.date | None) -> None:
     """
-    Show status for possible VMF3 dates.
-
-    Return status for each date for which there should be data available.
+    Print availability of hour and day files in selected interval.
 
     """
-    msg = f"Get VMF3 file status for files in chosen interval {beg} to {end} ..."
-    log.info(msg)
-    print(msg)
-    print([vmf_file.status() for vmf_file in vmf.vmf_files(ipath, opath, beg, end)])
+    args = __get_troposphere_args(ipath, opath, beg, end)
+    log.info(
+        f"Get VMF3 file status for files in chosen interval {args.beg} to {args.end} ..."
+    )
+    print(
+        [
+            vmf_file.status()
+            for vmf_file in vmf.day_file_builders(
+                args.ipath, args.opath, args.beg, args.end
+            )
+        ]
+    )
