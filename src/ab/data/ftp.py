@@ -98,12 +98,19 @@ def download(source: Source) -> DownloadStatus:
                 destination.mkdir(parents=True, exist_ok=True)
 
                 if "*" not in pair.fname:
+                    log.debug(
+                        f"Filename {pair.fname!r} has no wildcard and is added to the download list."
+                    )
                     # If the filename has no wildcard, just download the file
-                    to_download = [pair.fname]
+                    candidates = [pair.fname]
+
+                    # NOTE: At this point, we do not know if the filename in
+                    # `candidates` exists on the server.
 
                 else:
                     # Get files that match the current source filename
-                    to_download = [
+                    log.debug("Searching for wildcard results")
+                    candidates = [
                         candidate
                         for candidate in list_files(ftp, pair.path_remote)
                         # This, effectively, resolves the actual filename of the
@@ -113,40 +120,49 @@ def download(source: Source) -> DownloadStatus:
                         if fnmatch(candidate, pair.fname)
                     ]
 
-                if not to_download:
+                    # NOTE: At this point, we do know that the filenames in
+                    # `candidates` actually exist on the server.
+
+                if not candidates:
                     log.info(
                         f"Found no files matching {pair.path_remote}/{pair.fname} ..."
                     )
                     status.not_found += 1
                     continue
 
-                # Finally, download each of the filenames resolved
-                ftp.cwd(pair.path_remote)
-                for fname in to_download:
-                    # Get the resolved destination filename
+                # Filter out files already available
+                to_download = []
+                for fname in candidates:
+                    # Get resolved destination filename
                     ofname = destination / fname
-
                     if already_updated(ofname, max_age=source.max_age):
                         log.debug(f"{ofname.name} already downloaded ...")
                         status.existing += 1
                         continue
+                    to_download.append((fname, ofname))
 
-                    log.info(f"Downloading {ofname.name} ...")
+                # Finally, download each of the filenames resolved
+                ftp.cwd(pair.path_remote)
+                for fname, ofname in to_download:
+                    log.info(f"Downloading {fname} ...")
                     try:
-                        # Note: `pathlib.Path.write_text` is awesome, since it
-                        # eliminated the use of the with-statement, but when it
-                        # is used as a callback function in `retrbinary`, this
-                        # is called for each chunk of data, which means that the
-                        # file is overwritten with each new chunk only
+                        # NOTE: `pathlib.Path.write_text` can not be used as a
+                        # callback function in `retrbinary`, because it is
+                        # called for each chunk of data, which means that the
+                        # file is overwritten with each new chunk, thus only
                         # preserving the last chunk in the 'downloaded' file.
-                        # Therefore, we stick with the older way.
+
+                        # Therefore, we use the write on the context manager
                         with open(ofname, "wb") as f:
                             ftp.retrbinary(f"RETR {fname}", f.write)
 
                     except error_perm as e:
                         log.warn(f"Filename {fname} could not be downloaded ...")
                         log.debug(f"{e}")
+                        log.info(f"Deleting empty or incomplete {ofname} ...")
+                        ofname.unlink()
                         status.failed += 1
+                        continue
 
                     status.downloaded += 1
 
