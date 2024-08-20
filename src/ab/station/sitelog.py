@@ -121,13 +121,13 @@ def compile(s: str, flags=re.M) -> re.Pattern:
 
 
 # Section 1
-IERS_DOMES_NUMBER = compile(r"IERS DOMES Number\s*:\s(.*)")
+IERS_DOMES_NUMBER = compile(r"IERS DOMES Number\s*:\s*(\S*)$")
 SITE_NAME = compile(r"Site Name\s*:\s+(.*)")
-FOUR_CHARACTER_ID = compile(r"Four Character ID\s+:\s+([A-Z0-9]{4}?)")
+FOUR_CHARACTER_ID = compile(r"(?:Four|Nine) Character ID\s+:\s+([A-Z0-9]{4}?)")
 
 # Section 2
 CITY_OR_TOWN = compile(r"City or Town\s+:\s+(.*)")
-COUNTRY = compile(r"Country\s+:\s+(.*)")
+COUNTRY = compile(r"Country\s+(?:or Region)?\s+:\s+(.*)")
 
 # Section 3
 RECEIVER_TYPE = compile(r"Receiver Type\s+:\s(.*)")
