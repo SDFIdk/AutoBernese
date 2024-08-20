@@ -138,8 +138,8 @@ FIRMWARE_VERSION = compile(r"Firmware Version\s+:\s(.*)")
 ANTENNA_TYPE = compile(r"Antenna Type\s+:\s+(.*)")
 ANTENNA_SERIAL_NUMBER = compile(r"Serial Number\s+:\s+(.*)\s?[\r\n]")
 MARKER_UP = compile(r"Marker->ARP Up.*\s+:\s+([\.\d]*)")
-MARKER_NORTH = compile(r"Marker->ARP North.*\s+:\s+([\.\d]*)")
-MARKER_EAST = compile(r"Marker->ARP East.*\s+:\s+([\.\d]*)")
+MARKER_NORTH = compile(r"Marker->ARP North.*\s+:\s+(-?[\.\d]*)")
+MARKER_EAST = compile(r"Marker->ARP East.*\s+:\s+(-?[\.\d]*)")
 
 # Common for the given sections
 DATE_INSTALLED = compile(r"Date Installed\s+:\s+(\d{4})-(\d{2})-(\d{2})")
