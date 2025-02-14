@@ -17,7 +17,7 @@ from dataclasses import (
 )
 
 import click
-from click_aliases import ClickAliasedGroup
+from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 import humanize
 
