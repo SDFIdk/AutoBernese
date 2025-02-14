@@ -19,6 +19,9 @@ import ab.configuration.yaml_constructors
 from ab import pkg
 
 
+yaml_constructors.init()
+
+
 _CONFIGURATION: dict[str, Any] = None
 _POP: Final = (
     "bsw_env",

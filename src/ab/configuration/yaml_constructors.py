@@ -6,10 +6,10 @@ recommended way to load YAML-files.
 
 """
 
+import datetime as dt
 from pathlib import Path
 from typing import Iterable
-
-# import functools
+import functools
 
 import yaml
 from yaml_env_tag import construct_env_tag
@@ -40,7 +40,7 @@ def resolve_wildcards(path: Path | str) -> Iterable[Path]:
     return Path(path.root).glob(str(Path(*parts)))
 
 
-def path_constructor(loader: yaml.Loader, node: yaml.Node) -> None | Path | list[Path]:
+def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     """
     The path constructor can work on two types of input:
 
@@ -56,9 +56,9 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> None | Path | list
 
     ---
 
-    2) A sequence of different components useful, when one or more components
-       are YAML aliases referring to a string somewhere else in the YAML
-       document.
+    2) A sequence of path components, which is useful when one or more
+       components are YAML aliases referring to a string somewhere else in the
+       YAML document.
 
     More complex paths can thus be constructed by supplying the YAML tag with a
     sequence of path elements.
@@ -70,16 +70,15 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> None | Path | list
 
     ```yaml
 
-    key1: [*alias_to_a_base_path, subdirectory, file.txt]
-    key2:
-    - *alias_to_a_base_path
-    - subdirectory
-    - file.txt
+    key1: !Path [*alias_to_a_base_path, subdirectory, file.txt]
 
     ```
 
-    Any element in the sequence, except the first element, may use the common
-    wildcard `*` to specify any matching files.
+    Return types
+    ------------
+
+    Any element in the path or sequence of path components (except the first
+    element), may use the common wildcard `*` to specify any matching files.
 
     In this case, the constructor will return not one single Path instance, but
     a list of all matches found, except when only one result is found. In that
@@ -95,15 +94,16 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> None | Path | list
         path: Path = Path(loader.construct_scalar(node))
     else:
         # We use loader.construct_object, since there may be YAML aliases inside.
-        # Any YAML alias is assumed to resolve into to a string.
         multiple: list[str | Path] = [loader.construct_object(v) for v in node.value]
         path = Path(*multiple)
+
+    # Avoid relative paths `dir/../dir2`
+    path = path.absolute()
 
     resolved = list(resolve_wildcards(path))
 
     if not resolved:
-        # EnvironmentError(f"Path {path} could not be resolved.")
-        return None
+        EnvironmentError(f"Path {path!r} could not be resolved.")
 
     if len(resolved) > 1:
         return resolved
@@ -118,53 +118,17 @@ def path_as_str_constructor(loader: yaml.Loader, node: yaml.Node) -> str | list[
     return str(paths)
 
 
-def parent_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | str:
+def parent_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     """
-    Given a path, the constructor returns the parent directory of that path.
+    Returns the parent directory of the path given.
 
-    The constructor can work on fully specified path strings like the following:
-
-    *   /some/path/to/somewhere
-    *   /some/path/to/some.file
-
-    In both these cases, a Path instance of the path `/some/path/to` is
-    returned.
-
-    The supplied path may be a pointer (YAML alias) to another value in the
-    document. In this case, the value must be encapsulated in a YAML sequence:
-
-    *   [*alias]
-
-    If the conversion fails for any reason, the constructor returns an empty
-    string.
+    Expected input is the same as for path_contructor.
 
     """
-    # Break if the input is unexpected
-    if not isinstance(node, (yaml.ScalarNode, yaml.SequenceNode)):
-        raise KeyError(
-            f"Must be single string or list of strings. Got {node.value!r} ..."
-        )
-    # TODO: Remove try-except clauses.
-    try:
-        if isinstance(node, yaml.ScalarNode):
-            # Assume it is a single string specifying a path
-            # Grab the string value (a YAML scalar) and make a Path instance
-            raw_string_or_path = Path(loader.construct_scalar(node)).absolute().parent
-
-        else:
-            # At this point, it is a YAML sequence.
-            #
-            # We assume that it has a single item which could be a single string
-            # or an aliased value.
-            #
-            # We unpack the single item with `node.value[0]` and construct the
-            # object, string or aliased value (presumeably a Path instance or a
-            # single string that can be given to the Path constructor).
-            raw_string_or_path = loader.construct_object(node.value[0])
-
-        return Path(raw_string_or_path).absolute().parent
-    except:
-        return ""
+    paths = path_constructor(loader, node)
+    if isinstance(paths, list):
+        return [path.parent for path in paths]
+    return paths.parent
 
 
 def source_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> Source:
@@ -224,13 +188,45 @@ def date_range_constructor(
 
     """
     d = loader.construct_mapping(node)
-    result: list[GPSDate] = date_range(
-        d.get("beg"),
-        d.get("end"),
-        extend_end_by=d.get("extend_end_by", 0),
-        transformer=GPSDate,
+    result: list[GPSDate] = list(
+        date_range(
+            d.get("beg"),
+            d.get("end"),
+            extend_end_by=d.get("extend_end_by", 0),
+            transformer=GPSDate,
+        )
     )
     return result
+
+
+def date_offset_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> GPSDate:
+    d = loader.construct_mapping(node)
+    date = GPSDate.from_date(d.get("date"))
+    delta = dt.timedelta(days=d.get("days"))
+    return date + delta
+
+
+# def middle_epoch_constructor(
+#     loader: yaml.Loader, node: yaml.MappingNode
+# ) -> GPSDate:
+#     """
+#     From given beginning and end dates, return the middle date.
+
+#     If the list of dates has even number of dates, choose the left, except if
+#     the argument use_right is True.
+
+#     """
+#     dates = date_range_constructor(loader, node)
+#     # Get the raw input data anyway, to extract constructor-specific arguments.
+#     d = loader.construct_mapping(node)
+#     if d.get("right", False) == True:
+#         return len(dates) // 2 + 1
+#     return len(dates) // 2
+#     #  0  1 [2] 3  4
+#     # [1, 2, 3, 4, 5]  :: len // 2 == 5 // 2 == 2 :: so index 2 is selected, i.e. the middle.
+
+#     #  0  1  2,[3] 4  5
+#     # [1, 2, 3, 4, 5, 6]  :: len // 2 == 6 // 2 == 3 :: So index 2 is selected, i.e. the middle.
 
 
 def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask:
@@ -241,22 +237,32 @@ def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask
     return BPETask(**loader.construct_mapping(node, deep=True))
 
 
-yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
-yaml.SafeLoader.add_constructor("!Path", path_constructor)
-yaml.SafeLoader.add_constructor("!PathStr", path_as_str_constructor)
-yaml.SafeLoader.add_constructor("!Parent", parent_constructor)
-yaml.SafeLoader.add_constructor("!Source", source_constructor)
-yaml.SafeLoader.add_constructor("!GPSDate", gps_date_constructor)
-yaml.SafeLoader.add_constructor("!DateRange", date_range_constructor)
-yaml.SafeLoader.add_constructor("!AsGPSDate", date_to_gps_date_constructor)
-yaml.SafeLoader.add_constructor("!BPETask", bpe_task_constructor)
+def convert_to_GPSDate_instance(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print("Called the wrapper ...")
+        return GPSDate.from_date(func(*args, **kwargs))
+
+    return wrapper
 
 
-# def convert_to_GPSDate_instance(func):
-#     @functools.wraps(func)
-#     def wrapper(*args, **kwargs):
-#         return GPSDate.from_date(func(*args, **kwargs))
-#     return wrapper
+def init():
+    yaml.SafeLoader.add_constructor("!ENV", construct_env_tag)
+    yaml.SafeLoader.add_constructor("!Path", path_constructor)
+    yaml.SafeLoader.add_constructor("!PathStr", path_as_str_constructor)
+    yaml.SafeLoader.add_constructor("!Parent", parent_constructor)
+    yaml.SafeLoader.add_constructor("!Source", source_constructor)
+    yaml.SafeLoader.add_constructor("!GPSDate", gps_date_constructor)
+    yaml.SafeLoader.add_constructor("!DateRange", date_range_constructor)
+    yaml.SafeLoader.add_constructor("!AsGPSDate", date_to_gps_date_constructor)
+    yaml.SafeLoader.add_constructor("!DateOffset", date_offset_constructor)
+    yaml.SafeLoader.add_constructor("!BPETask", bpe_task_constructor)
 
+    # Update the constructor for timestamps, so that it makes times stamps
+    # GPSDate instances.
 
-# yaml.SafeLoader.construct_yaml_timestamp = convert_to_GPSDate_instance(yaml.SafeLoader.construct_yaml_timestamp)
+    # TODO or not TODO (all timestamps will be converted)
+    # from yaml.loader import SafeLoader
+    # tag = "tag:yaml.org,2002:timestamp"
+    # func = SafeLoader.yaml_constructors[tag]
+    # SafeLoader.yaml_constructors[tag] = convert_to_GPSDate_instance(func)
