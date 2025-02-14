@@ -17,11 +17,11 @@ class ReleaseInfo:
         return f"{self.version} ({self.release})"
 
 
-def get_bsw_release() -> ReleaseInfo | None:
+def get_bsw_release() -> ReleaseInfo:
     config = configuration.load()
     fname = config.get("bsw_files", {}).get("release_info")
     if fname is None:
-        return
+        return ReleaseInfo("", "")
     lines = fname.read_text().strip().splitlines()
     return ReleaseInfo(
         lines[0].split()[-1],
