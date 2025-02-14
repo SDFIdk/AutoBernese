@@ -361,6 +361,17 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     create_campaign_configuration_file(campaign_dir, metadata)
 
 
+def change_environment_variables(changes: list[dict[str, Any]]) -> None:
+    for change in changes:
+        variable = change.get("variable")
+        # Anything can be given in the YAML document, but only a single-word
+        # string is acceptable as variable name.
+        if not (s := str(variable)) == variable or s.strip() != s or s.split()[0] != s:
+            continue
+        value = str(change.get("value"))
+        os.environ[variable] = value
+
+
 def load(name: str) -> dict[str, Any]:
     """
     Load a given campaign configuration.
@@ -371,7 +382,11 @@ def load(name: str) -> dict[str, Any]:
         raise SystemExit(
             f"Campaign {name!r} does not exist or has no campaign-specific configuration file {ifname.name} ..."
         )
-    return configuration.with_env(ifname)
+    c = configuration.with_env(ifname)
+    if (changes := c.get("environment")) is not None:
+        if isinstance(changes, list):
+            change_environment_variables(changes)
+    return c
 
 
 def _campaign_subdirectories(name: str) -> dict[str, str]:
