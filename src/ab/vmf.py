@@ -47,7 +47,7 @@ def _input_filepaths(path: Path, date: dt.date | dt.datetime) -> list[Path]:
 
 
 def concatenate(*parts: list[str]) -> str:
-    return ("{}\n" * len(parts)).format(*parts)
+    return ("{}" * len(parts)).format(*parts)
 
 
 @dataclass
