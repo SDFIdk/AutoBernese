@@ -1,5 +1,9 @@
 """
-Module for building .GRD-files for each day.
+A module for working with gridded troposphere data from Technical University of
+Vienna presuming specifically data from the Vienna Mapping Function 3 (VMF3).
+
+The goal is to concatenate data files from a given day covering intervals of
+that day into a single file with data for that entire day.
 
 """
 
@@ -26,10 +30,10 @@ log = logging.getLogger(__name__)
 
 # First date with data on the source server.
 _EARLIEST: Final = dt.date(2008, 1, 1)
-_LATEST: Final = dt.date.today() - dt.timedelta(1)
+_LATEST: Final = dt.date.today() - dt.timedelta(days=1)
 
 _FSTR_IFNAME: Final = "VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
-_FSTR_OFNAME: Final = "VMFG_{date.year}{date.doy:03d}0.GRD"
+_FSTR_OFNAME: Final = "VMF3_{date.year}{date.doy:03d}0.GRD"
 
 _HOURS: Final = ["00", "06", "12", "18"]
 
