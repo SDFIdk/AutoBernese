@@ -54,8 +54,7 @@ C = TypeVar("C", bound="Comparable")
 
 
 class Comparable(Protocol):
-    def __sub__(self, other: C) -> C:
-        ...
+    def __sub__(self, other: C) -> C: ...
 
     __rsub__ = __sub__
 
