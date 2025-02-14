@@ -92,10 +92,10 @@ class MetaData:
 
     campaign: str
     template: str
-    beg: str
-    end: str
+    beg: str | dt.datetime
+    end: str | dt.datetime
     version: str = ab.__version__
-    created: str = dt.date.today().isoformat()
+    created: str | dt.datetime = dt.date.today().isoformat()
     username: str = getpass.getuser()
 
 
