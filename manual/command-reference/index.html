@@ -1,0 +1,2378 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+        <meta name="author" content="Joachim Mortensen">
+      
+      
+      
+        <link rel="prev" href="../quick-start/">
+      
+      
+        <link rel="next" href="../configuration-files/">
+      
+      
+      <link rel="icon" href="../../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
+    
+    
+      
+        <title>Command-line reference - GNSS-Process Automation with Bernese GNSS Software</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8608ea7d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/asciinema-player.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+    html.glightbox-open { overflow: initial; height: 100%; }
+    .gslide-title { margin-top: 0px; user-select: text; }
+    .gslide-desc { color: #666; user-select: text; }
+    .gslide-image img { background: white; }
+    .gscrollbar-fixer { padding-right: 15px; }
+    .gdesc-inner { font-size: 0.75rem; }
+    body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+    body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+    body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}</style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#running-autobernese" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="GNSS-Process Automation with Bernese GNSS Software" class="md-header__button md-logo" aria-label="GNSS-Process Automation with Bernese GNSS Software" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            GNSS-Process Automation with Bernese GNSS Software
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Command-line reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SDFIdk/AutoBernese" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AutoBernese
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="GNSS-Process Automation with Bernese GNSS Software" class="md-nav__button md-logo" aria-label="GNSS-Process Automation with Bernese GNSS Software" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    GNSS-Process Automation with Bernese GNSS Software
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SDFIdk/AutoBernese" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AutoBernese
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    User manual
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            User manual
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../install-autobernese/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Install AutoBernese
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Command-line reference
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Command-line reference
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-autobernese" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running AutoBernese
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running AutoBernese">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ab" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab --version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-bsw-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab --bsw-release
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-rendered-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show rendered configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Show rendered configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ab-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-config-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab config &lt;section&gt;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#download-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download sources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Download sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ab-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab download
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-download-c-campaign-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab download -c &lt;campaign-name&gt;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#campaign-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Campaign management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Campaign management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-existing-bernese-campaigns" class="md-nav__link">
+    <span class="md-ellipsis">
+      List existing Bernese campaigns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-autobernese-details-of-each-bernese-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      List AutoBernese details of each Bernese campaign
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-available-campaign-configuration-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      List available campaign-configuration templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-content-of-the-campaign-configuration-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show content of the campaign-configuration template
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-the-sources-specified-for-a-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show the sources specified for a given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-the-runnable-tasks-for-a-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show the runnable tasks for a given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-tasks-for-a-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run tasks for a given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete-sub-directory-content-in-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete sub directory content in given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#station-related-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Station-related utilities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Station-related utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#show-what-is-parsed-from-a-sitelog-when-creating-a-sta-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show what is parsed from a sitelog when creating a STA file.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-sta-file-from-sitelogs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create STA file from sitelogs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create STA file from sitelogs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      No arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-campaign-specific-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using campaign-specific settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-stationssta-from-custom-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create stations.STA from custom configuration file
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-stationssta-from-command-line-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create stations.STA from command-line arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combine-troposphere-hour-files-to-day-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Combine troposphere hour files to day files
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Combine troposphere hour files to day files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-day-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build day files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-date-information-for-a-specific-date-or-gps-week" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show date information for a specific date or GPS week
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examine-the-logfile-to-get-more-verbose-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examine the Logfile to get more verbose output
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration-files/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration files
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../download-sources/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Download sources
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/contribute/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contribute
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dev/system-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prerequisites/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Prerequisites
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../references/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    References
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-autobernese" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running AutoBernese
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Running AutoBernese">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ab" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab --version
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-bsw-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab --bsw-release
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-rendered-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show rendered configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Show rendered configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ab-config" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab config
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-config-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab config &lt;section&gt;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#download-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download sources
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Download sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ab-download" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab download
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ab-download-c-campaign-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      ab download -c &lt;campaign-name&gt;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#campaign-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Campaign management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Campaign management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-existing-bernese-campaigns" class="md-nav__link">
+    <span class="md-ellipsis">
+      List existing Bernese campaigns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-autobernese-details-of-each-bernese-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      List AutoBernese details of each Bernese campaign
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-available-campaign-configuration-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      List available campaign-configuration templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-content-of-the-campaign-configuration-template" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show content of the campaign-configuration template
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-a-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-the-sources-specified-for-a-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show the sources specified for a given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-the-runnable-tasks-for-a-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show the runnable tasks for a given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-tasks-for-a-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Run tasks for a given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#delete-sub-directory-content-in-given-campaign" class="md-nav__link">
+    <span class="md-ellipsis">
+      Delete sub directory content in given campaign
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#station-related-utilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      Station-related utilities
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Station-related utilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#show-what-is-parsed-from-a-sitelog-when-creating-a-sta-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show what is parsed from a sitelog when creating a STA file.
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-sta-file-from-sitelogs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create STA file from sitelogs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create STA file from sitelogs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      No arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-campaign-specific-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using campaign-specific settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-stationssta-from-custom-configuration-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create stations.STA from custom configuration file
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-stationssta-from-command-line-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create stations.STA from command-line arguments
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combine-troposphere-hour-files-to-day-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Combine troposphere hour files to day files
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Combine troposphere hour files to day files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-day-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build day files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#show-date-information-for-a-specific-date-or-gps-week" class="md-nav__link">
+    <span class="md-ellipsis">
+      Show date information for a specific date or GPS week
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examine-the-logfile-to-get-more-verbose-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examine the Logfile to get more verbose output
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Command-line reference</h1>
+
+<h2 id="running-autobernese">Running AutoBernese<a class="headerlink" href="#running-autobernese" title="Permanent link">&para;</a></h2>
+<p>With AutoBernese installed, you have a new command <code>ab</code> available, which lets
+you explore the rest of the available functionality based on the help system. By
+itself it also does a few house-hold things. These latter side effects are
+described below.</p>
+<h3 id="ab"><code>ab</code><a class="headerlink" href="#ab" title="Permanent link">&para;</a></h3>
+<p>Prints out help text to the terminal, describing the core themes of the
+application and showing the available sub commands.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Usage: ab [OPTIONS] COMMAND [ARGS]...
+
+  AutoBernese is a tool that can
+
+  1.  Create Bernese campaigns using the built-in template system.
+
+  2.  Download and organise data for general or campaign-specific use.
+
+  3.  Run the BPE for campaigns with an AutoBernese configuration.
+
+  4.  Do various other things related to GNSS-data processing.
+
+Options:
+  --version
+  --bsw-release
+  --help         Show this message and exit.
+
+Commands:
+  campaign (c)   Create campaigns and manage campaign-specific sources and...
+  config         Show all or specified configuration section(s).
+  dateinfo (dt)  Print date info on date, year+doy or GPS week.
+  download       Download all sources in the autobernese configuration file.
+  logs           Follow log file (run `tail -f path/to/logfile.log`).
+  qc             Quality-control measures
+  station        Stand-alone tools for station data.
+  troposphere    Stand-alone tools for troposphere data.
+</code></pre></div>
+<p><strong>Side Effects</strong></p>
+<p>The command itself is a script that imports the AutoBernese Python package.</p>
+<p>When run, it creates a <em>runtime directory</em> at the same directory level as the
+Bernese installation directory <code>BERN54</code>, i.e. in the parent directory of the
+<code>$C</code>.</p>
+<p>The directory tree can be seen below:</p>
+<div class="highlight"><span class="filename">AutoBernese runtime directory is in the parent directory of `$C`</span><pre><span></span><code>/path/to/environment
+├── autobernese     # AutoBernese runtime directory automatically
+│                   # created one level up from Bernese-installation directory
+│
+├── BERN54          # Bernese installation directory,
+│                   # a.k.a. `$C` in BERN54/LOADGPS.setvar
+└── ...
+</code></pre></div>
+<p>When running <code>ab</code> or any sub command, the following happens:</p>
+<ul>
+<li>
+<p>The built-in configuration file is read, and any user-configuration file is
+    loaded and allowed sections override those in the built-in configuration.
+    This combined configuration is the <em>rendered AutoBernese configuration</em>. Its
+    settings are fixed during the entire runtime of any command that is run.</p>
+</li>
+<li>
+<p>Before any other sub command is run, AutoBernese makes sure that a directory
+    <code>autobernese</code> is present in the environment directory. If not, the directory
+    is created, and the AutoBernese log file <code>autobernese.log</code> is created.</p>
+</li>
+<li>
+<p>In addition, the command makes sure that all variables exported in
+    <code>LOADGPS.setvar</code> exist in the shell environment. If not, a warning is shown,
+    and the program exits.</p>
+</li>
+</ul>
+<p>The rendered AutoBernese configuration thus provides a way to access paths and
+environment variables set by and derived from the exported variables set in the
+LOADGPS.setvar file. These are also available in the user-defined configuration
+files and so allows for a seamless integration with the activated Bernese
+environment.</p>
+<h3 id="ab-version"><code>ab --version</code><a class="headerlink" href="#ab-version" title="Permanent link">&para;</a></h3>
+<p>This command prints the current software version of AutoBernese.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>--version
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>0.3.0
+</code></pre></div>
+<h3 id="ab-bsw-release"><code>ab --bsw-release</code><a class="headerlink" href="#ab-bsw-release" title="Permanent link">&para;</a></h3>
+<p>This command prints the current software version and release of the activated
+Bernese installation in JSON format.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>--bsw-release
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>{
+  &quot;version&quot;: &quot;5.4&quot;,
+  &quot;release&quot;: &quot;2023-10-16&quot;
+}
+</code></pre></div>
+<h2 id="show-rendered-configuration">Show rendered configuration<a class="headerlink" href="#show-rendered-configuration" title="Permanent link">&para;</a></h2>
+<p>AutoBernese uses a built-in configuration file to integrate seamlessly into the
+given activated Bernese environment. Most of the functionality of AutoBernese
+relies on some configuration setting.</p>
+<p>The configuration format is a YAML whose syntax features make it highly useful.
+These features include re-using content in one place of the YAML document in
+some other part of the same document. Read more about the format and relevant
+data models on <a href="../configuration-files/">the configuration-file page</a>.</p>
+<!-- Sort of like using variables in a computer
+program. -->
+
+<!-- This means that repeating some value can be done by referring to the value in
+another place. -->
+
+<p>The static document, while being easy to create this way, does
+make it harder to read and find potential errors in, when the data structure in
+the document becomes larger or more complex in what is re-used, and how.</p>
+<p>The following commands lets you have a look at the rendered AutoBernese
+configuration file.</p>
+<h3 id="ab-config"><code>ab config</code><a class="headerlink" href="#ab-config" title="Permanent link">&para;</a></h3>
+<p>Let us look at the rendered AutoBernese configuration file, where among other
+things, we can see the Bernese-installation environment that AutoBernese has
+access to.</p>
+<!-- The following command prints the content of the section [`bsw_env`]
+of the AutoBernese-configuration file containing the environment variables that
+the software uses: -->
+
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Configuration file segment</label><label for="__tabbed_1_2">Rendered configuration</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Bernese GNSS Software [BSW] environment variables available after &#39;source&#39;ing</span>
+<span class="c1"># the shell script `LOADGPS.setvar` in the root of the installation directory.</span>
+<span class="nt">bsw_env</span><span class="p">:</span>
+
+<span class="w">  </span><span class="c1"># Installation directory</span>
+<span class="w">  </span><span class="nt">C</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;C</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">C</span>
+
+<span class="w">  </span><span class="c1"># Bernese documentation files</span>
+<span class="w">  </span><span class="nt">DOC</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;DOC</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DOC</span>
+
+<span class="w">  </span><span class="c1"># Built-in Bernese program panels</span>
+<span class="w">  </span><span class="nt">PAN</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;PAN</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PAN</span>
+
+<span class="w">  </span><span class="c1"># Global model files used by Bernese programs</span>
+<span class="w">  </span><span class="nt">MODEL</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;MODEL</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MODEL</span>
+
+<span class="w">  </span><span class="c1"># Global configuration file used by Bernese programs</span>
+<span class="w">  </span><span class="nt">CONFIG</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;CONFIG</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CONFIG</span>
+
+<span class="w">  </span><span class="c1"># DATAPOOL directory</span>
+<span class="w">  </span><span class="nt">D</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;D</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">D</span>
+
+<span class="w">  </span><span class="c1"># CAMPAIGN directory</span>
+<span class="w">  </span><span class="nt">P</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;P</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P</span>
+
+<span class="w">  </span><span class="c1"># SAVEDISK directory</span>
+<span class="w">  </span><span class="nt">S</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;S</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S</span>
+
+<span class="w">  </span><span class="c1"># User directory</span>
+<span class="w">  </span><span class="nt">U</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;U</span><span class="w"> </span><span class="kt">!ENV</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">U</span>
+
+<span class="c1"># (...)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>config
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span>
+    <span class="s1">&#39;bsw_env&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/bsw/prod/BERN54&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;DOC&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/bsw/prod/BERN54/SUPGUI/DOC&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PAN&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/bsw/prod/BERN54/SUPGUI/PAN&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;MODEL&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/bsw/prod/BERN54/GLOBAL/MODEL&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CONFIG&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/bsw/prod/BERN54/GLOBAL/CONFIG&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;/mnt/refgps/bsw/dev/DATAPOOL&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/bsw/prod/data/CAMPAIGN54&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;/mnt/refgps/bsw/dev/SAVEDISK&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;U&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/e088195/bsw/dev/user&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;/home/e088195/bsw/dev/temp&#39;</span>
+    <span class="p">},</span>
+    <span class="c1"># (...)</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>As seen above, you see that not all the variables set in BSW's <code>LOADGPS.setvar</code>
+script are included, but this is all that AutoBernese is using for now.</p>
+</div>
+<h3 id="ab-config-section"><code>ab config &lt;section&gt;</code><a class="headerlink" href="#ab-config-section" title="Permanent link">&para;</a></h3>
+<p>Adding the name of one of the outer-most keys in the YAML configuration, only
+the content of <code>&lt;section&gt;</code> will be shown.</p>
+<p>Available sections are</p>
+<div class="highlight"><span class="filename">Available sections in the rendered configuration</span><pre><span></span><code><span class="c1"># Bernese GNSS Software [BSW] environment variables available after &#39;source&#39;ing</span>
+<span class="c1"># the shell script `LOADGPS.setvar` in the root of the installation directory.</span>
+<span class="nt">bsw_env</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># (...)</span>
+
+<span class="c1"># Specific files in the Bernese environment that we need to access</span>
+<span class="nt">bsw_files</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># (...)</span>
+
+<span class="c1"># We define the environment root directory as the one containing the BSW</span>
+<span class="c1"># installation. It is assumed to be a directory that each user can can write to.</span>
+<span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;env</span><span class="w"> </span><span class="kt">!Parent</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*C</span><span class="p p-Indicator">]</span>
+
+<span class="c1"># AutoBernese runtime environment</span>
+<span class="nt">runtime</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># (...)</span>
+
+<span class="c1">## Default sections that can be overriden by the user</span>
+
+<span class="nt">station</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># (...)</span>
+
+<span class="nt">campaign</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># (...)</span>
+
+<span class="nt">sources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</code></pre></div>
+<p><strong>Example</strong></p>
+<p>The following command prints the content of the section [<code>runtime</code>] of the
+AutoBernese-configuration file containing the internal settings for the
+AutoBernese runtime directory:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Configuration file segment</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># (...)</span>
+
+<span class="c1"># installation. It is assumed to be a directory that each user can can write to.</span>
+<span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;env</span><span class="w"> </span><span class="kt">!Parent</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*C</span><span class="p p-Indicator">]</span>
+
+<span class="c1"># AutoBernese runtime environment</span>
+<span class="nt">runtime</span><span class="p">:</span>
+
+<span class="w">  </span><span class="c1"># Root of the package&#39;s runtime files</span>
+<span class="w">  </span><span class="nt">ab</span><span class="p">:</span><span class="w"> </span><span class="nl">&amp;ab</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*env</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">autobernese</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="nt">logging</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">filename</span><span class="p">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*ab</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">autobernese.log</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="c1"># Special parameters that can be added here are:</span>
+<span class="w">    </span><span class="c1"># `{user}` which adds the username using Python&#39;s getpass.getuser().</span>
+<span class="w">    </span><span class="nt">format</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;%(asctime)s</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">{user}</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">%(levelname)s</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">%(name)s</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">%(message)s&#39;</span>
+<span class="w">    </span><span class="nt">datefmt</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;%Y-%m-%d</span><span class="nv"> </span><span class="s">%H:%M:%S&#39;</span>
+<span class="w">    </span><span class="nt">style</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;%&#39;</span>
+<span class="w">    </span><span class="nt">level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEBUG</span>
+
+<span class="w">  </span><span class="c1"># Directory of the user-defined templates for each campaign-type&#39;s</span>
+<span class="w">  </span><span class="c1"># configuration.</span>
+<span class="w">  </span><span class="nt">campaign_templates</span><span class="p">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*ab</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">templates</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="c1"># Filename for the user-defined configuration.</span>
+<span class="w">  </span><span class="nt">user_config</span><span class="p">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*ab</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">autobernese.yaml</span><span class="p p-Indicator">]</span>
+
+<span class="w">  </span><span class="c1"># Sections that the user can add or override in the general configuration.</span>
+<span class="w">  </span><span class="nt">user_sections</span><span class="p">:</span>
+
+<span class="c1"># (...)</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><span class="filename">Command to see the rendered runtime configuration</span><pre><span></span><code>ab<span class="w"> </span>config<span class="w"> </span>runtime
+</code></pre></div>
+<div class="highlight"><span class="filename">Rendered configuration</span><pre><span></span><code><span class="p">{</span>
+    <span class="s1">&#39;ab&#39;</span><span class="p">:</span> <span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/autobernese&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;logging&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/autobernese/autobernese.log&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%(asctime)s</span><span class="s1"> | </span><span class="si">{user}</span><span class="s1"> | </span><span class="si">%(levelname)s</span><span class="s1"> | </span><span class="si">%(name)s</span><span class="s1"> | </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;datefmt&#39;</span><span class="p">:</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;style&#39;</span><span class="p">:</span> <span class="s1">&#39;%&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="s1">&#39;DEBUG&#39;</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;campaign_templates&#39;</span><span class="p">:</span> <span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/autobernese/templates&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;user_config&#39;</span><span class="p">:</span> <span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/autobernese/autobernese.yaml&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;user_sections&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;station&#39;</span><span class="p">,</span> <span class="s1">&#39;campaign&#39;</span><span class="p">,</span> <span class="s1">&#39;sources&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="download-sources">Download sources<a class="headerlink" href="#download-sources" title="Permanent link">&para;</a></h2>
+<p>Data acquisition from and management of external sources is a large part of the
+work performed, before creating Bernese campaigns.</p>
+<p>AutoBernese lets users download external sources from HTTP anf FTP and store
+them in any available local filepath desired.</p>
+<p>AutoBernese can download sources common to all users as well as
+campaign-specific sources.</p>
+<p>To do either, the sources must be specified in the relevant configuration file:</p>
+<table>
+<thead>
+<tr>
+<th>Download</th>
+<th>File</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Common data</td>
+<td><code>$C/../autobernese/autobernese.yaml</code></td>
+</tr>
+<tr>
+<td>Campaign data</td>
+<td><code>$P/&lt;campaign-name&gt;/campaign.yaml</code></td>
+</tr>
+</tbody>
+</table>
+<p><a href="../download-sources/">A separate document</a> describes in detail how to set up
+sources in the configuration files.</p>
+<h3 id="ab-download"><code>ab download</code><a class="headerlink" href="#ab-download" title="Permanent link">&para;</a></h3>
+<p>This downloads data from the sources specified in the rendered AutoBernese
+configuration. Below is the command for downloading sources for a given
+campaign.</p>
+<p>The built-in configuration contains no sources, so running the command without a
+user-supplied configuration file in the AutoBernese runtime directory, you will
+see the following.</p>
+<p><strong>Example 1</strong></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Configuration file segment</label><label for="__tabbed_2_2">Rendered configuration</label><label for="__tabbed_2_3">Command output</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># (...)</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">troposphere</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">station</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">campaign</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sources</span>
+
+<span class="c1"># Default sections that can be overriden by the user in the general</span>
+<span class="c1"># configuration file autobernese.yaml</span>
+
+<span class="nt">campaign</span><span class="p">:</span>
+
+<span class="w">  </span><span class="nt">directories</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ATM</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BPE</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GEN</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*CONFIG</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">OBSERV.SEL</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*PAN</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">SESSIONS.SES</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GRD</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OBS</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ORB</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ORX</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OUT</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RAW</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SOL</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STA</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>config<span class="w"> </span>sources
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">[]</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>download
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Finished downloading sources ...
+Overall status:
+Downloaded: 0
+Existing: 0
+</code></pre></div>
+</div>
+</div>
+</div>
+<p><strong>Example 2</strong></p>
+<p>This example illustrates the case, where a manually adding the AutoBernese
+configuration file <code>autobernese.yaml</code> with some entries in the <code>source</code> section
+is added to the <a href="../../concepts/">AutoBernese runtime directory</a>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Configuration file segment</label><label for="__tabbed_3_2">Rendered configuration</label><label for="__tabbed_3_3">Command output</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">sources</span><span class="p">:</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Source</span>
+<span class="w">  </span><span class="nt">identifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EUREF_STA</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EUREF STA file</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ftp://epncb.oma.be/pub/station/general/EUREF.STA</span>
+<span class="w">  </span><span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*D</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">station</span><span class="p p-Indicator">]</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Source</span>
+<span class="w">  </span><span class="nt">identifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BSW_MODEL</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BSW Model data</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/</span>
+<span class="w">  </span><span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="nv">*MODEL</span>
+<span class="w">  </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;*&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">max_age</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Source</span>
+<span class="w">  </span><span class="nt">identifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BSW_CONFIG</span>
+<span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BSW Configuration data</span>
+<span class="w">  </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/</span>
+<span class="w">  </span><span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="nv">*CONFIG</span>
+<span class="w">  </span><span class="nt">filenames</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;*&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">max_age</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>config<span class="w"> </span>sources
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">[</span>
+    <span class="n">Source</span><span class="p">(</span>
+        <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;EUREF_STA&#39;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;EUREF STA file&#39;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="s1">&#39;ftp://epncb.oma.be/pub/station/general/EUREF.STA&#39;</span><span class="p">,</span>
+        <span class="n">destination</span><span class="o">=</span><span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/data/DATAPOOL/station&#39;</span><span class="p">),</span>
+        <span class="n">filenames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_age</span><span class="o">=</span><span class="n">inf</span>
+    <span class="p">),</span>
+    <span class="n">Source</span><span class="p">(</span>
+        <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;BSW_MODEL&#39;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;BSW Model data&#39;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="s1">&#39;ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/&#39;</span><span class="p">,</span>
+        <span class="n">destination</span><span class="o">=</span><span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/BERN54/GLOBAL/MODEL&#39;</span><span class="p">),</span>
+        <span class="n">filenames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">],</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_age</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">),</span>
+    <span class="n">Source</span><span class="p">(</span>
+        <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;BSW_CONFIG&#39;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;BSW Configuration data&#39;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="s1">&#39;ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/&#39;</span><span class="p">,</span>
+        <span class="n">destination</span><span class="o">=</span><span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/BERN54/GLOBAL/CONFIG&#39;</span><span class="p">),</span>
+        <span class="n">filenames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">],</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_age</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>download
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Source: EUREF STA file
+ Downloaded: 1
+ Existing: 0
+Source: BSW Model data
+ Downloaded: 7
+ Existing: 0
+Source: BSW Configuration data
+ Downloaded: 43
+ Existing: 0
+Finished downloading sources ...
+Overall status:
+ Downloaded: 51
+ Existing: 0
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="ab-download-c-campaign-name"><code>ab download -c &lt;campaign-name&gt;</code><a class="headerlink" href="#ab-download-c-campaign-name" title="Permanent link">&para;</a></h3>
+<p>This downloads data from the sources specified in the campaign-specific
+configuration file <code>campaign.yaml</code> in the root of the campaign directory of
+campaign <code>&lt;campaign-name&gt;</code>.</p>
+<p>The download procedure is exactly the same as for the common sources above. Each
+source in the section <code>sources</code> has its remote paths resolved and downloaded to
+the specified download dirctory.</p>
+<p>The difference between specifying the sources in the common configuration file
+and a campaign-specific is that the sources in the campaign-configuration file
+has access to campaign metadata. suh as beginning and end dates for the Bernese
+campaign. This is explained in more detail in the section <a href="../download-sources/">Download sources</a>.</p>
+<p><strong>Example</strong></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Configuration file segment</label><label for="__tabbed_4_2">Rendered configuration</label><label for="__tabbed_4_3">Command output</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># (...)</span>
+<span class="nt">sources</span><span class="p">:</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Source</span>
+<span class="nt">identifier</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RINEX_EPN</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RINEX data</span>
+<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy:03d}</span>
+<span class="nt">destination</span><span class="p">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*D</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">RINEX</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;{date.gps_week}&#39;</span><span class="p p-Indicator">]</span>
+<span class="nt">filenames</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;{station}_{date.year}{date.doy:03d}0000_01D_30S_MO.crx.gz&#39;</span>
+<span class="nt">parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">station</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BUDP00DNK_R</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ONSA00SWE_R</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OSLS00NOR_S</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POTS00DEU_R</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WSRT00NLD_R</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WTZR00DEU_R</span>
+<span class="w">    </span><span class="nt">date</span><span class="p">:</span><span class="w"> </span><span class="kt">!DateRange</span>
+<span class="w">      </span><span class="nt">beg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2023-01-01</span>
+<span class="w">      </span><span class="nt">end</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2023-01-02</span>
+</code></pre></div></td></tr></table></div>
+<div class="admonition note">
+<p class="admonition-title">Python format strings</p>
+<p>The strings using the Python format-string syntax are explicitly written
+as strings with quotes, since they contain Python syntax for template
+strings that clash with YAML syntx for dictionaries.</p>
+</div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>config<span class="w"> </span>-c<span class="w"> </span>&lt;campaign-name&gt;<span class="w"> </span>sources
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">[</span>
+    <span class="n">Source</span><span class="p">(</span>
+        <span class="n">identifier</span><span class="o">=</span><span class="s1">&#39;RINEX_EPN&#39;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;RINEX data&#39;</span><span class="p">,</span>
+        <span class="n">url</span><span class="o">=</span><span class="s1">&#39;ftp://ftp.epncb.oma.be/pub/obs/</span><span class="si">{date.year}</span><span class="s1">/</span><span class="si">{date.doy:03d}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">destination</span><span class="o">=</span><span class="n">PosixPath</span><span class="p">(</span><span class="s1">&#39;/home/bsw/prod/data/DATAPOOL/RINEX/</span><span class="si">{date.gps_week}</span><span class="s1">&#39;</span><span class="p">),</span>
+        <span class="n">filenames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">{station}</span><span class="s1">_</span><span class="si">{date.year}{date.doy:03d}</span><span class="s1">0000_01D_30S_MO.crx.gz&#39;</span><span class="p">],</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;station&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s1">&#39;BUDP00DNK_R&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;ONSA00SWE_R&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;OSLS00NOR_S&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;POTS00DEU_R&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;RIGA00LVA_R&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;WSRT00NLD_R&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;WTZR00DEU_R&#39;</span>
+            <span class="p">],</span>
+            <span class="s1">&#39;date&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">GPSDate</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">GPSDate</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)]</span>
+        <span class="p">},</span>
+        <span class="n">max_age</span><span class="o">=</span><span class="n">inf</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>download<span class="w"> </span>-c<span class="w"> </span>&lt;campaign-name&gt;
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Source: RINEX data
+  Downloaded: 12
+  Existing: 0
+Finished downloading sources ...
+Overall status:
+  Downloaded: 12
+  Existing: 0
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="campaign-management">Campaign management<a class="headerlink" href="#campaign-management" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Usage: ab campaign [OPTIONS] COMMAND [ARGS]...
+
+  Create campaigns and manage campaign-specific sources and run BPE tasks.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  create     Create a Bernese campaign with directory content based on...
+  ls         List existing campaigns
+  run        Resolve campaign tasks and run them all.
+  sources    Print the campaign-specific sources.
+  tasks      Show tasks for a campaign.
+  templates  List available campaign templates or show content of given...
+</code></pre></div>
+<h3 id="list-existing-bernese-campaigns">List existing Bernese campaigns<a class="headerlink" href="#list-existing-bernese-campaigns" title="Permanent link">&para;</a></h3>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>ls
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Existing campaigns registered in the BSW campaign list:
+/home/bsw/prod/data/CAMPAIGN54/EXAMPLE
+</code></pre></div>
+<h3 id="list-autobernese-details-of-each-bernese-campaign">List AutoBernese details of each Bernese campaign<a class="headerlink" href="#list-autobernese-details-of-each-bernese-campaign" title="Permanent link">&para;</a></h3>
+<p>List campaign templates and template content.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>ls<span class="w"> </span>-v
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Existing campaigns registered in the BSW campaign list:
+/home/bsw/prod/data/CAMPAIGN54/EXAMPLE example 0.1.0 USERNAME 2023-06-08
+</code></pre></div>
+<h3 id="list-available-campaign-configuration-templates">List available campaign-configuration templates<a class="headerlink" href="#list-available-campaign-configuration-templates" title="Permanent link">&para;</a></h3>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>templates
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>default
+</code></pre></div>
+<h3 id="show-content-of-the-campaign-configuration-template">Show content of the campaign-configuration template<a class="headerlink" href="#show-content-of-the-campaign-configuration-template" title="Permanent link">&para;</a></h3>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>templates<span class="w"> </span>default
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="nt">tasks</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="nt">sources</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</code></pre></div>
+<h2 id="create-a-campaign">Create a campaign<a class="headerlink" href="#create-a-campaign" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>create<span class="w"> </span>WK2222<span class="w"> </span>-b<span class="w"> </span><span class="m">2022</span>-08-07<span class="w"> </span>-e<span class="w"> </span><span class="m">2022</span>-08-13
+ab<span class="w"> </span>campaign<span class="w"> </span>create<span class="w"> </span>WK2222<span class="w"> </span>-t<span class="w"> </span>&lt;template-name&gt;<span class="w"> </span>-b<span class="w"> </span><span class="m">2022</span>-08-07<span class="w"> </span>-e<span class="w"> </span><span class="m">2022</span>-08-13
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>
+</code></pre></div>
+<div class="result">
+<p><a class="glightbox" href="../assets/create-campaign-configuration.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="Creating a campaign-configuration file" src="../assets/create-campaign-configuration.png" /></a></p>
+</div>
+<h2 id="show-the-sources-specified-for-a-given-campaign">Show the sources specified for a given campaign<a class="headerlink" href="#show-the-sources-specified-for-a-given-campaign" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>sources<span class="w"> </span>&lt;campaign-name&gt;
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>
+</code></pre></div>
+<h2 id="show-the-runnable-tasks-for-a-given-campaign">Show the runnable tasks for a given campaign<a class="headerlink" href="#show-the-runnable-tasks-for-a-given-campaign" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>tasks<span class="w"> </span>&lt;campaign-name&gt;
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>
+</code></pre></div>
+<h2 id="run-tasks-for-a-given-campaign">Run tasks for a given campaign<a class="headerlink" href="#run-tasks-for-a-given-campaign" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>campaign<span class="w"> </span>run<span class="w"> </span>&lt;campaign-name&gt;
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>
+</code></pre></div>
+<h2 id="delete-sub-directory-content-in-given-campaign">Delete sub directory content in given campaign<a class="headerlink" href="#delete-sub-directory-content-in-given-campaign" title="Permanent link">&para;</a></h2>
+<p>Adding <a href="../configuration-files/#the-clean-section-not-shown">a <code>clean</code> section</a> to the campaign configuration allows for easy
+cleaning of entire subdirectories in the campaign directory.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>c<span class="w"> </span>clean<span class="w"> </span>EXAMPLE
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>/home/bsw/prod/data/CAMPAIGN54/EXAMPLE/OUT
+/home/bsw/prod/data/CAMPAIGN54/EXAMPLE/SOL
+Proceed<span class="w"> </span><span class="o">(</span>y/<span class="o">[</span>n<span class="o">])</span>:<span class="w"> </span>y
+<span class="c1"># List of deleted files</span>
+</code></pre></div>
+<h2 id="station-related-utilities">Station-related utilities<a class="headerlink" href="#station-related-utilities" title="Permanent link">&para;</a></h2>
+<p>The station command sub group has two commands:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>station
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Usage: ab station [OPTIONS] COMMAND [ARGS]...
+
+  Stand-alone tools for station data.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  parse-sitelog  Parse sitelog and print it to the screen.
+  sitelogs2sta   Create a STA file from sitelogs and other station info.
+</code></pre></div>
+<h3 id="show-what-is-parsed-from-a-sitelog-when-creating-a-sta-file">Show what is parsed from a sitelog when creating a STA file.<a class="headerlink" href="#show-what-is-parsed-from-a-sitelog-when-creating-a-sta-file" title="Permanent link">&para;</a></h3>
+<p>This command shows what is extracted from a site-log file, when creating a
+STA-file with the other command.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>station<span class="w"> </span>parse-sitelog<span class="w"> </span><span class="nv">$D</span>/sitelogs/budp00dnk_20221113.log
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;sec1&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;site_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Kobenhavn&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;four_character_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;BUDP&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;domes&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10101M003&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;date_installed&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1999 10 28&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;sec2&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;city_or_town&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Kobenhavn&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Denmark&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;sec3&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;receiver_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ASHTECH Z-XII3&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;receiver_serial_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;02259&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;firmware&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1D04/1L00&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date_installed&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1999 01 06&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;date_removed&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2001 12 18&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;sec4&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="c1">// ...</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="create-sta-file-from-sitelogs">Create STA file from sitelogs<a class="headerlink" href="#create-sta-file-from-sitelogs" title="Permanent link">&para;</a></h3>
+<p>As part of our internal pre-processing, we create a single STA-file from
+relevant site-log files.</p>
+<p>This can be done in four different ways depending on the input the command
+receives.</p>
+<h4 id="no-arguments">No arguments<a class="headerlink" href="#no-arguments" title="Permanent link">&para;</a></h4>
+<p>Running the command with no arguments:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>station<span class="w"> </span>sitelogs2sta
+</code></pre></div>
+<p>creates a STA file with the settings obtained from the <code>station</code> section of the
+rendered AutoBernese configuration file.</p>
+<p>The default settings in the built-in configuration file are:</p>
+<div class="highlight"><span class="filename">`station` section of the built-in configuration file</span><pre><span></span><code><span class="c1"># Default sections that can be overriden by the user in the general</span>
+<span class="c1"># configuration file autobernese.yaml</span>
+
+<span class="nt">campaign</span><span class="p">:</span>
+
+<span class="w">  </span><span class="nt">directories</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ATM</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BPE</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GEN</span>
+<span class="w">    </span><span class="nt">files</span><span class="p">:</span>
+</code></pre></div>
+<p>In this case, the sitelogs to use will be all the <code>.log</code> files in <code>$D/sitelogs</code>,
+with no individually-calibrated instrumentation, and the output file
+<code>sitelogs.STA</code> is placed in the directory <code>$D/station</code>.</p>
+<h4 id="using-campaign-specific-settings">Using campaign-specific settings<a class="headerlink" href="#using-campaign-specific-settings" title="Permanent link">&para;</a></h4>
+<p>You may add the same section in your campaign-specific configuration file and provide the name of the campaign to the command in order to use this as your input.</p>
+<div class="highlight"><span class="filename">`campaign.yaml`</span><pre><span></span><code><span class="nt">station</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sitelogs</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*D</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sitelogs</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;sta1*.log&#39;</span>
+<span class="w">  </span><span class="nv">- !Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*D</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sitelogs</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;sta2*.log&#39;</span>
+<span class="w">  </span><span class="nv">- !Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*D</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sitelogs</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;sta3*.log&#39;</span>
+<span class="w">  </span><span class="nv">individually_calibrated</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">sta1</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nv">output_sta_file</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*P</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">*campaign</span><span class="err">*</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">STA</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">campaign.STA</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<p>This has the implications that you may use the YAML aliases available in the
+campaign configuration as well as thos in the common configuration.</p>
+<p>As seen in the example configuration above, you may then create the STA file
+directly inside your campaing's STA directory. If your campaign has the name
+<code>CAMPAIGN</code>, the command you type will then be:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>station<span class="w"> </span>sitelogs2sta<span class="w"> </span>-c<span class="w"> </span>CAMPAIGN
+</code></pre></div>
+<h4 id="create-stationssta-from-custom-configuration-file">Create stations.STA from custom configuration file<a class="headerlink" href="#create-stationssta-from-custom-configuration-file" title="Permanent link">&para;</a></h4>
+<p>Thirdly, as this example demonstrates, you can build a STA file with a custom input YAML file located anywhere available on the filesystem. The following example also shows that the output file can be saved to your current working directory if not specific path is specified:</p>
+<div class="highlight"><span class="filename">station.yaml</span><pre><span></span><code><span class="nt">sitelogs</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BLAH00DNK_20230101.log</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BLUH00DNK_20220101.log</span>
+<span class="nt">individually_calibrated</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">BLUH</span><span class="p p-Indicator">]</span>
+<span class="nt">output_sta_file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sitelogs.STA</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>station<span class="w"> </span>sitelogs2sta<span class="w"> </span>-f<span class="w"> </span>station.yaml
+</code></pre></div>
+<h4 id="create-stationssta-from-command-line-arguments">Create stations.STA from command-line arguments<a class="headerlink" href="#create-stationssta-from-command-line-arguments" title="Permanent link">&para;</a></h4>
+<p>finally, it is also possible to give all the settings to the command as
+command-line arguments:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>station<span class="w"> </span>sitelogs2sta<span class="w"> </span>-i<span class="w"> </span>BLAH00DNK_20230101.log<span class="w"> </span>-i<span class="w"> </span>BLUH00DNK_20220101.log<span class="w"> </span>-k<span class="w"> </span>BLUH<span class="w"> </span>-o<span class="w"> </span>sitelogs.STA
+</code></pre></div>
+<p>The above, gives the same result as with the arguments given in the special
+<code>station.yaml</code> file.</p>
+<h2 id="combine-troposphere-hour-files-to-day-files">Combine troposphere hour files to day files<a class="headerlink" href="#combine-troposphere-hour-files-to-day-files" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>troposphere
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Usage: ab troposphere [OPTIONS] COMMAND [ARGS]...
+
+  Stand-alone tools for troposphere-delay model data (VMF3).
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  build   Concatenate hour files (`H%H`) into dayfiles.
+  status  Print availability of hour and day files in selected interval.
+</code></pre></div>
+<p>The two sub commands <code>status</code> and <code>build</code> provide a status on the availability
+of input files (six-hour interval model data) and the existence of the output
+file storing the concatenated content of a complete day from midnight to
+midnight (both midnights included).</p>
+<p>The tool needs locations for the downloaded data and the output files as well as
+the interval dates so it can examine (<code>status</code>) the input and output or produce
+(<code>build</code>) the output files.</p>
+<p>The <code>status</code> and <code>build</code> commands have the same call signature with the following logic:</p>
+<ul>
+<li>
+<p>Specify input path, output path and start and end dates to see status or build output.</p>
+</li>
+<li>
+<p>If either of (or both) the input path <code>ipath</code> or the output path <code>opath</code> are
+    not given, look for them in the common user configuration
+    (<code>autobernese.yaml</code>), where they should be defined in the following way
+    (using our path scheme, yours may differ):</p>
+<div class="highlight"><span class="filename">`autobernese.yaml`</span><pre><span></span><code><span class="c1"># (...)</span>
+<span class="nt">troposphere</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ipath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/your/DATAPOOL/VMF3/1x1_OP_H/{date.year}</span>
+<span class="w">  </span><span class="nt">opath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/your/DATAPOOL/VMF3/1x1_OP_GRD/{date.year}</span>
+<span class="c1"># (...)</span>
+</code></pre></div>
+<p>Or even so, using the AutoBernese YAML aliases:</p>
+<div class="highlight"><span class="filename">`autobernese.yaml`</span><pre><span></span><code><span class="c1"># (...)</span>
+<span class="nt">troposphere</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ipath</span><span class="p">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*D</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">VMF3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;1x1_OP_H&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;{date.year}&#39;</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">opath</span><span class="p">:</span><span class="w"> </span><span class="kt">!Path</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">*D</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">VMF3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;1x1_OP_GRD&#39;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&#39;{date.year}&#39;</span><span class="p p-Indicator">]</span>
+<span class="c1"># (...)</span>
+</code></pre></div>
+</li>
+</ul>
+<h3 id="build-day-files">Build day files<a class="headerlink" href="#build-day-files" title="Permanent link">&para;</a></h3>
+<p>Build day files from previously-downloaded hour files for the given interval.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>troposphere<span class="w"> </span>build<span class="w"> </span>-i<span class="w"> </span><span class="nv">$D</span>/VMF3/1x1_OP_H/2022<span class="w"> </span>-o<span class="w"> </span><span class="nv">$D</span>/VMF3/1x1_OP_GRD/2022<span class="w"> </span>-b<span class="w"> </span><span class="m">2023</span>-01-01<span class="w"> </span>-e<span class="w"> </span><span class="m">2023</span>-01-02
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
+  Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
+</code></pre></div>
+<p>Under the hood, the actual full file paths to the input and output files are reated in the same way as you would define them in a AutoBernese <code>Source</code> configuration in your common or campaign-specific configuration file. The filepaths are thus created from a template path, where each filename is generated from an input date. Now, the name of the date instances is <code>date</code>.</p>
+<p>With this information, a user is able to use this in the input path given as the command-line input in the following way:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>troposphere<span class="w"> </span>build<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">D</span><span class="si">}</span><span class="s2">/VMF3/1x1_OP_H/{date.year}&quot;</span><span class="w"> </span>-o<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">D</span><span class="si">}</span><span class="s2">/VMF3/1x1_OP_GRD/{date.year}&quot;</span><span class="w"> </span>-b<span class="w"> </span><span class="m">2023</span>-01-01<span class="w"> </span>-e<span class="w"> </span><span class="m">2023</span>-01-02
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
+  Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
+</code></pre></div>
+<p>Typing in the paths in this command is cumbersome, so it is more efficient to
+encode your path convention into the common user configuration file under its
+own section <code>troposphere</code>, like shown above.</p>
+<p>The same command would then look like this:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>troposphere<span class="w"> </span>build<span class="w"> </span>-b<span class="w"> </span><span class="m">2023</span>-01-01<span class="w"> </span>-e<span class="w"> </span><span class="m">2023</span>-01-02
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Build VMF3 files for chosen interval 2023-01-01 to 2023-01-02 ...
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230010.GRD ... SUCCESS
+Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ... FAILED
+  Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
+</code></pre></div>
+<h3 id="status">Status<a class="headerlink" href="#status" title="Permanent link">&para;</a></h3>
+<p>Show the status of day files and input they are based on for the given interval.</p>
+<p>See also the description under <strong>Build day files</strong> for possible ways to run the
+command with or without configuration setup.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>troposphere<span class="w"> </span>status<span class="w"> </span>-b<span class="w"> </span><span class="m">2023</span>-01-01<span class="w"> </span>-e<span class="w"> </span><span class="m">2023</span>-01-02
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="err">&#39;da</span><span class="kc">te</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">&#39;</span><span class="mi">2023-01-01</span><span class="err">&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="err">&#39;i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_available&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">True</span><span class="p">,</span>
+<span class="w">    </span><span class="err">&#39;ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_</span><span class="kc">f</span><span class="err">ile_exis</span><span class="kc">ts</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">True</span><span class="p">,</span>
+<span class="w">    </span><span class="err">&#39;ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_</span><span class="kc">f</span><span class="err">ile&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">&#39;/home/bsw/prod/da</span><span class="kc">ta</span><span class="err">/DATAPOOL/VMF</span><span class="mi">3</span><span class="err">/</span><span class="mi">1</span><span class="err">x</span><span class="mi">1</span><span class="err">_OP_GRD/</span><span class="mi">2023</span><span class="err">/VMFG_</span><span class="mf">20230010.</span><span class="err">GRD&#39;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="err">&#39;da</span><span class="kc">te</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">&#39;</span><span class="mi">2023-01-02</span><span class="err">&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="err">&#39;i</span><span class="kc">n</span><span class="err">pu</span><span class="kc">t</span><span class="err">_available&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">False</span><span class="p">,</span>
+<span class="w">    </span><span class="err">&#39;ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_</span><span class="kc">f</span><span class="err">ile_exis</span><span class="kc">ts</span><span class="err">&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">False</span><span class="p">,</span>
+<span class="w">    </span><span class="err">&#39;ou</span><span class="kc">t</span><span class="err">pu</span><span class="kc">t</span><span class="err">_</span><span class="kc">f</span><span class="err">ile&#39;</span><span class="p">:</span><span class="w"> </span><span class="err">&#39;/home/bsw/prod/da</span><span class="kc">ta</span><span class="err">/DATAPOOL/VMF</span><span class="mi">3</span><span class="err">/</span><span class="mi">1</span><span class="err">x</span><span class="mi">1</span><span class="err">_OP_GRD/</span><span class="mi">2023</span><span class="err">/VMFG_</span><span class="mf">20230020.</span><span class="err">GRD&#39;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<h2 id="show-date-information-for-a-specific-date-or-gps-week">Show date information for a specific date or GPS week<a class="headerlink" href="#show-date-information-for-a-specific-date-or-gps-week" title="Permanent link">&para;</a></h2>
+<p>Get general date information based on input date as GPS week, date, year+day-of-year.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>dateinfo
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>Usage: ab dateinfo [OPTIONS] COMMAND [ARGS]...
+
+  Print date info on date, year+doy or GPS week.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  gpsweek  Show date information based on GPS week.
+  ydoy     Show date information based on Year and day of year [DOY].
+  ymd      Show date information based on date.
+</code></pre></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1"><code>ymd</code></label><label for="__tabbed_5_2"><code>ydoy</code></label><label for="__tabbed_5_3"><code>gpsweek</code></label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>dateinfo<span class="w"> </span>ymd<span class="w"> </span><span class="m">2022</span>-08-07
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sunday&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-07&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;doy&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">219</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iso_week&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">31</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iso_weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2222</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week_beg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-07&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week_end&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-13&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>dateinfo<span class="w"> </span>ydoy<span class="w"> </span><span class="m">2022</span><span class="w"> </span><span class="m">219</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sunday&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-07&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;doy&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">219</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iso_week&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">31</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iso_weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2222</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week_beg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-07&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week_end&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-13&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>dateinfo<span class="w"> </span>gpsweek<span class="w"> </span><span class="m">2222</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sunday&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-07&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;doy&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">219</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iso_week&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">31</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;iso_weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2222</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week_beg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-07&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;gps_week_end&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-13&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="examine-the-logfile-to-get-more-verbose-output">Examine the Logfile to get more verbose output<a class="headerlink" href="#examine-the-logfile-to-get-more-verbose-output" title="Permanent link">&para;</a></h2>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>ab<span class="w"> </span>logs
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | OSLS00NOR_S_20230010000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | OSLS00NOR_S_20230020000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | POTS00DEU_R_20230010000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | POTS00DEU_R_20230020000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | WSRT00NLD_R_20230010000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | WSRT00NLD_R_20230020000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | WTZR00DEU_R_20230010000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.data.ftp | WTZR00DEU_R_20230020000_01D_30S_MO.crx.gz already downloaded ...
+2023-06-28 11:38:12 | USERNAME | DEBUG | ab.cli | Finished downloading sources ...
+2023-06-28 13:28:51 | USERNAME | DEBUG | ab.cli | Show log tail ...
+</code></pre></div>
+<p>To exit, press <kbd>Ctrl</kbd> + <kbd>C</kbd>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.sections", "navigation.expand", "navigation.top"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../../javascript/asciinema-player.min.js"></script>
+      
+    
+  <script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(() => { lightbox.reload() });
+</script></body>
+</html>
