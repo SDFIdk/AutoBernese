@@ -157,6 +157,7 @@ class GPSDate(dt.datetime):
     @property
     def info(self) -> dict[str, Any]:
         gps_week_beg = self.from_gps_week(self.gps_week)
+        gps_week_mid = gps_week_beg + dt.timedelta(days=3)
         gps_week_end = gps_week_beg + dt.timedelta(days=6)
         return dict(
             weekday=self.strftime("%A"),
@@ -168,5 +169,6 @@ class GPSDate(dt.datetime):
             gps_weekday=self.gps_weekday,
             # GPS week corresponds to a specific date without timestamp.
             gps_week_beg=gps_week_beg.isoformat()[:10],
+            gps_week_mid=gps_week_mid.isoformat()[:10],
             gps_week_end=gps_week_end.isoformat()[:10],
         )

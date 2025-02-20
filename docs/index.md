@@ -4,8 +4,8 @@ that automates and generalises common workflows with the [Bernese GNSS
 Software](http://www.bernese.unibe.ch/) [*Bernese* or *BSW*].
 
 AutoBernese is written i Python and the package is built and maintained by the
-geodetic software developers at the [Danish Agency for Data Supply and
-Infrastructure](https://eng.sdfi.dk/)
+geodetic software developers at the [Danish Agency for Climate
+Data](https://eng.kds.dk/)
 
 The software was created for our internal use, but as it may have some general
 application, it is published for a larger audience with the hope that it may be

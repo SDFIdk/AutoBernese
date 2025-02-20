@@ -11,13 +11,15 @@ from typing import (
     Any,
     Final,
 )
+from types import ModuleType
 from dataclasses import (
     dataclass,
     asdict,
 )
+import subprocess as sub
 
 import click
-from click_aliases import ClickAliasedGroup
+from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 import humanize
 
@@ -130,8 +132,11 @@ def logs() -> None:
 
     """
     runtime = configuration.load().get("runtime")
-    filename = runtime.get("logging").get("filename")
-    import subprocess as sub
+    if runtime is None:
+        raise SystemExit(f"No runtime entry found in configuration.")
+    filename = runtime.get("logging", {}).get("filename")
+    if filename is None:
+        raise SystemExit(f"No log-file name entry found in logging configuration.")
 
     process: sub.Popen | None = None
     try:
@@ -198,16 +203,13 @@ def residuals(
 
     pairs = check_example.get_available_comparables()
     for pair in pairs:
-        fname_reference = pair.get("reference")
-        fname_result = pair.get("result")
-
-        reference = check_example.extract_coordinates(fname_reference.read_text())
-        result = check_example.extract_coordinates(fname_result.read_text())
+        reference = check_example.extract_coordinates(pair.ref.read_text())
+        result = check_example.extract_coordinates(pair.res.read_text())
 
         diff = reference - result
 
-        print(f"Reference ({reference.date}): {fname_reference.name}")
-        print(f"Result    ({result.date}): {fname_result.name}")
+        print(f"Reference ({reference.date}): {pair.ref.name}")
+        print(f"Result    ({result.date}): {pair.res.name}")
         sz = 8
         header = f"{'ID': <4s} {'Delta x': >{sz}s}  {'Delta y': >{sz}s}  {'Delta z': >{sz}s}  F"
         print(f"{'Delta = Reference - Result': ^{len(header)}s}")
@@ -309,12 +311,21 @@ def download(
 
     sources: list[_source.Source] = config.get("sources", [])
     if not sources:
-        log.debug(f"No sources found ...")
+        msg = f"No sources found in configuration ..."
+        print(msg)
+        log.debug(msg)
         raise SystemExit
 
     # Filter if asked to
     if len(identifier) > 0:
         sources = [source for source in sources if source.identifier in identifier]
+
+    # Check again after filtering
+    if not sources:
+        msg = f"No sources matching selected identifiers ({', '.join(identifier)}) ..."
+        print(msg)
+        log.debug(msg)
+        raise SystemExit
 
     # Print preamble, before asking to proceed
     preamble = "Downloading the following sources\n"
@@ -343,6 +354,7 @@ def download(
         if force:
             source.max_age = 0
 
+        agent: ModuleType
         if source.protocol == "ftp":
             agent = ftp
         elif source.protocol in ("http", "https"):
@@ -386,7 +398,7 @@ def info(name: str) -> None:
     from ab.dates import date_range
 
     config = _campaign.load(name)
-    metadata = _campaign.MetaData(**config.get("metadata"))
+    metadata = _campaign.MetaData(**config.get("metadata", {}))
     print(metadata)
     epoch = metadata.beg + dt.timedelta((metadata.end - metadata.beg).days // 2)
     print(f"Dates:")

@@ -44,24 +44,34 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import (
     Protocol,
-    Self,
+    TypeVar,
 )
 
 from ab import configuration
 
 
+C = TypeVar("C", bound="Comparable")
+
+
 class Comparable(Protocol):
-    def __sub__(self, other: Self) -> Self: ...
+    def __sub__(self, other: C) -> C: ...
 
     __rsub__ = __sub__
 
 
-def get_available_comparables() -> list[dict[str, Path]]:
+@dataclass
+class FilePair:
+    ref: Path
+    res: Path
+
+
+def get_available_comparables() -> list[FilePair]:
     config = configuration.load()
     return [
-        pair
-        for pair in config.get("bsw_files").get("check_install")
-        if pair.get("reference").is_file() and pair.get("result").is_file()
+        FilePair(ref, res)
+        for pair in config.get("bsw_files", {}).get("check_install", [])
+        if (ref := pair.get("reference")).is_file()
+        and (res := pair.get("result")).is_file()
     ]
 
 
@@ -73,7 +83,7 @@ class LineCRD:
     z: float
     flag: str
 
-    def __sub__(self, other: Self) -> Self:
+    def __sub__(self, other: "LineCRD") -> "LineCRD":
         if not self.station == other.station:
             raise RuntimeError(
                 f"Must subtract from the same station. Got {self.station!r} and {other.station!r}"
@@ -95,7 +105,7 @@ class FileCRD:
     date: str
     coordinates: list[LineCRD]
 
-    def __sub__(self, other: Self) -> Self:
+    def __sub__(self, other: "FileCRD") -> "FileCRD":
         diffs = [
             self_line - other_line
             for (self_line, other_line) in zip(self.coordinates, other.coordinates)
