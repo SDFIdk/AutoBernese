@@ -121,13 +121,13 @@ def compile(s: str, flags=re.M) -> re.Pattern:
 
 
 # Section 1
-IERS_DOMES_NUMBER = compile(r"IERS DOMES Number\s*:\s(.*)")
+IERS_DOMES_NUMBER = compile(r"IERS DOMES Number\s*:\s*(\S*)$")
 SITE_NAME = compile(r"Site Name\s*:\s+(.*)")
-FOUR_CHARACTER_ID = compile(r"Four Character ID\s+:\s+([A-Z0-9]{4}?)")
+FOUR_CHARACTER_ID = compile(r"(?:Four|Nine) Character ID\s+:\s+([A-Z0-9]{4}?)")
 
 # Section 2
 CITY_OR_TOWN = compile(r"City or Town\s+:\s+(.*)")
-COUNTRY = compile(r"Country\s+:\s+(.*)")
+COUNTRY = compile(r"Country\s+(?:or Region)?\s+:\s+(.*)")
 
 # Section 3
 RECEIVER_TYPE = compile(r"Receiver Type\s+:\s(.*)")
@@ -138,8 +138,8 @@ FIRMWARE_VERSION = compile(r"Firmware Version\s+:\s(.*)")
 ANTENNA_TYPE = compile(r"Antenna Type\s+:\s+(.*)")
 ANTENNA_SERIAL_NUMBER = compile(r"Serial Number\s+:\s+(.*)\s?[\r\n]")
 MARKER_UP = compile(r"Marker->ARP Up.*\s+:\s+([\.\d]*)")
-MARKER_NORTH = compile(r"Marker->ARP North.*\s+:\s+([\.\d]*)")
-MARKER_EAST = compile(r"Marker->ARP East.*\s+:\s+([\.\d]*)")
+MARKER_NORTH = compile(r"Marker->ARP North.*\s+:\s+(-?[\.\d]*)")
+MARKER_EAST = compile(r"Marker->ARP East.*\s+:\s+(-?[\.\d]*)")
 
 # Common for the given sections
 DATE_INSTALLED = compile(r"Date Installed\s+:\s+(\d{4})-(\d{2})-(\d{2})")
