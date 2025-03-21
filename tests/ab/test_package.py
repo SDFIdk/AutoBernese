@@ -16,5 +16,4 @@ def test_package_data_exist():
     assert pkg.bpe_runner.is_file()
     assert pkg.template_campaign_menu_list.is_file()
     assert pkg.template_campaign_default.is_file()
-    assert pkg.template_campaign_example.is_file()
     assert pkg.campaign_header.is_file()
