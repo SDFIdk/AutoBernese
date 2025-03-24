@@ -1,0 +1,516 @@
+     BUDP00DNK Site Information Form (site log v2.0)
+     International GNSS Service
+     See Instructions at:
+       https://files.igs.org/pub/station/general/sitelog_instr_v2.0.txt
+
+
+0.   Form
+
+     Prepared by (full name)  : SDFI GNSS Team (gnss@sdfi.dk)
+     Date Prepared            : 2024-08-12
+     Report Type              : UPDATE
+     If Update:
+      Previous Site Log       : budp00dnk_20221113.log
+      Modified/Added Sections : 1
+
+
+1.   Site Identification of the GNSS Monument
+
+     Site Name                : Kobenhavn
+     Nine Character ID        : BUDP00DNK
+     Monument Inscription     : none
+     IERS DOMES Number        : 10101M003
+     CDP Number               : (A4)
+     Monument Description     : pillar
+       Height of the Monument : 9.1 m
+       Monument Foundation    : Concrete pad
+       Foundation Depth       : 3.6 m
+     Marker Description       : center of antenna mount disc
+     Date Installed           : 1999-01-06
+     Geologic Characteristic  : gravel/sand
+       Bedrock Type           : (IGNEOUS/METAMORPHIC/SEDIMENTARY)
+       Bedrock Condition      : (FRESH/JOINTED/WEATHERED)
+       Fracture Spacing       : (0 cm/1-10 cm/11-50 cm/51-200 cm/over 200 cm)
+       Fault zones nearby     : NO
+         Distance/activity    : (multiple lines)
+     Additional Information   : The reference marker is the center of a 120 mm
+                              : diameter disc made of 10 mm stainless steel.
+                              : Antenna is mounted with a force centered steel
+                              : bolt. The mount disc is embedded in a conical
+                              : shaped concrete top on a concrete pillar.
+                              : The pillar consist of an 1)inner solid concrete
+                              : pillar (600 mm diameter) electrically heated
+                              : to prevent thermal expansion 2)100 mm
+                              : insulation material 3)outer concrete shell
+                              : (60 mm) and 4) a wooden protective surface.
+                              : Inner and outer concrete pillars are only
+                              : connected via the foundation.
+
+
+2.   Site Location Information
+
+     City or Town             : Kobenhavn
+     State or Province        : N/A
+     Country or Region        : DNK
+     Tectonic Plate           : EURASIAN
+     Approximate Position (ITRF)
+       X coordinate (m)       : 3513638.561
+       Y coordinate (m)       : 778956.187
+       Z coordinate (m)       : 5248216.249
+       Latitude (N is +)      : +554420.46
+       Longitude (E is +)     : +0123000.07
+       Elevation (m,ellips.)  : 94.0
+     Additional Information   : ETRS89 coordinates (Danish realization).
+                              : The ETRS89 coordinates originates from a 7 day
+                              : IGb08 solution at the epoch 2015-10-30.
+
+
+3.   GNSS Receiver Information
+
+3.1  Receiver Type            : ASHTECH Z-XII3
+     Satellite System         : GPS
+     Serial Number            : 02259
+     Firmware Version         : 1D04/1L00
+     Elevation Cutoff Setting : 5 deg
+     Date Installed           : 1999-01-06
+     Date Removed             : 2001-12-18
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.2  Receiver Type            : ASHTECH UZ-12
+     Satellite System         : GPS
+     Serial Number            : 00802
+     Firmware Version         : UG00/0A13
+     Elevation Cutoff Setting : 5 deg
+     Date Installed           : 2001-12-18
+     Date Removed             : 2002-10-22
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.3  Receiver Type            : ASHTECH Z-XII3
+     Satellite System         : GPS
+     Serial Number            : 02259
+     Firmware Version         : 1D04/1L00
+     Elevation Cutoff Setting : 5 deg
+     Date Installed           : 2002-10-22
+     Date Removed             : 2003-03-03T12:00Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.4  Receiver Type            : ASHTECH UZ-12
+     Satellite System         : GPS
+     Serial Number            : 11106
+     Firmware Version         : CJ00/0A16
+     Elevation Cutoff Setting : 5 deg
+     Date Installed           : 2003-03-03T12:48Z
+     Date Removed             : 2006-03-24T09:00Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.5  Receiver Type            : ASHTECH UZ-12
+     Satellite System         : GPS
+     Serial Number            : 01902
+     Firmware Version         : CJ00/0A16
+     Elevation Cutoff Setting : 5 deg
+     Date Installed           : 2006-03-24T09:05Z
+     Date Removed             : 2006-06-19T00:00Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.6  Receiver Type            : ASHTECH UZ-12
+     Satellite System         : GPS
+     Serial Number            : 11106
+     Firmware Version         : CK00/0A16
+     Elevation Cutoff Setting : 5 deg
+     Date Installed           : 2006-06-19T11:11Z
+     Date Removed             : 2006-09-11T11:01Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.7  Receiver Type            : ASHTECH UZ-12
+     Satellite System         : GPS
+     Serial Number            : 11106
+     Firmware Version         : CK00/0A16
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2006-09-11T11:01Z
+     Date Removed             : 2008-09-15T11:00Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.8  Receiver Type            : LEICA GRX1200GGPRO
+     Satellite System         : GPS+GLO
+     Serial Number            : 352269
+     Firmware Version         : 5.00
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2008-09-15T11:00Z
+     Date Removed             : 2008-10-28T12:00Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.9  Receiver Type            : LEICA GRX1200GGPRO
+     Satellite System         : GPS+GLO
+     Serial Number            : 352269
+     Firmware Version         : 6.00
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2008-10-28T12:00Z
+     Date Removed             : 2009-08-18T12:15Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.10 Receiver Type            : LEICA GRX1200GGPRO
+     Satellite System         : GPS+GLO
+     Serial Number            : 355523
+     Firmware Version         : 7.50
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2009-08-18T12:15Z
+     Date Removed             : 2011-07-15T06:00Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.11 Receiver Type            : LEICA GRX1200GGPRO
+     Satellite System         : GPS+GLO
+     Serial Number            : 355523
+     Firmware Version         : 8.20
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2011-07-15T06:30Z
+     Date Removed             : 2014-06-19T06:30Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.12 Receiver Type            : LEICA GRX1200GGPRO
+     Satellite System         : GPS+GLO
+     Serial Number            : 355523
+     Firmware Version         : 8.71
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2014-06-19T07:15Z
+     Date Removed             : 2015-06-24T09:45Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.13 Receiver Type            : LEICA GRX1200GGPRO
+     Satellite System         : GPS+GLO
+     Serial Number            : 355523
+     Firmware Version         : 9.20
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2015-06-24T09:45Z
+     Date Removed             : 2020-04-02T08:30Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.14 Receiver Type            : SEPT POLARX5
+     Satellite System         : GPS+GLO+GAL+BDS+QZSS+IRNSS
+     Serial Number            : 3062184
+     Firmware Version         : 5.3.2
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2020-04-02T08:45Z
+     Date Removed             : 2020-04-28T07:01Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.15 Receiver Type            : SEPT POLARX5
+     Satellite System         : GPS+GLO+GAL+BDS+QZSS+IRNSS
+     Serial Number            : 3013899
+     Firmware Version         : 5.3.2
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2020-04-28T08:01Z
+     Date Removed             : 2021-07-05T09:01Z
+     Temperature Stabiliz.    : (deg C) +/- (deg C)
+     Additional Information   : (multiple lines)
+
+3.16 Receiver Type            : SEPT POLARX5
+     Satellite System         : GPS+GLO+GAL+BDS+QZSS+IRNSS
+     Serial Number            : 3013899
+     Firmware Version         : 5.4.0-patch1
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2021-07-05T09:19Z
+     Date Removed             : 2022-11-13T14:18Z
+     Temperature Stabiliz.    : none
+     Additional Information   : (multiple lines)
+
+3.17 Receiver Type            : SEPT POLARX5
+     Satellite System         : GPS+GLO+GAL+BDS+QZSS+IRNSS
+     Serial Number            : 3013899
+     Firmware Version         : 5.5.0
+     Elevation Cutoff Setting : 0 deg
+     Date Installed           : 2022-11-13T14:22Z
+     Date Removed             : CCYY-MM-DDThh:mmZ
+     Temperature Stabiliz.    : none
+     Additional Information   : (multiple lines)
+
+3.x  Receiver Type            : (A20, from rcvr_ant.tab; see instructions)
+     Satellite System         : (GPS+GLO+GAL+BDS+QZSS+IRNSS+SBAS)
+     Serial Number            : (A20, but note the first A5 is used in SINEX)
+     Firmware Version         : (A11)
+     Elevation Cutoff Setting : (deg)
+     Date Installed           : (CCYY-MM-DDThh:mmZ)
+     Date Removed             : (CCYY-MM-DDThh:mmZ)
+     Temperature Stabiliz.    : (none or tolerance in degrees C)
+     Additional Information   : (multiple lines)
+
+
+4.   GNSS Antenna Information
+
+4.1  Antenna Type             : ASH700936C_M    DOME
+     Serial Number            : 12374
+     Antenna Reference Point  : BPA
+     Marker->ARP Up Ecc. (m)  :   0.0000
+     Marker->ARP North Ecc(m) :   0.0000
+     Marker->ARP East Ecc(m)  :   0.0000
+     Alignment from True N    : 0 deg
+     Antenna Radome Type      : DOME
+     Radome Serial Number     : n/a
+     Antenna Cable Type       : RG213/U
+     Antenna Cable Length     : 52 m
+     Date Installed           : 1999-01-06
+     Date Removed             : 2000-01-19
+     Additional Information   : Custom made non-hemispheric plexiglass radome.
+                              : Antenna signal splitter from GPS-networking
+                              : p/n: LDCB1S1X4. High isolation/DC blocked.
+                              : Ashtech Line Amplifier p/n: 700389
+                              : antenna->amplifier = 26 m
+                              : amplifier->receiver= 26 m
+                              : Suhner Lightning protection(3402.17.A) at
+                              : amplifier.
+
+4.2  Antenna Type             : ASH701941.B     UNAV
+     Serial Number            : 95104
+     Antenna Reference Point  : BPA
+     Marker->ARP Up Ecc. (m)  :   0.0000
+     Marker->ARP North Ecc(m) :   0.0000
+     Marker->ARP East Ecc(m)  :   0.0000
+     Alignment from True N    : 0 deg
+     Antenna Radome Type      : UNAV
+     Radome Serial Number     : n/a
+     Antenna Cable Type       : RG213/U
+     Antenna Cable Length     : 52 m
+     Date Installed           : 2000-01-19
+     Date Removed             : CCYY-MM-DDThh:mmZ
+     Additional Information   : Full serial: CBL29995104.
+                              : 
+
+4.x  Antenna Type             : (A20, from rcvr_ant.tab; see instructions)
+     Serial Number            : (A*, but note the first A5 is used in SINEX)
+     Antenna Reference Point  : (BPA/BCR/XXX from "antenna.gra"; see instr.)
+     Marker->ARP Up Ecc. (m)  : (F8.4)
+     Marker->ARP North Ecc(m) : (F8.4)
+     Marker->ARP East Ecc(m)  : (F8.4)
+     Alignment from True N    : (deg; + is clockwise/east)
+     Antenna Radome Type      : (A4 from rcvr_ant.tab; see instructions)
+     Radome Serial Number     : 
+     Antenna Cable Type       : (vendor & type number)
+     Antenna Cable Length     : (m)
+     Date Installed           : (CCYY-MM-DDThh:mmZ)
+     Date Removed             : (CCYY-MM-DDThh:mmZ)
+     Additional Information   : (multiple lines)
+
+
+5.   Surveyed Local Ties
+
+5.1  Tied Marker Name         : BUDD
+     Tied Marker Usage        : Local control / EUREF station
+     Tied Marker CDP Number   : (A4)
+     Tied Marker DOMES Number : 10101M002
+     Differential Components from GNSS Marker to the tied monument (ITRS)
+       dx (m)                 : 11.071 m
+       dy (m)                 : -1.646 m
+       dz (m)                 : -14.464 m
+     Accuracy (mm)            : 2 mm
+     Survey method            : GPS campaign
+     Date Measured            : 1999-11-10
+     Additional Information   : Measured during a 5 day campaign.
+                              : Additionally precise triangulation is performed
+                              : at discrete intervals. The adjusted coordinates
+                              : in meters(utm33Netrs89)for BUDP are:
+                              : Date        Northing      Easting     MSLheight
+                              : 1999-03-03  6179864.1432  343050.8366 57.8898
+                              : 2001-06-24  6179864.1421  343050.8359 57.8925
+                              : 2002-08-22  6179864.1421  343050.8369 57.8908
+
+5.x  Tied Marker Name         : 
+     Tied Marker Usage        : (SLR/VLBI/LOCAL CONTROL/FOOTPRINT/etc)
+     Tied Marker CDP Number   : (A4)
+     Tied Marker DOMES Number : (A9)
+     Differential Components from GNSS Marker to the tied monument (ITRS)
+       dx (m)                 : (m)
+       dy (m)                 : (m)
+       dz (m)                 : (m)
+     Accuracy (mm)            : (mm)
+     Survey method            : (GPS CAMPAIGN/TRILATERATION/TRIANGULATION/etc)
+     Date Measured            : (CCYY-MM-DDThh:mmZ)
+     Additional Information   : (multiple lines)
+
+
+6.   Frequency Standard
+
+6.1  Standard Type            : INTERNAL
+       Input Frequency        : (if external)
+       Effective Dates        : 1999-01-06/1999-10-13
+       Notes                  : (multiple lines)
+
+6.2  Standard Type            : EXTERNAL RUBIDIUM
+       Input Frequency        : 5 MHz
+       Effective Dates        : 1999-10-13/2008-12-13
+       Notes                  : EFRATOM FRK-LLN s/n: 18267
+
+6.3  Standard Type            : INTERNAL
+       Input Frequency        : (if external)
+       Effective Dates        : 2008-12-13/CCYY-MM-DD
+       Notes                  : (multiple lines)
+
+6.x  Standard Type            : (INTERNAL or EXTERNAL H-MASER/CESIUM/etc)
+       Input Frequency        : (if external)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Notes                  : (multiple lines)
+
+
+7.   Collocation Information
+
+7.x  Instrumentation Type     : (GPS/GLONASS/DORIS/PRARE/SLR/VLBI/TIME/etc)
+       Status                 : (PERMANENT/MOBILE)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Notes                  : (multiple lines)
+
+
+8.   Meteorological Instrumentation
+
+8.1.x  Humidity Sensor Model  : 
+       Manufacturer           : 
+       Serial Number          : 
+       Data Sampling Interval : (sec)
+       Accuracy (% rel h)     : (% rel h)
+       Aspiration             : (UNASPIRATED/NATURAL/FAN/etc)
+       Height Diff to Ant     : (m)
+       Calibration date       : (CCYY-MM-DD)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Notes                  : (multiple lines)
+
+8.2.x  Pressure Sensor Model  : 
+       Manufacturer           : 
+       Serial Number          : 
+       Data Sampling Interval : (sec)
+       Accuracy               : (hPa)
+       Height Diff to Ant     : (m)
+       Calibration date       : (CCYY-MM-DD)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Notes                  : (multiple lines)
+
+8.3.x  Temp. Sensor Model     : 
+       Manufacturer           : 
+       Serial Number          : 
+       Data Sampling Interval : (sec)
+       Accuracy               : (deg C)
+       Aspiration             : (UNASPIRATED/NATURAL/FAN/etc)
+       Height Diff to Ant     : (m)
+       Calibration date       : (CCYY-MM-DD)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Notes                  : (multiple lines)
+
+8.4.x  Water Vapor Radiometer : 
+       Manufacturer           : 
+       Serial Number          : 
+       Distance to Antenna    : (m)
+       Height Diff to Ant     : (m)
+       Calibration date       : (CCYY-MM-DD)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Notes                  : (multiple lines)
+
+8.5.x  Other Instrumentation  : (multiple lines)
+
+
+9.   Local Ongoing Conditions Possibly Affecting Computed Position
+
+9.1.x  Radio Interferences    : (TV/CELL PHONE ANTENNA/RADAR/etc)
+       Observed Degradations  : (SN RATIO/DATA GAPS/etc)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Additional Information : (multiple lines)
+
+9.2.x  Multipath Sources      : (METAL ROOF/DOME/VLBI ANTENNA/etc)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Additional Information : (multiple lines)
+
+9.3.x  Signal Obstructions    : (TREES/BUILDINGS/etc)
+       Effective Dates        : (CCYY-MM-DD/CCYY-MM-DD)
+       Additional Information : (multiple lines)
+
+
+10.  Local Episodic Effects Possibly Affecting Data Quality
+
+10.x  Date                    : (CCYY-MM-DD/CCYY-MM-DD)
+      Event                   : (TREE CLEARING/CONSTRUCTION/etc)
+
+
+11.  On-Site, Point of Contact Agency Information
+
+     Agency                   : Agency for Data Supply and Infrastructure
+     Preferred Abbreviation   : SDFI
+     Mailing Address          : Rentemestervej 8
+                              : DK-2400 Copenhagen NV
+                              : Denmark
+     Primary Contact
+       Contact Name           : SDFI GNSS Team
+       Telephone (primary)    : 
+       Telephone (secondary)  : 
+       Fax                    : 
+       E-mail                 : gnss@sdfi.dk
+     Secondary Contact
+       Contact Name           : 
+       Telephone (primary)    : 
+       Telephone (secondary)  : 
+       Fax                    : 
+       E-mail                 : 
+     Additional Information   : (multiple lines)
+
+
+
+
+12.  Responsible Agency (if different from 11.)
+
+     Agency                   : (multiple lines)
+     Preferred Abbreviation   : (A10)
+     Mailing Address          : (multiple lines)
+     Primary Contact
+       Contact Name           : 
+       Telephone (primary)    : 
+       Telephone (secondary)  : 
+       Fax                    : 
+       E-mail                 : 
+     Secondary Contact
+       Contact Name           : 
+       Telephone (primary)    : 
+       Telephone (secondary)  : 
+       Fax                    : 
+       E-mail                 : 
+     Additional Information   : (multiple lines)
+
+
+13.  More Information
+
+     Primary Data Center      : BKG
+     Secondary Data Center    : BEV
+     URL for More Information : 
+     Hardcopy on File
+       Site Map               : (Y or URL)
+       Site Diagram           : (Y or URL)
+       Horizon Mask           : (Y or URL)
+       Monument Description   : (Y or URL)
+       Site Pictures          : (Y or URL)
+     Additional Information   : (multiple lines)
+     Antenna Graphics with Dimensions
+
+ASH701941.1
+ASH701941.2
+ASH701941.A
+ASH701941.B
+                        +---------+
+                       /     +     \                        <-- 0.1267 L2
+                      |      +      |                       <-- 0.1080 L1
+    +-----------------+-------------+------------------+    <-- 0.1008 TCR
+    |                                                  |
+    |                                                  |
+    |                                                  |
+    |                                                  |
+  +-+--------------------------------------------------+-+  <-- 0.0378
+  +-------------------+-------------+--------------------+  <-- 0.0348 BCR
+                      |             |
+                      |             |
+                      +------x------+                       <-- 0.0 BPA=ARP
