@@ -1,12 +1,13 @@
 # [GNSS-Process Automation with Bernese GNSS Software](https://github.com/SDFIdk/AutoBernese)
 
--- By the SDFI geodetic software developers and users.
+-- By the KDS geodetic software developers and users.
 
 
 ## The package
 
-This package is built and maintained by the Geodetic IT team at the [Danish
-Agency for Data Supply and Infrastructure](https://eng.sdfi.dk/)
+AutoBernese is written i Python and the package is built and maintained by the
+geodetic software developers at the [Danish Agency for Climate
+Data](https://eng.kds.dk/)
 
 The package is mainly built for our internal use, but as the tool may have some
 general application, it is published with the hope that it may be useful for
