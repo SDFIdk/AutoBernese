@@ -5,8 +5,10 @@ Module for dates.
 
 import datetime as dt
 from dataclasses import dataclass
-from typing import (
+from collections.abc import (
     Iterable,
+)
+from typing import (
     Protocol,
     Any,
 )
@@ -18,9 +20,9 @@ class HasFromOrdinal(Protocol):
 
     """
 
-    def fromordinal(self, ordinal: int, /) -> Any:
+    def fromordinal(self, ordinal: int, /) -> "HasFromOrdinal":
         """
-        Method that converts a Python integer date.
+        Method that converts a Python integer date to an instance of the object.
 
         """
 
@@ -34,9 +36,10 @@ def date_range(
     transformer: HasFromOrdinal = dt.date,
 ) -> Iterable[HasFromOrdinal]:
     """
-    Return a range of dates between and including the given start and end dates.
+    By default, returns a range of dates between and including the given start
+    and end dates.
 
-    `datetime` instances are truncated to dates, since only `date` instances
+    Note: `datetime` instances are truncated to dates, since only `date` instances
     have the method `toordinal`.
 
     """

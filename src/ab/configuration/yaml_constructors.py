@@ -12,7 +12,7 @@ from typing import Iterable
 import functools
 
 import yaml
-from yaml_env_tag import construct_env_tag
+from yaml_env_tag import construct_env_tag  # type: ignore
 
 from ab.bsw.bpe import BPETask
 from ab.data.source import Source
@@ -91,7 +91,10 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
         )
 
     if isinstance(node, yaml.ScalarNode):
-        path: Path = Path(loader.construct_scalar(node))
+        raw = loader.construct_scalar(node)
+        if not isinstance(raw, str):
+            raise RuntimeError(f"Expected {raw!r} to be a string.")
+        path: Path = Path(raw)
     else:
         # We use loader.construct_object, since there may be YAML aliases inside.
         multiple: list[str | Path] = [loader.construct_object(v) for v in node.value]
@@ -136,7 +139,7 @@ def source_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> Source:
     Construct a Source instance from the given keyword arguments.
 
     """
-    return Source(**loader.construct_mapping(node))
+    return Source(**loader.construct_mapping(node))  # type: ignore[misc]
 
 
 def gps_date_constructor(loader: yaml.Loader, node: yaml.ScalarNode) -> GPSDate:
@@ -188,22 +191,40 @@ def date_range_constructor(
 
     """
     d = loader.construct_mapping(node)
-    result: list[GPSDate] = list(
-        date_range(
-            d.get("beg"),
-            d.get("end"),
-            extend_end_by=d.get("extend_end_by", 0),
-            transformer=GPSDate,
-        )
+
+    beg = d.get("beg")
+    if not isinstance(beg, (dt.datetime, dt.date)):
+        raise TypeError(f"Expected {beg!r} to be a date or datetime instance ...")
+
+    end = d.get("end")
+    if not isinstance(end, (dt.datetime, dt.date)):
+        raise TypeError(f"Expected {end!r} to be a date or datetime instance ...")
+
+    extend_end_by = d.get("extend_end_by", 0)
+    if not isinstance(extend_end_by, int):
+        raise TypeError(f"Expected {extend_end_by!r} to be an integer ...")
+
+    return list(
+        date_range(beg, end, transformer=GPSDate, extend_end_by=extend_end_by)  # type: ignore
     )
-    return result
 
 
 def date_offset_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> GPSDate:
+    """
+    Using input date and number of days to offset, return the offset date.
+
+    """
     d = loader.construct_mapping(node)
-    date = GPSDate.from_date(d.get("date"))
-    delta = dt.timedelta(days=d.get("days"))
-    return date + delta
+
+    date = d.get("date")
+    if not isinstance(date, (dt.datetime, dt.date)):
+        raise TypeError(f"Expected {date!r} to be a date or datetime instance ...")
+
+    days = d.get("days")
+    if not isinstance(days, int):
+        raise TypeError(f"Expected {days!r} to be an integer ...")
+
+    return GPSDate.from_date(date) + dt.timedelta(days=days)
 
 
 # def middle_epoch_constructor(
@@ -234,7 +255,7 @@ def bpe_task_constructor(loader: yaml.Loader, node: yaml.MappingNode) -> BPETask
     Construct a BPETask instance from the given keyword arguments.
 
     """
-    return BPETask(**loader.construct_mapping(node, deep=True))
+    return BPETask(**loader.construct_mapping(node, deep=True))  # type: ignore[misc]
 
 
 def convert_to_GPSDate_instance(func):
@@ -258,8 +279,8 @@ def init():
     yaml.SafeLoader.add_constructor("!DateOffset", date_offset_constructor)
     yaml.SafeLoader.add_constructor("!BPETask", bpe_task_constructor)
 
-    # Update the constructor for timestamps, so that it makes times stamps
-    # GPSDate instances.
+    # Update the constructor for timestamps, so that it makes timestamps GPSDate
+    # instances.
 
     # TODO or not TODO (all timestamps will be converted)
     # from yaml.loader import SafeLoader
