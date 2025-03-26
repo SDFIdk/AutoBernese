@@ -15,14 +15,14 @@ import os
 
 import yaml
 
-import ab.configuration.yaml_constructors
+from ab.configuration import yaml_constructors
 from ab import pkg
 
 
 yaml_constructors.init()
 
 
-_CONFIGURATION: dict[str, Any] = None
+_CONFIGURATION: dict[str, Any] | None = None
 _POP: Final = (
     "bsw_env",
     "bsw_files",
@@ -38,7 +38,7 @@ def clean(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
-def merge(*filenames: Iterable[Path | str]) -> str:
+def merge(*filenames: Path | str) -> str:
     """
     Merge file contents in the order of the given filenames.
 
