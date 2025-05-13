@@ -3,7 +3,6 @@ channels:
 - conda-forge
 dependencies:
 - click
-- click-aliases
 - humanize
 - pip
 - python=3.12
@@ -11,4 +10,5 @@ dependencies:
 - requests
 - rich
 - pip:
+  - click-aliases
   - pyyaml_env_tag
