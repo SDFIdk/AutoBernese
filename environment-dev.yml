@@ -3,7 +3,6 @@ channels:
 - conda-forge
 dependencies:
 - click
-- click-aliases
 - humanize
 - pip
 - python=3.12
@@ -11,6 +10,7 @@ dependencies:
 - requests
 - rich
 - pip:
+  - click-aliases
   - mkdocs-glightbox
   - mkdocs-kroki-plugin
   - pyyaml_env_tag
@@ -25,3 +25,4 @@ dependencies:
 - pre-commit
 # For MyPy
 - types-pyyaml
+- types-requests
