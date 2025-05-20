@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from ab.configuration.yaml_constructors import (
+from ab.configuration.constructors.paths import (
     resolve_wildcards,
 )
 
