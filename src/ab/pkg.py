@@ -36,4 +36,3 @@ with resources.as_file(module) as base:
 
     # Campaign templates included in the package
     template_campaign_default = base.joinpath("bsw/templates/default.yaml")
-    template_campaign_example = base.joinpath("bsw/templates/example.yaml")
