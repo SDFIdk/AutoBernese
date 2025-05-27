@@ -1,5 +1,5 @@
 """
-Command-line interface for troposphere delay model data
+Command-line interface for troposphere-delay model data
 
 """
 

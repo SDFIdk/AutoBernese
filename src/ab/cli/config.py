@@ -1,3 +1,8 @@
+"""
+Command-line interface for AutoBernese configuration content.
+
+"""
+
 import logging
 
 import click

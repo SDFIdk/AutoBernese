@@ -1,5 +1,5 @@
 """
-Command-line interface for station sitelogs and STA files.
+Command-line interface for station sitelogs and STA files
 
 """
 

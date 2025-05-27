@@ -1,5 +1,5 @@
 """
-Command-line types
+Command-line interface types
 
 """
 
