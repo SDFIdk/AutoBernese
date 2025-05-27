@@ -1,7 +1,5 @@
 """
-Custom PyYAML constructors.
-
-Constructors defined in this module are added to the SafeLoader.
+Custom PyYAML constructors
 
 """
 
@@ -10,7 +8,6 @@ from yaml_env_tag import construct_env_tag  # type: ignore
 
 from ab.configuration.constructors import (
     paths,
-    tasks,
     sources,
     dates,
 )
@@ -28,9 +25,6 @@ _tag_constructor_map = (
     # Use parameters
     ("!DateRange", dates.date_range_constructor),
     ("!AsGPSDate", dates.date_to_gps_date_constructor),
-    # Add tasks
-    ("!BPETask", tasks.bpe_task_constructor),
-    # ("!TropoTask", tasks.tropo_task_constructor),
 )
 
 
