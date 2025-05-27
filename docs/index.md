@@ -1,5 +1,5 @@
 
-This is the documentation website for AutoBernese, a Command-line application
+This is the documentation website for AutoBernese, a command-line application
 that automates and generalises common workflows with the [Bernese GNSS
 Software](http://www.bernese.unibe.ch/) [*Bernese* or *BSW*].
 

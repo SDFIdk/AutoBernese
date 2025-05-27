@@ -28,16 +28,9 @@ theme:
 
   language: en
   features:
-  # - navigation.tabs
-  # - navigation.tabs.sticky
   - navigation.sections
   - navigation.expand
-  # - toc.integrate
   - navigation.top
-
-#   palette:
-#     primary: light green
-#     accent: light green
 
 extra_css:
 - stylesheets/extra.css
@@ -75,7 +68,8 @@ markdown_extensions:
     emoji_index: !!python/name:material.extensions.emoji.twemoji
     emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
-- pymdownx.highlight
+- pymdownx.highlight:
+    anchor_linenums: true
 - pymdownx.inlinehilite
 
 - pymdownx.keys
