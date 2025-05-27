@@ -165,3 +165,7 @@ class GPSDate(dt.datetime):
             gps_week_mid=gps_week_mid.isoformat()[:10],
             gps_week_end=gps_week_end.isoformat()[:10],
         )
+
+
+def dates_to_gps_date(dates: Iterable[dt.date]) -> list[GPSDate]:
+    return [GPSDate.from_date(date) for date in dates]
