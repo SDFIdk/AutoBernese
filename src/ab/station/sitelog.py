@@ -1,8 +1,7 @@
 """
-Sitelog parser for the specific purpose of extracting data needed in the
-STA-file.
+Parse a GNSS-sitelog file to extract data needed for a STA-file
 
-Given
+Parsed:
 
 *   Sitelog with sections 1 through 4, extract needed fields to produce station
     history in a STA-file.
