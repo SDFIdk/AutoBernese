@@ -21,3 +21,18 @@ class DownloadStatus:
         return self
 
     __radd__ = __add__
+
+
+# class Handler:
+#     def __init__(self, source: Source):
+#         self.source = source
+
+#     def __enter__(self):
+#         return self.agent
+
+#     def __exit__(self, *args):
+#         self.agent.close()
+
+
+# class Agent:
+#     ...
