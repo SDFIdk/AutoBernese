@@ -9,22 +9,13 @@ import logging
 from typing import Iterable
 
 from ab import configuration
+from ab.paths import resolve_wildcards
 from ab.data import DownloadStatus
 from ab.data.source import Source
 from ab.data.stats import already_updated
 
 
 log = logging.getLogger(__name__)
-
-
-def resolve_filename_wildcards(uri: str) -> Iterable[Path]:
-    """
-    Resolve wildcards for filenames only.
-
-    """
-    path = Path(uri)
-    parts = path.parts[path.is_absolute() :]
-    return Path(path.root).glob(str(Path(*parts)))
 
 
 def download(source: Source) -> DownloadStatus:
@@ -39,7 +30,7 @@ def download(source: Source) -> DownloadStatus:
         destination.mkdir(parents=True, exist_ok=True)
 
         # Loop over each file resolved
-        for ifname in resolve_filename_wildcards(pair.uri):
+        for ifname in resolve_wildcards(pair.uri):
             ofname = destination / ifname.name
 
             if not ifname.is_file():
