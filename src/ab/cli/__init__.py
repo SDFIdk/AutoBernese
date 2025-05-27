@@ -4,26 +4,15 @@ Command-line interface for AutoBernese
 """
 
 import logging
-import json
-import datetime as dt
-from dataclasses import (
-    asdict,
-)
 
 import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab import (
-    __version__,
-    configuration,
-)
-from ab.bsw import (
-    get_bsw_release,
-)
-
+from ab import configuration
 from ab.cli import (
     _input,
+    about,
     config,
     logs,
     qc,
@@ -55,24 +44,20 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
     4.  Do various other things related to GNSS-data processing.
 
     """
+
     if show_version:
-        print(f"{__version__}")
+        print(about.autobernese())
         raise SystemExit
-
-    if not configuration.LOADGPS_setvar_sourced():
-        msg = "Not all variables in LOADGPS.setvar are set ..."
-        print(f"[white on red]{msg}[/]")
-        raise SystemExit
-
-    configuration.set_up_runtime_environment()
 
     if bsw_release:
-        print(json.dumps(asdict(get_bsw_release()), indent=2))
+        print(about.bernese())
         raise SystemExit
 
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
         raise SystemExit
+
+    configuration.set_up_runtime_environment()
 
 
 main.add_command(config.config)
