@@ -14,27 +14,13 @@ from typing import (
 )
 
 
-class HasFromOrdinal(Protocol):
-    """
-    A formal definition of a type that can transform an ordinal date to a date.
-
-    """
-
-    def fromordinal(self, ordinal: int, /) -> "HasFromOrdinal":
-        """
-        Method that converts a Python integer date to an instance of the object.
-
-        """
-
-
 def date_range(
     beg: dt.date | dt.datetime,
     end: dt.date | dt.datetime,
     /,
     *,
     extend_end_by: int = 0,
-    transformer: HasFromOrdinal = dt.date,
-) -> Iterable[HasFromOrdinal]:
+) -> Iterable[dt.date]:
     """
     By default, returns a range of dates between and including the given start
     and end dates.
@@ -51,7 +37,7 @@ def date_range(
         raise ValueError(f"{extend_end_by=}, but must be zero or greater.")
 
     return [
-        transformer.fromordinal(n)
+        dt.date.fromordinal(n)
         for n in range(
             beg.toordinal(),
             end.toordinal() + 1 + extend_end_by,
