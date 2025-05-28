@@ -158,6 +158,10 @@ class GPSDate(dt.datetime):
         return doy(self)
 
     @property
+    def Y(self) -> int:
+        return int(self.strftime("%Y"))
+
+    @property
     def info(self) -> dict[str, Any]:
         gps_week_beg = self.from_gps_week(self.gps_week)
         gps_week_mid = gps_week_beg + dt.timedelta(days=3)
