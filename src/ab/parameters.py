@@ -1,16 +1,19 @@
 """
-Module for handling parameters.
+Resolve parameterised strings
 
 """
 
-from typing import (
-    Any,
-    Iterable,
-)
+from typing import Any
+from collections.abc import Iterable
 import itertools as it
 
 
-def resolved(parameters: dict[str, Iterable[Any]]) -> list[dict[str, Any]]:
+type ArgumentsType = dict[str, Any]
+type ParametersType = dict[str, Iterable[Any]]
+type PermutationType = dict[Any, Any]
+
+
+def permutations(parameters: ParametersType) -> list[PermutationType]:
     """
     Parameter expansion for a mapping with at least one key and a sequence of at
     least one value.
@@ -44,25 +47,57 @@ def resolved(parameters: dict[str, Iterable[Any]]) -> list[dict[str, Any]]:
     ]
 
 
-def resolvable(
-    parameters: dict[str, Iterable[Any]], string_to_format: str
-) -> dict[str, Iterable[Any]]:
+def resolvable(parameters: ParametersType, string_to_format: str) -> ParametersType:
     """
-    Return dict with parameters that are actually employed in formatabale.
+    Remove keys in parameters that are not present in string to format.
 
-    This function exists, because the user may provide more parameters than are
-    usable, and the mechanism that expands the dict of parameters and possible
-    values to a list of dicts with each possible combination of parameter value
-    will provide duplicate file listings when the name is resolved for each
-    parameter combination where the difference in parameter value is only in the
-    not-used parameter (which is ignored by the .format() method).
+    A user may provide more parameters than are used in the string to format.
+
+    Since the mechanism expanding the parameters and possible values
+    to a list of dicts with each possible permutation of parameter value will
+    provide duplicate file listings when the name is resolved for each parameter
+    permutation where the difference in parameter value is only in the not-used
+    parameter (which is ignored by the .format() method).
 
     """
     return {
         parameter: values
         for (parameter, values) in parameters.items()
-        # Case: 'Whatever comes before {parameter} whatever comes after'
+        # Case: 'String with {parameter} whatever comes after'
         if f"{{{parameter}}}" in string_to_format
-        # Case: 'Whatever comes before {parameter.property} whatever comes after'
+        # Case: 'String with {parameter.property} whatever comes after'
         or f"{{{parameter}." in string_to_format
     }
+
+
+def resolve(
+    arguments: ArgumentsType, parameters: ParametersType
+) -> list[ArgumentsType]:
+    """
+    Returns a list of dictionaries with the argument names as keys and the
+    corresponding values all possible permutation of the given parameters.
+
+    """
+    if not parameters:
+        return [arguments]
+
+    return [
+        {key: format_strings(value, permutation) for (key, value) in arguments.items()}
+        for permutation in permutations(parameters)
+    ]
+
+
+def format_strings(structure: Any, parameters: ParametersType) -> Any:
+
+    if isinstance(structure, dict):
+        return {
+            key: format_strings(value, parameters) for (key, value) in structure.items()
+        }
+
+    if isinstance(structure, list):
+        return [format_strings(value, parameters) for value in structure]
+
+    if isinstance(structure, str):
+        return structure.format_map(parameters)
+
+    return structure

@@ -1,122 +1,42 @@
-AutoBernese uses configuration files to integrate itself with Bernese and
-determine actions common to all campaigns and ones that are specific to each
-campaign. Core functionality is kept inside the package installation directory,
-whereas the common configuration and campaign-specific configuration are stored
-in the AutoBernese runtime directory and in the root of the specific campaign
-directories, respectively.
-
-Bernese is used for different end-results which the campaign system reflects.
-Using AutoBernese, users can create re-usable campaign settings for common
-campaign types and have AutoBernese use these templates to create new campaigns.
-
-Thus, there are three configuration files in play, when you run a campaign: 1)
-core functionality, 2) common settings and 3) campaign-specific settings, and
-they are read into AutoBernese in that order, each file overriding the previous,
-when possible. The campaign template files are not active, but only have their
-data copied over, when a new campaign is created using them.
-
-<!-- ""AutoBernese uses configuration files to integrate itself with Bernese, using the
-same environment variables to know where relevant files and directories are on
-the filesystem. There are three configuration files in play, when you run a
-campaign: 1) core functionality, 2) common settings and 3) campaign-specific
+AutoBernese uses configuration files to integrate with Bernese, have
+customisable shared settings and defaults, as well as campaign-specific
 settings.
-"" -->
 
-<!--
-"AutoBernese uses configuration files to integrate with Bernese by using its
-environment variables allowing the user to switch between the Bernese GUI and
-the AutoBernese command-line interface, 2) set up  There are three configuration
-files in play, when you run a campaign: 1) core functionality, 2) common
-settings and 3)
-"
--->
+The active configuration files are read into AutoBernese in the following order,
+each file overriding the previous, when merging is possible: 1) core
+functionality and defult settings, 2) common user-defined settings and defaults,
+and 3) campaign-specific settings, created anew or from a template based on a
+previous campaign. The campaign-specific settings are only read, when working
+with a campaign.
 
-!!! info "Recapitulation"
+In addition, AutoBernese also has a template system that enables users to set up
+re-usable campaign settings for common *campaign types* and use these templates
+to create new campaigns.
 
-    The goal of AutoBernese is automation and reproducibility in order to reduce
-    human error and achieve higher-quality end-products, easier and faster.
+The different types of configuration are shown in the table below:
 
-    AutoBernese is, mainly, focused on operating Bernese without the GUI and
-    replicating workflows common to all campaigns. This means that it so far, by
-    design, puts the campaign workflow at the centre, while at the same time being
-    ignorant of the user running it. For AutoBernese, it means that there are
-    campaign configurations, and not user-specific configurations, all though this
-    could be made possible, it would work against the principle of re-producibility.
-    End-products should not depend on the user that created them.
+| Configuration     | File                   | Location                                               | Purpose                                                                             |
+| ----------------- | ---------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| Core              | `env.yaml`             | Inside the package                                     | Integrate with activated Bernese environment and provide core and default settings. |
+| Common            | `autobernese.yaml`     | AutoBernese runtime directory                          | Contain common data sources, campaign-creation setup and station sitelog settings.  |
+| Campaign          | `campaign.yaml`        | Campaign directory                                     | Campaign-specific environment, data sources and actions                             |
+| Campaign template | `<campaign-type>.yaml` | `templates` directory in AutoBernese runtime directory | Have pre-set campaign configuration for campaigns of the same type.                 |
 
-    <!--
-    The choice of having each user have their own user directory is irrelevant to
-    the actual use of Bernese, since the dynamic location that each user obtains by
-    using the `$HOME` environment variable can be replaced with a fixed value so
-    that all users have the same path. AutoBernese lets users change the environment
-    variables at runtime which allows users to, completely, move away from
-    user-specific directories.
-    -->
+The configuration files are in [YAML][] format, and how AutoBernese use it is
+explained in the examples given below together with the required and permitted
+content of each file.
 
-    <!--
-    A newly-added feature, changing the environment means that a specific campaign
-    type can, as defined in its template, change the 'user' directory `$U` and set
-    it to a destination which looks like a user directory, but only contains
-    campaign-type-specific files. The PCF files files may then include environment
-    variables set dynamically by the campaign-specific configuration. This in turn
-    would remove the need for editing PCF files for each specific campaign. On top
-    of this, the campaign-type-specific 'user' directory can then be
-    version-controlled and shared, internally, or even internationally, between
-    different organisations that need to have the same workflow for their
-    collaboration.
-    -->
-
-
-These files are in YAML format and makes heavy use of the format's features. How
-this is done is explained in the examples given below.
-
-The three types of configuration and the template concept are shown in the table
-below:
-
-| Configuration     | File                   | Location                                               | Purpose                                                                                  |
-| ----------------- | ---------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Core              | `env.yaml`             | Inside the package                                     | Integrate with activated Bernese environment and provide core and some default settings. |
-| Common            | `autobernese.yaml`     | AutoBernese runtime directory                          | Contain common data sources, campaign-creation setup and station sitelog settings.       |
-| Campaign          | `campaign.yaml`        | Campaign directory                                     | Campaign-specific environment, data sources and actions                                  |
-| Campaign template | `<campaign-type>.yaml` | `templates` directory in AutoBernese runtime directory | Have pre-set campaign configuration for campaigns of the same type.                      |
-
-The core configuration file makes the integration wth Bernese possible, and
-establishes the location of the AutoBernese runtime directory for log data and
-files shared by the users of the given Bernese installation.
-
-In the AutoBernese runtime directory, is a configuration file used for common
-things that need to be done for the users. Common sources of data to be
-synchronised or common settings to apply in all campaigns are put here in order
-to avoid duplication and thus errors or unwanted differences in workflow between
-different users.
-
-Each Benese campaign requires a configuration in the root of the campaign
-directory. It has information about the campaign and e.g. defines
-campaign-specific data sources and actions that let AutoBernese run the campaign
-from the command line.
-
-Last, but not least, a main feature of AutoBernese is to create campaigns that
-are similar in goal but uses different input. This is achieved with the
-campaign-configuration templates. Once set up, they will make it easy to create
-new capaigns of a given type.
-
-The required and permitted content of each file is explained and illustrated
-below.
+[YAML]: https://yaml.org/
 
 
 ## Core configuration
 
-Inside the installed AutoBernese package is the core-configuration file
-`env.yaml`.
-
-Before being parsed and loaded into AutoBernese, the contents of the core
-configuration file is concatenated with the common and, if relevant, the
-campaign-specific configuration file. This means that settings available in the
-core configuration can be used in the remaining configuration files.
-
-Reusable values include relative paths that make it possible to e.g. download
-data sources to the DATAPOOL area and create new campaigns in the CAMPAIGN54
-directory.
+The core configuration file makes the integration with Bernese possible, and
+establishes the location of the AutoBernese runtime directory for log data and
+files shared by the users of the given Bernese installation. It is built in to
+the package, and the user is not supposed to edit this file. Its contents are
+explained here, since the two user-edited configuration types are meant to
+utilise YAML features to re-use values in this file.
 
 The overall structure of the core configuration file looks like this.
 
@@ -133,9 +53,9 @@ Each section is explained below.
 
 ### BSW environment variables
 
-Inside the `bsw_env` section are entries that, when loaded, read in the values
-of relevant environment variables set by the `LOADGPS.setvar` script. The values
-are then available for reference in other configuration settings.
+Inside the `bsw_env` section are key-value pairs whose values are the names of
+relevant environment variables set by the `LOADGPS.setvar` script. The extracted
+values are made available for re-use in other parts of the configuration.
 
 ```yaml linenums="1"
 --8<-- "src/ab/configuration/env.yaml::33"
@@ -163,27 +83,38 @@ file paths are derived by referencing the dynamically-loaded environment
 variables in the previous section.
 
 ```yaml linenums="35"
---8<-- "src/ab/configuration/env.yaml:35:73"
+--8<-- "src/ab/configuration/env.yaml:35:42"
 ```
 
 
 ### Runtime settings
 
 The `env` and `runtime` sections are settings that AutoBernese use to create and
-maintain a directory for its runtime files. Since there may be more than one
-Bernese installation, the runtime directory is set to be in the same directory
-as the root directory containing the activated Bernese installation `BERN54`.
+maintain a directory `autobernese` for its runtime files (listed below). It also
+defines names of configuration sections that one may override in the common
+configuration file `autobernese.yaml` or, for some of them, the
+campaign-specific configuration file; both described further below.
 
-```yaml linenums="75"
---8<-- "src/ab/configuration/env.yaml:75:106"
+```yaml linenums="44"
+--8<-- "src/ab/configuration/env.yaml:44:75"
 ```
 
-The runtime files include:
+As there may be more than one Bernese installation on a system, the AutoBernese
+runtime directory is, currently, set to be next to the activated Bernese
+installation directory `BERN54`.
+
+!!! info "Bernese environmemt"
+
+    The directory containing the AutoBernese runtime directory and the Bernese
+    installation directory is referred to in this context, variously, as *the
+    Bernese environment*, *the activated environment* or *runtime environment*.
+
+The files in the AutoBernese runtime directory include:
 
 *   The logfile `autobernese.log`
-*   Campaign templates inside the sub directory `templates`
 *   The common configuration file `autobernese.yaml` with possible overrides for
     the built-in configuration file.
+*   Campaign-configuration templates inside the sub directory `templates`
 
 
 ### Settings overridable
@@ -191,25 +122,18 @@ The runtime files include:
 The `campaign` section determines the default directory structure of a new
 campaign. This section is overridable by the common configuration.
 
-```yaml linenums="108"
---8<-- "src/ab/configuration/env.yaml:108"
+```yaml linenums="70"
+--8<-- "src/ab/configuration/env.yaml:77"
 ```
 
 
 ## Common configuration
 
-<!-- AutoBernese lets users of a given Bernese installation share a common
-configuration file [see `autobernese.yaml` below], where, for instance, you can
-maintain the default campaign-directory content as well as a list of common data
-sources to download. -->
-
-Provides default settings for campaign creation, external-data source
-specification and, specificly for us at the agency, sitelog-to-STA file
-transformation.
-
-As mentioned above, a few sections of the built-in AutoBernese configuration can
-be overridden/added with a common user configuration file `autobernese.yaml` in
-the AutoBernese runtime directory whose path, in turn, is determined at runtime.
+The common configuration file is for functionality that does not require a
+Bernese campaign or which is common to all campaigns. To use common settings,
+put them inside a file called `autobernese.yaml` in the AutoBernese runtime
+directory. The settings work as defaults for campaigns, unless they are
+overridden in the campaign-specific configuration file.
 
 ``` title="The AutoBernese runtime directory"
 /path/to/environment
@@ -262,11 +186,11 @@ With this file, users may configure the following:
 
 ## Campaign configuration
 
-Campaign-specific sources and, especially, PCF files to run with BPE, are
-managed from a campaign-specific configuration file in the root of a Bernese
-campaign directory.
+Campaigns differ by their purpose, time interval, data needed and actions
+required. To *run* a Bernese campaign, AutoBernese requires a configuration file
+`campaign.yaml` in the root of the campaign directory.
 
-``` title="Environment-specific files in the AutoBernese runtime directory"
+``` title="Location of a campaign-specific configuration"
 /path/to/CAMPAIGN54
 ├── EXAMPLE
 │   ├── (...)
@@ -275,18 +199,20 @@ campaign directory.
 └── (...)
 ```
 
-Using this configuration file allows AutoBernese to work with the campaign,
-specifically, by doing two things at the campaign level:
+It stores all information about the campaign, defines what data sources to
+retrieve and what actions [tasks] to perform. It also allows one to (re-)define
+environment variables which can be helpful, if a given campaign uses a special
+directory for the Bernese `.PCF`-files it needs.
 
-1.  Download campaign-specific data from sources specified in the same way as in
-    the general AutoBernese configuration file.
-2.  Run the Bernese Processing Engine for PCF files with campaign-specific
-    settings.
+One can build the campaign configuration file manually, e.g. by copying the
+example in this manual. But AutoBernese is made to automatically create a
+Bernese campaign from a pre-defined configuration template. AutoBernese comes
+with an empty, default template to allow basic campaign-creation.
 
 
 ### Creating a new campaign configuration
 
-A campaign-specific configuration file is **created** by autobernese by
+A campaign-specific configuration file is **created** by AutoBernese by
 combining information gathered at the campaign creation time with a
 campaign-configuration template. The combination of these metadata and the
 template go into a campaign-specific configuration file `campaign.yaml` which is
@@ -295,7 +221,7 @@ added to root of the newly-created campaign directory.
 The gathered data are stored in a `metadata` section at the top. Its purpose is
 to specify the YAML anchors used in the template part of the
 campaign-configuration template file. The metadata are also used when displaying
-verbose information about the created campaign, when using autobernese to list
+verbose information about the created campaign, when using AutoBernese to list
 all the campaigns in the environment.
 
 ```yaml title="Sections in a campaign-specific configuration file"
@@ -312,7 +238,8 @@ clean: []
 It is also possible to use AutoBernese on existing campaigns by, manually,
 adding a `campaign.yaml` file to the campaign-directory root. The quick-start
 section provides an example of such a file, which is prepared to work with the
-EXAMPLE campaign that comes bundled with Bernese 5.4.
+EXAMPLE campaign that comes bundled with Bernese 5.4 (works for releases
+2022-10-23 and 2023-10-16).
 
 For reference, you can se the contents of that file by unfolding the section
 below.
@@ -320,7 +247,7 @@ below.
 ??? note "Unfold to see an AutoBernese configuration for the pre-created EXAMPLE campaign"
 
     As it is only the presence of the configuration file that enables AutoBernese to
-    do its work, existing campaigns can be 'runable' with AutoBernese by adding a
+    do its work, existing campaigns can be run with AutoBernese by adding a
     campaign-configuration file to those campaign directories.
 
     Below is an example of the campaign-configuration template `campaign.yaml`,
@@ -354,7 +281,7 @@ metadata:
 ```
 
 The `metadata` section contains data about the campaign. The first four items in
-the dictionary contain the context in which the campaign was created. `version`
+the mapping contain the context in which the campaign was created. `version`
 refers to the AutoBernese version, `username` is the user that created the
 campaign, `created` is the campaign-creation time, and `template` is the
 filename without suffix for the campaign template that was used to create the
@@ -364,18 +291,92 @@ The last three items are shortcuts available, primarily, for the tasks in the
 `tasks` section. The string value in `campaign` is the name of the directory in
 the campaign directory containing the Bernese campaign. The *YAML anchor*
 `&campaign` can be resolved in other places in the YAML document to re-use the
-string value, in this case `EXAMPLE`. this is particularly useful for specifying
-BPE tasks to be run for the campaign, since the campaign name, thanks to the
-YAML specification, need not be repeated explicitly, but can be written once.
-The same is the case for the items `beg` and `end` which denote the beginning
-and end date [both included] that the campaign covers.
+string value, in this case `EXAMPLE`. The same is the case for the items `beg`
+and `end` which denote the beginning and end date [both included] that the
+campaign covers.
+
+!!! tip "Key idea"
+
+    This is particularly useful for specifying a BPE task to be run for the
+    campaign, since the campaign name, thanks to the YAML specification, need not be
+    repeated explicitly, but can be written once. Similarly, as illustrated below,
+    one may use the beginning and end dates to define the beginning and end date for
+    which a given task needs to be run.
 
 
 ### The `environment` section
 
 Adding an `environment` section to a campaign configuration, you are able to set
-or update environment variables for the given campaign. This is a powerful
-feature that addresses two problems:
+or update environment variables for the given campaign at runtime.
+
+In this way, campaign-specific input can be defined in a single location from
+which values are created/updated at runtime, 1) dynamically, changing
+directories, before running Bernese from AutoBernese, and 2) propagating input
+data to `.PCF` files and scripts using them.
+
+This addresses three issues:
+
+*   **Reproducibility**
+
+    By default, each user has their own Bernese-user environment (the directory
+    `$U`) with `.PCF` files and options set for their work. These files require
+    effort to maintain, and different users doing the same calculations, might
+    have diverging settings in their user-environment. This can be a problem.
+
+    Settings should come from a single source of truth if one wants to maintain
+    a high-quality workflow and avoid human errors.
+
+*   **Adaptability**
+
+    The `.PCF` files in a Bernese-user environment also have variables for
+    easier re-use throughout the file. This makes them easier to maintain and
+    adapt for campaigns of the same type. The values of these variables can be
+    set from existing environment variables, which means that users can avoid
+    changing the `.PCF` file itself and thus use the same file across different
+    campaigns. This adaptability is great.
+
+    But as with the need for reproducibility, having a single source of settings
+    reduces maintenance effort and improves quality assurrance, by needing fewer
+    mechanisms for changing those settings, dynamically.
+
+*   **Separation of concerns**
+
+    Having all one's critical `.PCF` files and scripts in one directory, and
+    maybe having some `.PCF` files use the same `OPT`-directories for their
+    input, can be good for reproducibility and adaptability.
+
+    But the maintenance effort increases, when complexity of the file
+    organisation and functionality dependence increases. The overview may be
+    lost and/or require a specialist to see the consequences of changes in
+    shared `.INP` files and scripts. Testing also becomes harder with increasing
+    complexity. If there is no testing done to see what these consequences might
+    be, it is not easy to ascertain the quality of the results that come out.
+
+    Similarly, a user might share a common workflow with colleagues in other
+    organisations. Having the workflow stored separate from one's own
+    user-environment allows for a much cleaner way to maintain and test this
+    workflow, but also to share it, e.g. using distributed version control
+    systems such as Git or simply copying from a shared FTP server.
+
+The `environment` section solves these issues in the following ways:
+
+1.  A user should be able to specify what directory to use as for a given
+    campaign in order to separate workflows between different campaign types,
+    thus decreasing maintenaince effort and allow them to, easily, share
+    workflows with other organisations.
+
+    The example below shows how to do this, by *changing* the variable `$U` to
+    point to another directory.
+
+2.  A user should be able to change or add environment variables as needed for
+    different campaigns, thus having a single source from which to control the
+    variable input in e.g. `.PCF` files, and in turn make use of these files for
+    different campaigns easier.
+
+    The example below shows how a new environment variable
+    `AB_PATH_CAMPAIGN_REFDIR` is defined and added during runtime. Its value, a
+    path to the given campaign, is thus available to any software component run
+    by AutoBernese using this as input.
 
 ```yaml title="Custom environment variables for a campaign"
 environment:
@@ -383,62 +384,45 @@ environment:
   # Use a campaign-specific directory with only the needed PCF files and settings
   value: !Path [*U, .., campaign_type]
 
-# Set a variable that can be used inside the the campaign-specific PCF files.
+# Set a variable that can be used e.g. inside the the campaign-specific PCF files.
 - variable: AB_PATH_CAMPAIGN_REFDIR
   value: !Path [*D, REF54, *campaign]
 ```
-
-Use case: A user should be able to specify, freely, where to have a Bernese-user
-environment.
-
-This way, the user no longer needs to set them in an external script or at the
-command line before every command.
-
-Additionally, adding new variables using values from the metadata section, these
-can be used in the PCF files that are used in that user environment (or the
-commons ones in the default user directory), and so in a dynamic way, the same
-PCF files can be re-used for different campaigns, but still making it possible
-to separate e.g. campaign-specific DATAPOOL sub directories or ditto for the
-end-products of each campaign.
 
 !!! question "Is this safe?"
 
     **Answer:** Yes.
 
-    Since the user may set/change their environment variables before execution of
-    any command, the mutation of any variable is already possible. Therefore, this
-    feature is not decreasing the safety.
+    The user may set/change their environment variables before execution of any
+    command, so the mutation of any variable is already possible.
 
-    What it does is making the user(s) able to have specific environment variables
-    set for different campaign types, and the campaign-template system again makes
-    replication very easy as well as dynamic, since the values being set can depend
-    on the values in the `metadata` section of a specific campaign.
+Redirection is a powerful thing and can be done at many levels, and one of the
+main powers of Bernese GNSS Software is the use of environment variables to
+define where things are located. AutoBernese is designed to take advantage of
+this without forcing the user to have to re-structure their entire workflow
+setup, but, instead, make it easier to use the existing abstractions and
+centralise control at the campaign-level, not as a requirement, but as a
+liberating alternative.
 
 
 ### The `tasks` section
 
-A task in the list of tasks is something that is runnable by AutoBernese. Each
-list item specifies something that AutoBernese may initialise and start, when
-user decides to 'run' the campaign.
+When *running* a campaign using the `ab campaign run` command, AutoBernese looks
+in the `tasks` section of the configuration file, loads the selected task
+definitions and runs the tasks they define in the order they are defined.
 
-For now, AutoBernese only has one type of task, which is the primary goal of
-the first release: The concept of a BPETask. Using the YAML tag `!BPETask`
-before the content of the list-item, AutoBernese will run the BPE Perl module
-that is included in BSW.
+The following is an example of a single task definition which illustrates the
+features implemented for our primary usecase: It instructs AutoBernese to run
+the Bernese Processing Engine for each day in the given campaign. The repetitive
+pattern is encoded once as a template, and the actual sessions run are based on
+a set of parameters, here a single one, the `date` for which to run the BPE:
 
-<!-- For the `EXAMPLE` campaign, a single task is specified to use the `PPP.PCF`
-file included in the BSW user scripts. As specified here, the task has a
-name [`name`] used to display what is going on, some arguments
-[`arguments`] which are sent to the Bernese Processing Engine. `arguments`
-contain a dictionary with items having a string to be used with the BSW BPE
-program. -->
-
-```yaml
+```yaml title="Example of a task definition"
 tasks:
 
-- !BPETask
-  identifier: PPP
-  description: Run PPP for the EXAMPLE campaign
+- identifier: BPE_PPP
+  description: Run the BPE using PPP.PCF
+  run: RunBPE
   arguments:
     pcf_file: PPP
     campaign: *campaign
@@ -446,46 +430,74 @@ tasks:
     session: '{date.doy:0>3d}0'
     sysout: 'PPP_{date.doy:0>3d}0'
     status: 'PPP_{date.doy:0>3d}0.RUN'
-    taskid: PP
+    taskid: PPP
   parameters:
     date: !DateRange {beg: *beg, end: *end}
 ```
 
-Here, the YAML *anchor* `&campaign` is referred to with the syntax `*campaign`
-[a YAML *alias*] so that, in this case, the name of the campaign directory is
-inserted, when the configuration file is loaded.
+As seen, the `campaign`-argument gets its value by referencing the YAML alias
+`*campaign` which in turn is defined in the `metadata` section of the
+configuration file.
 
-Some of the strings given to the other items, e.g. `year` and `session` are
-Python format strings [more on this below]. The `date` reference
-is an AutoBernese GPSDate which has the day-of-year property `doy` that can
-be used inside the strings.
+Arguments `year`, `session`, `sysout` and `status` use the [Python format-string
+syntax][PYDOC-FORMAT-STRINGS] to access the four-digit year or day-of-year [doy]
+of the parameter `date`.
 
-To use template strings requires that a `parameters` item is included as part
-of the BPETask. The `parameters` dictionary must have items with the keys
-used inside the Python format strings. The values must be a sequence of possible values.
+As mentioned, the dates that `date` refers to are the ones covering the
+campaign. The sequence is generated at runtime, when the YAML aliases `*beg` and
+`*end` are sent to a custom constructor in AutoBernese by using the custom YAML
+tag `!DateRange` in front of the mapping.
 
-In this case, the value of `date` in the `parameters` dictionary is another
-AutoBernese construction, denoted with the YAML tag `!DateRange`. When
-resolved as the document is loaded, the value of `date`is a list of
-AutoBernese `GPSDdate` instances, one for each day in the interval specified.
-Here, the power of the metadata section is seen, as the dates defining the
-Bernese-campaign interval are referenced by their YAML alias. The user
-therefore only needs to write these dates once during campaign-creation
-time.
 
-When runnning the tasks, each task is resolved to the concrete set of possible
-values that BPE can receive, and the BPE is run for each concrete given by
-the task specification. In this case, the BPE will run for each of three days
-that the EXAMPLE campaign stretches over.
+#### The task definition
+
+As seen in the above example, a task definition is a mapping that in a compact
+way may define a larger set of tasks. It names an API-level function to run, the
+arguments needed and possible parameters used in the argument mapping. When
+loaded, the task definition expands to a set of concrete tasks that are run with
+the `run` sub-command. So far, tasks are run, sequentially.
+
+A task definition needs a unique `identifier`, a `description`, something to
+`run` as a task, `arguments` (if needed) for the task and `parameters` (if
+specified in the `arguments` section) that will be used to create a set of
+concrete tasks based on the task definition. If no parameters are used, the
+arguments provided are used to perform a single task. If no arguments are
+needed, the API-level function is run as a single task with no arguments given
+to the function.
+
+Requirements:
+
+*   The identifier must be without whitespace. It is used, when selecting only
+    specific tasks definitions. (The concrete tasks may still be several.)
+
+*   The description can be long, but short descriptions are easier to read when
+    printed to the terminal.
+
+*   `run` needs a key to a mapping, currently, hard-coded in AutoBernese; or a
+    reference to the API-level Python function that you want to run.
+
+*   `dispatch_with` needs a value in the same way as the `run` part. If not
+    present, the arguments are sent directly to the API-level function refered
+    to by `run`. When defined, the arguments are first sent through the function
+    pointed to by `dispatch_with` to be pre-processed or to convert their input
+    to match the signature of the API-level function.
+
+*   Keyword arguments inside the `arguments` section contain arguments readable
+    by the function in `run` or, if used, `dispatch_with`.
+
+*   Any keyword arguments using string templates, must have a key of the same
+    name in the `parameters` section. The value must be a sequence or iterable
+    of values that the parameter may take inside any of the argument string
+    template formats.
+
+
+[PYDOC-FORMAT-STRINGS]: https://docs.python.org/3/library/string.html#formatstrings
 
 
 ### The `sources` section
 
 Campaign-specific sources of external data can be specified in a `sources` section
 in the campaign configuration.
-
-The purpose of the configuration-specific sources section is that a given
-campaign type may need, well, specific data for that campaign.
 
 As illustrated in the EXAMPLE-campaign configuration file, a single FTP source
 with two files needed for the built-in process-control file `ITRF.PCF` is
@@ -505,8 +517,6 @@ sources:
   destination: !Path [*D, ITRF14]
 ```
 
-Here, the YAML *anchor* `&campaign` is referred to with the syntax `*campaign`
-
 
 ### The `clean` section
 
@@ -525,41 +535,15 @@ clean: [SOL, OUT]
 
 ## Campaign templates
 
-<!--
-AutoBernese is created with purpose of having reusable campaign settings (using
-campaign templates) so that different campaign types are fast to create over and
-over again, with any concrete campaign only being different in the ways encoded
-by the `metadata` section above. Users may create the campaign configuration by
-hand. But the premise of the workflow is that the campaign-specific
-configuration is build using the AutoBernese campaign-creation command.
--->
+A main feature of AutoBernese is the ability to store common campaign settings
+as templates and use them to create campaigns of the same type. This will
+further speed up common workflows, since newly-created Bernese campaigns are
+ready to be 'run' with AutoBernese. By adding different templates for different
+campaign types, users avoid having to copy over settings to set environment
+variables, download data, and run tasks.
 
-<!--
-The power of using campaign templates comes, when the campaign configuration for
-a specific campaign type is determined with respect to the Bernese
-user-environment and the PCF files used, as well as the sources of data that
-must be downloaded and organised. A campaign template for that type of campaign
-can then be created by copying the concrete campaign settings over to the
-runtime directory's template directory without the `metadata` section and giving
-it a meaningful filename.
--->
-
-Based on the assumption that most users do the same things over and over again
-to different data sets, and thus to avoid copying-and-pasting recurring
-processing workflow between Bernese campaigns, AutoBernese has the concept of a
-*campaign type* which is defined by a template campaign-configuration file in
-the templates directory of the AutoBernese runtime directory.
-
-Adding different templates for different campaign scenarios, i.e. campaign
-types, will speed up the process of creating a new campaign, getting it ready by
-downloading data, and running the BPE tasks set in the campaign-specific
-configuration file.
-
-With this template-management system, you only need to set up your Bernese
-campaigns once, or rarely.
-
-Campaign-configuration templates can be put in the AutoBernese runtime
-directory:
+This *campaign type* is defined by a template campaign-configuration file in
+the `templates` directory of the AutoBernese runtime directory.
 
 ``` title="Campaign-configuration template location in the AutoBernese runtime directory"
 /path/to/environment
@@ -577,28 +561,12 @@ directory:
 The default campaign template is empty and comes with the AutoBernese package,
 but is selected if none given by the user.
 
+!!! note "Template maintenance"
 
-<!--
-### Difference between concrete configuration and its template
-
-The difference between a campaign-configuration file and its template it the
-metadata section that is part of the concrete Bernese campaign. AutoBernese adds
-the metadata section automatically, but a user can also ad it manually, if the
-configuration is made for an existing campaign such as the EXAMPLE campaign.
-
-AutoBernese lets a user define configuration templates for common campaign
-scenarios, where the only difference is in the time interval for which a given
-campaign is created and run.
-
-A default campaign template `default.yaml` is added to the `autobernese`
-directory, automatically, when the command `ab campaign` is run. If the file
-already exists, AutoBernese does nothing.
-
-As the user creates a campaign with AutoBernese, if no other template name is
-specified, the default campaign template is used. Therefore, this file should be
-edited to suit the most common scenario. Even so, having more than one
-configuration template will make common scenarios faster to setup.
--->
+    Over time, templates will need to be changed. Changes to templates will not
+    change the configuration in existing campaigns, and these would need to be
+    edited, manually. However, needing to 're-run' these campaigns anyway, it might
+    be safer to start over and create new campaigns to 're-create' the output.
 
 
 ## Notes on Python-string templates in YAML documents
@@ -613,7 +581,7 @@ strings may clash with the YAML syntax, so a few potential problems and
 solutions are shown below.
 
 
-### Difference between Template strings and `f` string syntax
+### Caveats on difference between Template strings and `f` string syntax
 
 This example shows the difference in Python syntax between two Python-string
 types:

@@ -1,5 +1,5 @@
 """
-Module for dates.
+Date handling and specific tools for conversion between different formats.
 
 """
 
@@ -51,6 +51,14 @@ def doy(d: dt.date | dt.datetime) -> int:
 
     """
     return d.timetuple().tm_yday
+
+
+def doy2date(year: int, doy: int) -> dt.date:
+    """
+    Date from year and day-of-year
+
+    """
+    return dt.date(year, 1, 1) + dt.timedelta(days=doy - 1)
 
 
 GPS_EPOCH = dt.date(1980, 1, 6)
@@ -115,13 +123,12 @@ class GPSDate(dt.datetime):
         return cls(date.year, date.month, date.day)
 
     @classmethod
-    def from_gps_week(cls, n: int | str, /) -> "GPSDate":
-        date = date_from_gps_week(n)
-        return cls(date.year, date.month, date.day)
+    def from_gps_week(cls, gps_week: int | str, /) -> "GPSDate":
+        return cls.from_date(date_from_gps_week(gps_week))
 
     @classmethod
     def from_year_doy(cls, year: int | str, doy: int | str, /) -> "GPSDate":
-        return cls(int(year), 1, 1) + dt.timedelta(int(doy) - 1)
+        return cls.from_date(doy2date(int(year), int(doy)))
 
     def date(self) -> dt.date:
         return dt.date(self.year, self.month, self.day)
@@ -144,8 +151,8 @@ class GPSDate(dt.datetime):
         return doy(self)
 
     @property
-    def Y(self) -> int:
-        return int(self.strftime("%Y"))
+    def y(self) -> int:
+        return int(self.strftime("%y"))
 
     @property
     def info(self) -> dict[str, Any]:

@@ -1,10 +1,10 @@
-from ab.data.source import (
-    resolved,
+from ab.parameters import (
+    permutations,
     resolvable,
 )
 
 
-def test_resolved():
+def test_permutations():
     parameters = dict(a=(0, 1), b=(2, 3))
     expected = [
         dict(a=0, b=2),
@@ -12,7 +12,7 @@ def test_resolved():
         dict(a=1, b=2),
         dict(a=1, b=3),
     ]
-    result = resolved(parameters)
+    result = permutations(parameters)
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
 
 

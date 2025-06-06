@@ -1,5 +1,5 @@
 """
-Module for handling an external data source.
+Handle data sources
 
 """
 
@@ -19,7 +19,7 @@ import logging
 
 from ab.parameters import (
     resolvable,
-    resolved,
+    permutations,
 )
 
 log = logging.getLogger(__name__)
@@ -205,8 +205,8 @@ class Source:
 
         return [
             RemoteLocalPair(
-                url.format(**combination), self.destination_.format(**combination)
+                url.format(**permutation), self.destination_.format(**permutation)
             )
             for url in urls
-            for combination in resolved(resolvable(self.parameters, url))
+            for permutation in permutations(self.parameters)
         ]

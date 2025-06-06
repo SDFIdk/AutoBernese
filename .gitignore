@@ -136,3 +136,5 @@ workspace/structurizr/workspace.json
 __ab__
 
 *.code-workspace
+
+scripts
