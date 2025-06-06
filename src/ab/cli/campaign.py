@@ -2,10 +2,12 @@ import logging
 from pathlib import Path
 import json
 import datetime as dt
+import itertools as it
 from dataclasses import (
     dataclass,
     asdict,
 )
+from typing import Any
 
 import click
 from click_aliases import ClickAliasedGroup  # type: ignore
@@ -13,19 +15,23 @@ from rich import print
 import humanize
 
 from ab.cli import (
-    about,
     _input,
+    about,
 )
-from ab import (
-    configuration,
-    # dates,
-    task as _task,
-)
+from ab import configuration
+from ab.configuration import tasks as _tasks
 from ab.bsw import campaign as _campaign
 from ab.data import source as _source
 
 
 log = logging.getLogger(__name__)
+
+
+def require_loadgps_setvar_sourced() -> None:
+    if not configuration.LOADGPS_setvar_sourced():
+        msg = "Not all variables in LOADGPS.setvar are set ..."
+        print(f"[white on red]{msg}[/]")
+        raise SystemExit
 
 
 @click.group(cls=ClickAliasedGroup, invoke_without_command=True)
@@ -35,6 +41,7 @@ def campaign(ctx: click.Context) -> None:
     Create campaigns and manage campaign-specific sources and run BPE tasks.
 
     """
+    require_loadgps_setvar_sourced()
     _campaign.init_template_dir()
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
@@ -54,7 +61,7 @@ def campaign(ctx: click.Context) -> None:
 #     print(metadata)
 #     epoch = metadata.beg + dt.timedelta((metadata.end - metadata.beg).days // 2)
 #     print(f"Dates:")
-#     for date in date_range(metadata.beg, metadata.end, transformer=dates.GPSDate):
+#     for date in date_range(metadata.beg, metadata.end):
 #         is_epoch = "*" if date.date() == epoch else ""
 #         print(
 #             f"{is_epoch:1s} {date.isoformat()[:10]} {date.doy:0>3d} {date.gps_week:0>4d} {date.gps_weekday:1d}"
@@ -179,32 +186,40 @@ def sources(name: str, verbose: bool = False) -> None:
     print("\n".join(sorted(formatted)))
 
 
-@campaign.command
-@click.argument("name", type=str)
+def load_raw_tasks(name: str) -> list[dict[str, Any]]:
+    raw = _campaign.load(name).get("tasks", [])
+    if not raw:
+        msg = f"No tasks found"
+        print(msg)
+        log.info(msg)
+    return raw
+
+
+@campaign.command(name="tasks")
+@click.argument("campaign_name", type=str)
 @click.option("--verbose", "-v", is_flag=True, help="Print realised task data.")
-def tasks(name: str, verbose: bool) -> None:
+def tasks_command(campaign_name: str, verbose: bool) -> None:
     """
     Show tasks for a campaign.
 
     """
-    tasks: list[_task.TaskDefinition] | None = _campaign.load(name).get("tasks")
 
-    if tasks is None:
-        msg = f"No tasks found"
-        print(msg)
-        log.info(msg)
+    raw_task_defs = load_raw_tasks(campaign_name)
+
+    if not raw_task_defs:
         return
+
+    task_defs = _tasks.load_all(raw_task_defs)
 
     if not verbose:
-        for task in tasks:
-            print(task)
+        for task_def in task_defs:
+            print(task_def)
             print()
         return
 
-    for task in tasks:
-        for resolved in task.resolve():
-            print(json.dumps(resolved, indent=2))
-            print()
+    # Resolve permutations of defined task arguments and view them, a kind of
+    # dry-run showing the input, before running anything.
+    print(list(it.chain(*(task_def.tasks() for task_def in task_defs))))
 
 
 @campaign.command
@@ -215,72 +230,77 @@ def run(campaign_name: str, identifier: list[str]) -> None:
     Resolve and run all or specified campaign tasks.
 
     """
-    try:
-        tasks: list[_task.TaskDefinition] | None = _campaign.load(campaign_name).get(
-            "tasks"
-        )
-    except RuntimeError as e:
-        print(e)
-        raise SystemExit
 
-    if tasks is None:
-        msg = f"No tasks found"
-        print(msg)
-        log.info(msg)
+    raw_task_defs = load_raw_tasks(campaign_name)
+
+    if not raw_task_defs:
         return
 
+    # We have candidates
     about.print_versions()
 
+    # Create all combinations and group by task definition
+    task_defs = _tasks.load_all(raw_task_defs)
+
+    # Take only user selection
     if len(identifier) > 0:
-        tasks = [task for task in tasks if task.identifier in identifier]
+        task_defs = [
+            task_def
+            for task_def in task_defs
+            # Check if the string value on the left is contained in the list of
+            # strings on the right. This unfortunate naming is a compromise that
+            # ensures that click makes readable CLI documentation, but means
+            # that the semantics become unclear in the code.
+            if task_def.identifier in identifier
+        ]
+
+    # For display purposes
+    # Resolve and pre-process arguments and instantiate the tasks
+    hierarchy = {task_def.identifier: task_def.tasks() for task_def in task_defs}
 
     print("Running the following tasks in the campaign configuration file")
-    sz = max(len(task.identifier) for task in tasks)
+    sz = max(len(task_def_id) for task_def_id in hierarchy)
     print(
         "\n".join(
-            f"{task.identifier: >{sz}s}: {len(task.runners()): >3d} unique combinations"
-            for task in tasks
+            f"{task_def_id: >{sz}s}: {len(tasks): >3d} unique combinations"
+            for (task_def_id, tasks) in hierarchy.items()
         )
     )
-    proceed = input("Proceed (y/[n]): ").lower() == "y"
+    proceed = _input.prompt_proceed()
     if not proceed:
         raise SystemExit
 
-    runner: _task.Task
-    for task in tasks:
-        task_type: str = type(task).__qualname__
-        msg = (
-            f"Running combinations for {task_type} instance with ID {task.identifier!r}"
-        )
+    # At this point, we are only concerned with the tasks that are now made
+    # ready to run
+
+    # Combine all the tasks
+    all_tasks = it.chain(*hierarchy.values())
+    # TODO: Loop differently, so that taskdefinition descriptions can be written to the terminal/log
+    for task in all_tasks:
+        msg = f"Running task {task.identifier} ..."
         log.info(msg)
         print(msg)
         try:
-            # This assumes that the task instance is a BPETask
-            for runner in task.runners():
-                msg = f"{task_type} ID: {runner.arguments.get('taskid')}"
-                log.info(msg)
-                print(msg, end="")
-                # TODO: This is not part of the protocol, but should be, when
-                # other types of tasks are added.
-                result = runner.run()
-                if result.ok:
-                    postfix = " [green][ done ][/]"
-                else:
-                    postfix = " [red][ error ][/]"
-                print(postfix)
-                print(result)
+            task.run()
+            if task.result.finished:
+                postfix = " [green][ done ][/]"
+            else:
+                postfix = " [red][ error ][/]"
+                log.info(
+                    f"Task {task.identifier} failed with exception ({task.result.exception}) ..."
+                )
+            print(postfix)
+            # TODO: Log the result(ing value)?
+            # print(task.result)
 
         except KeyboardInterrupt:
-            log.info(
-                "Asking user to continue or completely exit from list of campaign tasks."
-            )
+            log.info(f"Task {task.identifier} interrupted by user ...")
+            log.info("Asking user to continue with remaining tasks or exit completely.")
             exit_confirmed = input(
                 "Do you want to exit completely ([y]/n)"
             ).lower() in ("", "y")
             if exit_confirmed:
-                log.info(
-                    "User confirmed breaking the execution of the remaining campaign tasks."
-                )
+                log.info("User confirmed breaking execution of remaining tasks.")
                 break
 
 

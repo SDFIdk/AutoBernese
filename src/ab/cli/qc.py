@@ -1,5 +1,5 @@
 """
-Command-line interface
+Command-line interface for quality assurance and quality control
 
 """
 
@@ -9,13 +9,6 @@ import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-# from ab import (
-#     __version__,
-#     configuration,
-# )
-# from ab.bsw import (
-#     campaign as _campaign,
-# )
 from ab.qaqc import (
     check_example,
 )

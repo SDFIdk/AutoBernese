@@ -16,6 +16,7 @@ from ftplib import (
 from typing import (
     Any,
     Iterable,
+    Iterator,
 )
 from contextlib import contextmanager
 import functools
@@ -36,7 +37,7 @@ def is_file(ftp: FTP, candidate: str) -> bool:
 
 
 @contextmanager
-def specific_path(ftp: FTP, path: str) -> None:
+def specific_path(ftp: FTP, path: str) -> Iterator[FTP]:
     cwd = ftp.pwd()
     log.debug(f"switch to {path} ...")
     ftp.cwd(path)
@@ -59,7 +60,7 @@ def list_files(ftp: FTP, path: str, *, ix_column: int = 8) -> list[str]:
 
     """
     with specific_path(ftp, path) as tmp:
-        tmp.retrlines("LIST", (lines := []).append)
+        tmp.retrlines("LIST", (lines := []).append)  # type: ignore
         return [line.split()[ix_column] for line in lines if not line.startswith("d")]
 
 

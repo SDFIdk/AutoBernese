@@ -1,5 +1,5 @@
 """
-Module for dates.
+Date handling and specific tools for conversion between different formats.
 
 """
 
@@ -14,27 +14,13 @@ from typing import (
 )
 
 
-class HasFromOrdinal(Protocol):
-    """
-    A formal definition of a type that can transform an ordinal date to a date.
-
-    """
-
-    def fromordinal(self, ordinal: int, /) -> "HasFromOrdinal":
-        """
-        Method that converts a Python integer date to an instance of the object.
-
-        """
-
-
 def date_range(
     beg: dt.date | dt.datetime,
     end: dt.date | dt.datetime,
     /,
     *,
     extend_end_by: int = 0,
-    transformer: HasFromOrdinal = dt.date,
-) -> Iterable[HasFromOrdinal]:
+) -> Iterable[dt.date]:
     """
     By default, returns a range of dates between and including the given start
     and end dates.
@@ -51,7 +37,7 @@ def date_range(
         raise ValueError(f"{extend_end_by=}, but must be zero or greater.")
 
     return [
-        transformer.fromordinal(n)
+        dt.date.fromordinal(n)
         for n in range(
             beg.toordinal(),
             end.toordinal() + 1 + extend_end_by,
@@ -65,6 +51,14 @@ def doy(d: dt.date | dt.datetime) -> int:
 
     """
     return d.timetuple().tm_yday
+
+
+def doy2date(year: int, doy: int) -> dt.date:
+    """
+    Date from year and day-of-year
+
+    """
+    return dt.date(year, 1, 1) + dt.timedelta(days=doy - 1)
 
 
 GPS_EPOCH = dt.date(1980, 1, 6)
@@ -129,13 +123,12 @@ class GPSDate(dt.datetime):
         return cls(date.year, date.month, date.day)
 
     @classmethod
-    def from_gps_week(cls, n: int | str, /) -> "GPSDate":
-        date = date_from_gps_week(n)
-        return cls(date.year, date.month, date.day)
+    def from_gps_week(cls, gps_week: int | str, /) -> "GPSDate":
+        return cls.from_date(date_from_gps_week(gps_week))
 
     @classmethod
     def from_year_doy(cls, year: int | str, doy: int | str, /) -> "GPSDate":
-        return cls(int(year), 1, 1) + dt.timedelta(int(doy) - 1)
+        return cls.from_date(doy2date(int(year), int(doy)))
 
     def date(self) -> dt.date:
         return dt.date(self.year, self.month, self.day)
@@ -158,8 +151,8 @@ class GPSDate(dt.datetime):
         return doy(self)
 
     @property
-    def Y(self) -> int:
-        return int(self.strftime("%Y"))
+    def y(self) -> int:
+        return int(self.strftime("%y"))
 
     @property
     def info(self) -> dict[str, Any]:
@@ -179,3 +172,7 @@ class GPSDate(dt.datetime):
             gps_week_mid=gps_week_mid.isoformat()[:10],
             gps_week_end=gps_week_end.isoformat()[:10],
         )
+
+
+def dates_to_gps_date(dates: Iterable[dt.date]) -> list[GPSDate]:
+    return [GPSDate.from_date(date) for date in dates]

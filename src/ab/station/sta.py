@@ -1,5 +1,5 @@
 """
-Module for creating a stand-alone STA-file from a list of sitelog files.
+Create a stand-alone STA-file from a list of sitelog files
 
 Problem ascertainment:
 

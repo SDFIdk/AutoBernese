@@ -15,11 +15,11 @@ import os
 
 import yaml
 
-from ab.configuration import yaml_constructors
+from ab.configuration import constructors
 from ab import pkg
 
 
-yaml_constructors.init()
+constructors.add()
 
 
 _CONFIGURATION: dict[str, Any] | None = None

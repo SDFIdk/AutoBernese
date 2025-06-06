@@ -1,8 +1,6 @@
 from pathlib import Path
 
-from ab.configuration.yaml_constructors import (
-    resolve_wildcards,
-)
+from ab.configuration.constructors import paths
 
 
 def test_resolve_wildcards_with_wildcards(tmp_path):
@@ -38,7 +36,7 @@ def test_resolve_wildcards_with_wildcards(tmp_path):
     path = Path(tmp_path / "foo*.bar")
 
     # Act
-    result = list_sorted(resolve_wildcards(path))
+    result = list_sorted(paths.resolve_wildcards(path))
 
     # Assert
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
@@ -48,5 +46,5 @@ def test_resolve_wildcards_without_wildcards():
     fname = "foo.bar"
     path = Path(fname)
     expected = [Path(fname)]
-    result = list(resolve_wildcards(path))
+    result = list(paths.resolve_wildcards(path))
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."

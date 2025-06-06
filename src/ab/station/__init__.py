@@ -1,4 +1,4 @@
 """
-Module for reading and converting station data.
+Read and convert station data
 
 """

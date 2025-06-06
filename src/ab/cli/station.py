@@ -1,14 +1,11 @@
 """
-Command-line interface for station sitelogs and STA files.
+Command-line interface for station sitelogs and STA files
 
 """
 
 import logging
 from pathlib import Path
-import json
-from typing import (
-    Any,
-)
+from typing import Any
 
 import click
 from click_aliases import ClickAliasedGroup  # type: ignore
@@ -18,13 +15,8 @@ from ab import (
     configuration,
     dates,
 )
-from ab.bsw import (
-    campaign,
-)
-from ab.station import (
-    sitelog,
-    sta,
-)
+from ab.bsw import campaign
+from ab.station import sta
 
 
 log = logging.getLogger(__name__)
@@ -36,22 +28,6 @@ def station() -> None:
     Stand-alone tools for station data.
 
     """
-
-
-@station.command
-@click.argument("filename", type=Path)
-def parse_sitelog(filename: Path) -> None:
-    """
-    Parse sitelog and print it to the screen.
-
-    This command was created for debugging and may have some value as it can
-    quickly show the fields that are extracted as part of creating a STA file
-    from site-log files.
-
-    Thus, not all fields from the site-log file are extracted.
-
-    """
-    print(json.dumps(sitelog.Sitelog(filename).sections_extracted, indent=2))
 
 
 @station.command
@@ -198,7 +174,7 @@ def sitelogs2sta(
         arguments = configuration.load().get("station")
 
     if arguments is None:
-        msg = f"No tasks found"
+        msg = f"No arguments found ..."
         print(msg)
         log.info(msg)
         return

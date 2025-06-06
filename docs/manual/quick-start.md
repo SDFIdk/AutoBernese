@@ -29,13 +29,13 @@ First, initialise the environments:
 !!! note "Bernese user environment"
 
     Make sure that you have configured a Bernese user environment
-    for the active user. Run 
-    
+    for the active user. Run
+
     ```
     $EXE/configure.pm
     ```
-    
-    and select option 3. 
+
+    and select option 3.
     AutoBernese will fail without a functional Bernese user environment.
 
 ## Run the campaign
@@ -74,60 +74,56 @@ The file that you downloaded to the EXAMPLE-campaign directory above is an
 example of a campaign-configuration file that AutoBernese uses to download
 campaign-specific data and configure and run the Bernese Processing Engine.
 
-The three sections in this file are `metadata`, which contain data about the
-campaign, `tasks` which contain a list of tasks to run for the campaign, and
-`sources`, which contain a list of data sources.
+??? info "Expand to see the AutoBernese campaign-configuration file for the EXAMPLE campaign"
 
-See a short description of each section in the tabs below:
+    ``` title="`campaign.yaml`" linenums="1"
+    --8<-- "docs/manual/assets/campaign.yaml"
+    ```
 
-!!! info "AutoBernese campaign-configuration file for the EXAMPLE campaign"
+The three standard sections in this file are `metadata`, which contain data
+about the campaign, `tasks` which contain a list of tasks to run for the
+campaign, and `sources`, which contain a list of data sources.
 
-    === "Raw"
+!!! warning "IMPORTANT"
 
-        ``` title="`campaign.yaml`" linenums="1"
-        --8<-- "docs/manual/assets/campaign.yaml"
-        ```
+    For the EXAMPLE campaign, the provided data cover several two-day intervals
+    instead of having a single interval, that can be defined by the beginning and
+    end dates in the `metadata`section. AutoBernese only supports creating campaigns
+    with a single date interval, but the campaign configuration can easily be
+    amended to accommodate the case, where several arbitrary dates are used.
 
-        The campaign-specific configuration is an additional file that AutoBernese uses
-        to manage data and run tasks related to a specific Bernese campaign.
+    In this case, a custom section, arbitrarily named `custom`, has been added, in
+    which a YAML anchor `&dates` is defined for the sequence of dates that all
+    `.PCF` files, except `LEOPOD.PCF`, use in the EXAMPLE campaign.
 
-    === "`metadata`"
+    This section is not 'seen' by AutoBernese, since it does not use this key, when
+    loading the configuration. But the configuration settings that use the YAML
+    alias `*dates` do have its values inserted, before being read by AutoBernese.
 
-        ``` title="`campaign.yaml`" linenums="1" hl_lines="1-8"
-        --8<-- "docs/manual/assets/campaign.yaml"
-        ```
+See a short description of each section below or an expanded description in the
+section on [campaign-specific configuration files][AB-C-CONFIG]:
 
-        The `metadata` section contains data about the contet in which the campaign was
-        created, if it was created by AutoBernese. With YAML anchors [`&<anchor>`],
-        information such as the campaign directory [here,  `EXAMPLE`] and the date
-        interval [`beg` and `end`] covered by the campaign can be re-used later in the
-        document
+[AB-C-CONFIG]: configuration-files.md#campaign-configuration
 
-        Here, the beginning and end dates define an interval in which there are data in
-        the EXAMPLE campaign.
+*   The `metadata` section contains data about the context in which the campaign
+    was created, if it was created by AutoBernese. With YAML anchors
+    [`&<anchor>`], information such as the campaign directory [here,  `EXAMPLE`]
+    and the date interval [`beg` and `end`] covered by the campaign can be
+    re-used later in the document
 
-    === "`tasks`"
+    Here, the beginning and end dates define an interval in which there are data
+    for the `LEOPOD.PCF` file in the EXAMPLE campaign.
 
-        ``` title="`campaign.yaml`" linenums="1" hl_lines="10-23"
-        --8<-- "docs/manual/assets/campaign.yaml"
-        ```
+*   The `custom` section, as explained above is not a part of AutoBernese, but a
+    useful construct, that works as a container for manually-set-up data.
 
-        A single task is specified to use the `PPP.PCF` file included in the BSW user
-        scripts. As specified here, the task has a name [`name`] used to display what is
-        going on, some arguments [`arguments`] which are sent to the Bernese Processing
-        Engine. `arguments` contain a dictionary with items having a string to be used
-        with the BSW BPE program.
+*   The `tasks` section contains short definitions of each BPE process to run,
+    and in which the details depend on the input dates that the `.PCF` file
+    should run for.
 
-    === "`sources`"
-
-        ``` title="`campaign.yaml`" linenums="1" hl_lines="25"
-        --8<-- "docs/manual/assets/campaign.yaml"
-        ```
-
-        External or otherwise remote data sources needed for the campaign can be
-        specified here, but as the EXAMPLE campaign comes with the data included, the
-        list is empty.
-
+*   The `sources` section define external or otherwise remote data sources
+    needed for the campaign. The EXAMPLE campaign does not come with all needed
+    data by default, and the missing source is defined as a single entry here.
 
 To learn more about how to configure campaigns, go to [Configuration files]. To
 learn how to use AutoBernese to create Bernese campaigns based on templates, go
