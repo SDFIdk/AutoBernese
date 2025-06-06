@@ -18,7 +18,6 @@ nav:
   - Contribute: dev/contribute.md
   - System overview: dev/system-overview.md
 - Prerequisites: prerequisites.md
-- Concepts: concepts.md
 - References: references.md
 
 theme:
