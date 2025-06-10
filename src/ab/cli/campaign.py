@@ -150,40 +150,39 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 
 @campaign.command
 @click.argument("name", type=str)
+@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option("--verbose", "-v", is_flag=True, help="Print more details.")
-def sources(name: str, verbose: bool = False) -> None:
+def sources(
+    name: str, identifier: list[str] | None = None, verbose: bool = False
+) -> None:
     """
     Print the campaign-specific sources.
 
     """
-    sources: list[_source.Source] | None = _campaign.load(name).get("sources", [])
+    sources: list[_source.Source] = _campaign.load(name).get("sources", [])
+
+    if identifier is not None and len(identifier) > 0:
+        sources = [source for source in sources if source.identifier in identifier]
 
     if not sources:
-        msg = f"No sources found"
+        msg = f"No sources found ..."
         print(msg)
         log.info(msg)
         return
 
-    formatted = (
-        f"""\
-{source.identifier=}
-{source.url=}
-{source.destination=}
-{source.protocol=}
-"""
-        for source in sources
-    )
+    if not verbose:
+        formatted = (f"{source}" for source in sources)
 
-    if verbose:
-        join = lambda pairs: "\n".join(
+    else:
+        join_pairs = lambda pairs: "\n".join(
             f"{p.path_remote} -> {p.path_local}/{p.fname}" for p in pairs
         )
         formatted = (
-            f"{info}{join(source.resolve())}\n"
+            f"{info}{join_pairs(source.resolve())}\n"
             for (source, info) in zip(sources, formatted)
         )
 
-    print("\n".join(sorted(formatted)))
+    print("\n".join(formatted))
 
 
 def load_raw_tasks(
