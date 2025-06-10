@@ -1,37 +1,37 @@
 """
-Command-line interface for downloading external data
+Command-line interface for downloading external and local data sources
 
 """
 
 import logging
 from types import ModuleType
-from dataclasses import (
-    asdict,
-)
+from dataclasses import asdict
 
 import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab.cli import (
-    _input,
-)
-from ab import (
-    configuration,
-)
-from ab.bsw import (
-    campaign as _campaign,
-)
+from ab.cli import _input
+from ab import configuration
+from ab.bsw import campaign as _campaign
 from ab.data import (
     TransferStatus,
     source as _source,
-    ftp,
-    http,
-    file,
+    ftp as _ftp,
+    http as _http,
+    file as _file,
 )
 
 
 log = logging.getLogger(__name__)
+
+
+PROTOCOLS: dict[str, ModuleType] = dict(
+    ftp=_ftp,
+    http=_http,
+    https=_http,
+    file=_file,
+)
 
 
 @click.command
@@ -63,21 +63,29 @@ def download(
 
     sources: list[_source.Source] = config.get("sources", [])
     if not sources:
-        msg = f"No sources found in configuration ..."
+        msg = f"Source list empty ..."
         print(msg)
         log.debug(msg)
-        raise SystemExit
+        return
 
-    # Filter if asked to
+    # Select based on identifiers, if any
     if len(identifier) > 0:
         sources = [source for source in sources if source.identifier in identifier]
 
-    # Check again after filtering
     if not sources:
-        msg = f"No sources matching selected identifiers ({', '.join(identifier)}) ..."
+        msg = f"No sources matching selected identifiers ..."
         print(msg)
         log.debug(msg)
-        raise SystemExit
+        return
+
+    # Remove sources with an unsupported protocol
+    sources = [source for source in sources if source.protocol in PROTOCOLS]
+
+    if not sources:
+        msg = f"No sources with supported protocols ..."
+        print(msg)
+        log.debug(msg)
+        return
 
     # Print preamble, before asking to proceed
     preamble = "Downloading the following sources\n"
@@ -89,40 +97,32 @@ def download(
 
     # Ask
     if not _input.prompt_proceed():
-        raise SystemExit
+        return
 
     # Resolve sources
     s = "s" if len(sources) > 1 else ""
     msg = f"Resolving {len(sources)} source{s} ..."
     log.info(msg)
 
+    # Set force attribute
     source: _source.Source
+    if force:
+        for source in sources:
+            source.max_age = 0
+
     status_total: TransferStatus = TransferStatus()
     for source in sources:
         msg = f"Download: {source.identifier}: {source.description}"
         print(f"[black on white]{msg}[/]")
         log.info(msg)
-
-        if force:
-            source.max_age = 0
-
-        agent: ModuleType
-        if source.protocol == "ftp":
-            agent = ftp
-        elif source.protocol in ("http", "https"):
-            agent = http
-        elif source.protocol == "file":
-            agent = file
-
+        agent = PROTOCOLS[source.protocol]
         status = agent.download(source)
         status_total += status
-
         print(asdict(status))
 
     else:
         msg = "Finished downloading sources ..."
         print(f"\n{msg}")
         log.debug(msg)
-
         print(f"Overall status:")
         print(asdict(status_total))
