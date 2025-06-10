@@ -186,25 +186,32 @@ def sources(name: str, verbose: bool = False) -> None:
     print("\n".join(sorted(formatted)))
 
 
-def load_raw_tasks(name: str) -> list[dict[str, Any]]:
+def load_raw_tasks(
+    name: str, identifiers: list[str] | None = None
+) -> list[dict[str, Any]]:
     raw = _campaign.load(name).get("tasks", [])
     if not raw:
         msg = f"No tasks found"
         print(msg)
         log.info(msg)
-    return raw
+
+    if identifiers is None or len(identifiers) == 0:
+        return raw
+
+    return [raw_item for raw_item in raw if raw_item.get("identifier") in identifiers]
 
 
 @campaign.command(name="tasks")
 @click.argument("campaign_name", type=str)
+@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option("--verbose", "-v", is_flag=True, help="Print realised task data.")
-def tasks_command(campaign_name: str, verbose: bool) -> None:
+def tasks_command(campaign_name: str, identifier: list[str], verbose: bool) -> None:
     """
     Show tasks for a campaign.
 
     """
 
-    raw_task_defs = load_raw_tasks(campaign_name)
+    raw_task_defs = load_raw_tasks(campaign_name, identifier)
 
     if not raw_task_defs:
         return
@@ -231,7 +238,7 @@ def run(campaign_name: str, identifier: list[str]) -> None:
 
     """
 
-    raw_task_defs = load_raw_tasks(campaign_name)
+    raw_task_defs = load_raw_tasks(campaign_name, identifier)
 
     if not raw_task_defs:
         return
@@ -241,18 +248,6 @@ def run(campaign_name: str, identifier: list[str]) -> None:
 
     # Create all combinations and group by task definition
     task_defs = _tasks.load_all(raw_task_defs)
-
-    # Take only user selection
-    if len(identifier) > 0:
-        task_defs = [
-            task_def
-            for task_def in task_defs
-            # Check if the string value on the left is contained in the list of
-            # strings on the right. This unfortunate naming is a compromise that
-            # ensures that click makes readable CLI documentation, but means
-            # that the semantics become unclear in the code.
-            if task_def.identifier in identifier
-        ]
 
     # For display purposes
     # Resolve and pre-process arguments and instantiate the tasks
