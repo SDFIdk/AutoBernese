@@ -23,7 +23,7 @@ from ab.bsw import (
     campaign as _campaign,
 )
 from ab.data import (
-    DownloadStatus,
+    TransferStatus,
     source as _source,
     ftp,
     http,
@@ -53,7 +53,7 @@ def download(
     identifier: list[str], force: bool = False, campaign: str | None = None
 ) -> None:
     """
-    Download all sources in the autobernese configuration file.
+    Download all sources in the AutoBernese configuration file.
 
     """
     if campaign is not None:
@@ -97,7 +97,7 @@ def download(
     log.info(msg)
 
     source: _source.Source
-    status_total: DownloadStatus = DownloadStatus()
+    status_total: TransferStatus = TransferStatus()
     for source in sources:
         msg = f"Download: {source.identifier}: {source.description}"
         print(f"[black on white]{msg}[/]")
@@ -121,7 +121,7 @@ def download(
 
     else:
         msg = "Finished downloading sources ..."
-        print(msg)
+        print(f"\n{msg}")
         log.debug(msg)
 
         print(f"Overall status:")
