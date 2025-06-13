@@ -20,7 +20,7 @@ from ab.tasks import (
 from ab.imports import import_function
 from ab.data import compress
 from ab.bsw import bpe
-from ab.data import transfer
+from ab.data import sftp
 from ab.station import sta
 from ab import vmf
 

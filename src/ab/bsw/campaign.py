@@ -1,5 +1,5 @@
 """
-Module for working with campaigns in the current BSW environment.
+Work with Bernese campaigns in the current Bernese environment
 
 """
 
@@ -36,16 +36,7 @@ def get_template_dir() -> Path:
     Return the Path instance to the directory containing the campaign templates.
 
     """
-    c = configuration.load()
-    runtime = c.get("runtime")
-    if not runtime:
-        raise RuntimeError("Configuration must have a `runtime` section ...")
-    templates = runtime.get("campaign_templates")
-    if not templates:
-        raise ValueError(
-            "Configuration section m`runtime` has no value `campaign_templates` ..."
-        )
-    return Path(templates)
+    return configuration._campaign_templates()
 
 
 def get_bsw_env() -> dict[str, str | Path]:
@@ -77,8 +68,8 @@ def get_campaign_menu_file() -> Path:
 
 _TEMPLATE_P: Final = "${P}"
 """
-The shell/pearl friendly string representing the environment variable $P used by
-BSW to point to the campaign directory.
+The shell/perl-friendly string representing the environment variable $P used by
+Bernese GNSS Software to point to the campaign directory.
 """
 
 
@@ -181,7 +172,7 @@ def ls(verbose: bool = False) -> list[CampaignInfo]:
         ifname = Path(campaign_info.directory) / "campaign.yaml"
         if not ifname.is_file():
             continue
-        meta = configuration.with_env(ifname).get("metadata", {})
+        meta = configuration.load(ifname).get("metadata", {})
         for key, value in meta.items():
             setattr(campaign_info, key, value)
 
@@ -382,7 +373,7 @@ def load(name: str) -> dict[str, Any]:
         raise SystemExit(
             f"Campaign {name!r} does not exist or has no campaign-specific configuration file {ifname.name} ..."
         )
-    c = configuration.with_env(ifname)
+    c = configuration.load(ifname)
     if (changes := c.get("environment")) is not None:
         if isinstance(changes, list):
             change_environment_variables(changes)

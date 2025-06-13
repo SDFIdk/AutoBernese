@@ -1,5 +1,5 @@
 """
-Module for downloading files over HTTP.
+Transfer files over HTTP
 
 """
 
@@ -8,7 +8,7 @@ import logging
 
 import requests
 
-from ab.data import DownloadStatus
+from ab.data import TransferStatus
 from ab.data.source import Source
 from ab.data.stats import already_updated
 
@@ -16,7 +16,7 @@ from ab.data.stats import already_updated
 log = logging.getLogger(__name__)
 
 
-_SESSION: requests.Session = None
+_SESSION: requests.Session | None = None
 
 
 def get_session() -> requests.Session:
@@ -26,12 +26,12 @@ def get_session() -> requests.Session:
     return _SESSION
 
 
-def download(source: Source) -> DownloadStatus:
+def download(source: Source) -> TransferStatus:
     """
     Download a file over HTTP (TLS or not)
 
     """
-    status = DownloadStatus()
+    status = TransferStatus()
     for pair in source.resolve():
         destination = Path(pair.path_local)
         destination.mkdir(parents=True, exist_ok=True)
@@ -46,9 +46,7 @@ def download(source: Source) -> DownloadStatus:
         response = get_session().get(pair.uri, allow_redirects=True, timeout=30)
 
         if not response.ok:
-            # Calling it a failure, since we are not checking for remote
-            # existence of the file and therefore unbeknownst to us, the file
-            # may or may not exist.
+            # Calling it a failure, without knowing the cause of the error.
             status.failed += 1
             continue
 

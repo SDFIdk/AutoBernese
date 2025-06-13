@@ -1,5 +1,5 @@
 """
-Download [i.e. copy] local files.
+Copy local files
 
 """
 
@@ -10,7 +10,7 @@ from typing import Iterable
 
 from ab import configuration
 from ab.paths import resolve_wildcards
-from ab.data import DownloadStatus
+from ab.data import TransferStatus
 from ab.data.source import Source
 from ab.data.stats import already_updated
 
@@ -18,12 +18,12 @@ from ab.data.stats import already_updated
 log = logging.getLogger(__name__)
 
 
-def download(source: Source) -> DownloadStatus:
+def download(source: Source) -> TransferStatus:
     """
     Download local paths resolved from a Source instance.
 
     """
-    status = DownloadStatus()
+    status = TransferStatus()
 
     for pair in source.resolve():
         destination = Path(pair.path_local)

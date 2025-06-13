@@ -1,0 +1,10 @@
+# Not allowed
+bsw_env: {}
+bsw_files: {}
+env: {}
+runtime: {}
+campaign: {}
+
+# Section may override the previous
+troposphere:
+  ipath: !Path [*D, foo]

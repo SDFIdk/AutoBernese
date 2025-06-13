@@ -1,0 +1,8 @@
+section_1:
+- *letter
+
+section_2:
+  bar: baz
+
+section_3: &section_3
+  hello: you

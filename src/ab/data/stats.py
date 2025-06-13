@@ -11,6 +11,7 @@ from typing import (
 )
 import math
 from pathlib import Path
+import functools
 
 import logging
 
@@ -18,7 +19,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-# Local files
 def date_changed(fname: Path | str) -> dt.date:
     """
     Return the last modification date for given file.
@@ -47,6 +47,7 @@ def already_updated(fname: Path, *, max_age: int | float = math.inf) -> bool:
     return fname.is_file() and file_age(fname) < max_age
 
 
+@functools.cache
 def dir_size(start_path: str = ".") -> float:
     """
     Return size of files in directory, excluding symbolic links.

@@ -1,0 +1,9 @@
+section_1:
+- c
+
+section_2:
+  baz: no
+
+section_3:
+  <<: *section_3
+  hi: there

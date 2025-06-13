@@ -1,0 +1,3 @@
+# Section may override the previous
+troposphere:
+  ipath: !Path [*U, bar]
