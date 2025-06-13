@@ -27,13 +27,6 @@ from ab.data import source as _source
 log = logging.getLogger(__name__)
 
 
-def require_loadgps_setvar_sourced() -> None:
-    if not configuration.LOADGPS_setvar_sourced():
-        msg = "Not all variables in LOADGPS.setvar are set ..."
-        print(f"[white on red]{msg}[/]")
-        raise SystemExit
-
-
 @click.group(cls=ClickAliasedGroup, invoke_without_command=True)
 @click.pass_context
 def campaign(ctx: click.Context) -> None:
@@ -41,7 +34,6 @@ def campaign(ctx: click.Context) -> None:
     Create campaigns and manage campaign-specific sources and run BPE tasks.
 
     """
-    require_loadgps_setvar_sourced()
     _campaign.init_template_dir()
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
