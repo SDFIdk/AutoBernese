@@ -54,8 +54,8 @@ def get_project_dir() -> Path:
 
     """
     project_dir = Path(get_bsw_env().get("P", ""))
-    if not project_dir.is_dir():
-        raise RuntimeError("Root directory {P!r} is not a directory ...")
+    # if not project_dir.is_dir():
+    #     raise RuntimeError(f"Root directory {P!r} is not a directory ...")
     return project_dir
 
 
@@ -284,9 +284,9 @@ def add_campaign_to_bsw_menu(name: str) -> None:
     """
     campaign_dir = _campaign_dir(name)
     if not campaign_dir.is_dir():
-        raise RuntimeError(
-            f"Campaign directory {campaign_dir!r} is not a directory ..."
-        )
+        msg = f"Campaign directory {campaign_dir!r} is not a directory ..."
+        log.warn(msg)
+        return
 
     # Load existing campaign-menu file
     campaign_menu = get_campaign_menu_file()
@@ -327,13 +327,13 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     if campaign_dir.is_dir():
         msg = f"Campaign directory {campaign_dir} exists ..."
         log.warn(msg)
-        raise RuntimeError(msg)
+        return
 
     # Is the template available?
     if template not in available_templates():
         msg = f"Template {template} does not exist ..."
         log.warn(msg)
-        raise RuntimeError(msg)
+        return
 
     # Create
 
