@@ -117,31 +117,6 @@ def clean(config: dict[str, Any]) -> dict[str, Any]:
     return config
 
 
-def merge(*filenames: Path | str) -> str:
-    """
-    Merge file contents in the order of the given filenames.
-
-    Duplicate file references are removed.
-
-    Raises a RuntimeError, if a file does not exist.
-
-    Returns an empty string, if no files are given.
-
-    """
-    # Using a list to keep the order
-    unique = []
-    for fname in filenames:
-        ifname = Path(fname).absolute()
-        if not ifname.is_file():
-            raise RuntimeError(f"File {ifname} does not exist ...")
-        if ifname in unique:
-            continue
-        unique.append(ifname)
-    fstr = "\n".join("{}" for _ in range(len(unique)))
-    contents = (ifname.read_text() for ifname in unique)
-    return fstr.format(*contents)
-
-
 def loads(raw: str, /) -> ConfigurationType:
     """
     Load string input as a YAML document.
@@ -206,6 +181,31 @@ def _sections_to_override() -> list[str]:
     if sections_to_override is None:
         raise RuntimeError("No `sections_to_override` sub section found ...")
     return sections_to_override
+
+
+def merge(*filenames: Path | str) -> str:
+    """
+    Merge file contents in the order of the given filenames.
+
+    Duplicate file references are removed.
+
+    Raises a RuntimeError, if a file does not exist.
+
+    Returns an empty string, if no files are given.
+
+    """
+    # Using a list to keep the order
+    unique = []
+    for fname in filenames:
+        ifname = Path(fname).absolute()
+        if not ifname.is_file():
+            raise RuntimeError(f"File {ifname} does not exist ...")
+        if ifname in unique:
+            continue
+        unique.append(ifname)
+    fstr = "\n".join("{}" for _ in range(len(unique)))
+    contents = (ifname.read_text() for ifname in unique)
+    return fstr.format(*contents)
 
 
 def update(
