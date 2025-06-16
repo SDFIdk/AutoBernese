@@ -48,18 +48,20 @@ def get_bsw_env() -> dict[str, str | Path]:
     return configuration.load().get("bsw_env", {})
 
 
-def get_campaign_dir() -> Path:
+def get_project_dir() -> Path:
     """
-    Return Path instance to the campaign directory `$P`.
+    Return path to campaign-directory container `$P`
 
     """
-    return Path(get_bsw_env().get("P", ""))
+    project_dir = Path(get_bsw_env().get("P", ""))
+    if not project_dir.is_dir():
+        raise RuntimeError("Root directory {P!r} is not a directory ...")
+    return project_dir
 
 
 def get_campaign_menu_file() -> Path:
     """
-    Return Path instance pointing to the campaign menu inside the Bernese
-    installation.
+    Return path to the campaign-menu file inside the Bernese installation
 
     """
     c = configuration.load()
@@ -76,8 +78,7 @@ Bernese GNSS Software to point to the campaign directory.
 @dataclass
 class MetaData:
     """
-    Model for the metadata section of a concrete campaign-specific configuration
-    file.
+    Model for the metadata section in campaign configuration file
 
     """
 
@@ -92,13 +93,11 @@ class MetaData:
 
 def init_template_dir() -> None:
     """
-    Create a directory for user-defined campaign templates in the autobernese
-    directory.
+    Create campaign-template directory in AutoBernese runtime directory.
 
     Does nothing if the template directory already exists.
 
-    If it does not exist, the directory is created and the packaged default
-    template is added.
+    Otherwise, create it and add the built-in default template.
 
     """
     template_dir = get_template_dir()
@@ -123,7 +122,7 @@ def available_templates() -> list[str]:
     return [fname.stem for fname in template_dir.glob("*.yaml")]
 
 
-def load_template(template: Path | str) -> str:
+def read_template(template: Path | str) -> str:
     if not template in available_templates():
         raise ValueError(f"Template {template!r} does not exist ...")
     ifname = (get_template_dir() / template).with_suffix(".yaml")
@@ -135,6 +134,9 @@ def _extract_campaign_list(raw: str) -> list[str]:
     Reads the list of existing campaign directories from a string matching
     possible content in the file `MENU_CMP.INP` in the current Bernese
     installation directory.
+
+    The full path to each campaign directory is resolved using the given
+    environment variables.
 
     """
     meat = raw.split("  ## widget")[0]
@@ -157,7 +159,9 @@ class CampaignInfo:
 
 def ls(verbose: bool = False) -> list[CampaignInfo]:
     """
-    Return list of created campaigns.
+    Return list of existing Bernese campaigns.
+
+    Calculate directory size and display metadata, if `verbose is True`.
 
     """
     result = [
@@ -184,7 +188,7 @@ def _campaign_dir(name: str) -> Path:
     Return the directory path to the campaign `name`.
 
     """
-    return get_campaign_dir() / f"{name}"
+    return get_project_dir() / f"{name}"
 
 
 def _campaign_configuration(name: str) -> Path:
@@ -195,63 +199,30 @@ def _campaign_configuration(name: str) -> Path:
     return _campaign_dir(name) / "campaign.yaml"
 
 
-def build_campaign_menu(campaign_list: list[str]) -> str:
+def create_campaign_configuration_file(metadata: MetaData) -> None:
     """
-    Build content for a MENU_CMP.INP file with list of the given campaigns.
-
-    If a campaign path matches that of the default Bernese campaign directory
-    denoted `${P}`, the respective path component is replaced with these
-    literals.
+    Create campaign-configuration file in the campaign directory
 
     """
-    _P = str(get_campaign_dir())
-    formatted: list[str] = [
-        f'  "{campaign.replace(_P, _TEMPLATE_P)}"' for campaign in campaign_list
-    ]
-    count: int = len(campaign_list)
-    separator: str = "\n" if count > 1 else ""
-    campaigns: str = "\n".join(formatted)
-    parameters = dict(count=count, separator=separator, campaigns=campaigns)
-    return pkg.template_campaign_menu_list.read_text().format(**parameters)
+    campaign_dir = _campaign_dir(metadata.campaign)
+    ofname = _campaign_configuration(metadata.campaign)
+    log.info(f"Creating campaign-configuration file {ofname} ...")
+    header = pkg.campaign_header.read_text().format(**asdict(metadata))
+    raw_template = read_template(metadata.template)
+    ofname.write_text(f"{header}\n{raw_template}")
 
 
-def add_campaign_to_bsw_menu(path: str | Path) -> None:
-    """
-    Update the campaign-menu file in Bernese install directory.
+def build_campaign_directory_tree(name: str) -> None:
+    campaign_dir = _campaign_dir(name)
+    if not campaign_dir.is_dir():
+        log.debug(f"Campaign directory {campaign_dir!r} is not a directory ...")
+        return
 
-    Add given campaign path to the list of campaigns in the campaign-menu file
-    in the Bernese installation directory.
-
-    """
-    path = Path(path)
-    if not path.is_dir():
-        raise ValueError(f"Path {path!r} is not a directory ...")
-
-    campaign_menu = get_campaign_menu_file()
-
-    # Load existing campaign-menu file
-    raw = campaign_menu.read_text()
-
-    # Create a backup just as BSW does.
-    campaign_menu.with_suffix(".bck").write_text(raw)
-
-    # Update the campaign list
-    existing = set(_extract_campaign_list(raw))
-
-    # We convert the PosixPath to a string, and the make a single-element set
-    # with that string before adding it to the existing list and sorting it.
-    updated = sorted(existing | {f"{path}"})
-
-    # Write the updated and formatted list to the campaign-menu file.
-    campaign_menu.write_text(build_campaign_menu(updated))
-
-
-def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
-    campaign_dir = Path(campaign_dir)
-    directories = configuration.load().get("campaign", {}).get("directories")
+    # Load campaign configuration and its (propagated) directory tree settings
+    directories = load_campaign(name).get("campaign", {}).get("directories")
 
     if directories is None:
-        msg = f"list of campaign directories to create is empty in the user configuration ..."
+        msg = f"List of campaign directories to create is empty ..."
         log.error(msg)
         raise RuntimeError(msg)
 
@@ -282,29 +253,59 @@ def build_campaign_directory_tree(campaign_dir: Path | str) -> None:
             shutil.copy(fname_source, path_full / ifname_source.name)
 
 
-def create_campaign_configuration_file(
-    campaign_dir: Path | str, metadata: MetaData
-) -> None:
+def build_campaign_menu(campaign_names: list[str]) -> str:
     """
-    Create a campaign configuration file with relevant metadata.
+    Build content for a MENU_CMP.INP file with list of the given campaigns.
+
+    If a campaign path matches that of the default Bernese campaign-directory
+    container denoted `${P}`, the respective path component is replaced with
+    these literals.
 
     """
-    campaign_dir = Path(campaign_dir)
+    # Replace full paths to short-hand paths
+    _P = str(get_project_dir())
+    formatted: list[str] = [
+        f'  "{campaign.replace(_P, _TEMPLATE_P)}"' for campaign in campaign_names
+    ]
+    count = len(campaign_names)
+    separator = "\n" if count > 1 else ""
+    campaigns = "\n".join(formatted)
+    parameters = dict(count=count, separator=separator, campaigns=campaigns)
+    return pkg.template_campaign_menu_list.read_text().format(**parameters)
+
+
+def add_campaign_to_bsw_menu(name: str) -> None:
+    """
+    Update the campaign-menu file in Bernese install directory.
+
+    Resolve campaign-directory path and add it to the list of campaigns in the
+    campaign-menu file in the Bernese-installation directory.
+
+    """
+    campaign_dir = _campaign_dir(name)
     if not campaign_dir.is_dir():
-        msg = f"{campaign_dir!r} is not a directory ..."
-        log.error(msg)
-        raise RuntimeError(msg)
+        raise RuntimeError(
+            f"Campaign directory {campaign_dir!r} is not a directory ..."
+        )
 
-    # Create AutoBernese campaign-configuration file
-    fname_campaign_config = campaign_dir / "campaign.yaml"
-    log.info(
-        f"Creating AutoBernese campaign-configuration file {fname_campaign_config} ..."
-    )
-    # Make parsable YAML
-    header = pkg.campaign_header.read_text().format_map(asdict(metadata))
-    fname_template_config = get_template_dir() / f"{metadata.template}.yaml"
-    content = f"{header}\n{fname_template_config.read_text()}"
-    fname_campaign_config.write_text(content)
+    # Load existing campaign-menu file
+    campaign_menu = get_campaign_menu_file()
+    raw = campaign_menu.read_text()
+
+    # Create a backup file just as Bernese does
+    # This might be unnecessary, but, for now, we just mimic its behaviour
+    campaign_menu.with_suffix(".bck").write_text(raw)
+
+    # Update the campaign list
+
+    # Put existing Bernese campaign paths into a set to get unique paths
+    existing = set(_extract_campaign_list(raw))
+
+    # Add new campaign_dir to this set and sort updates to get a list
+    updated = sorted(existing | {f"{campaign_dir}"})
+
+    # Write the formatted updates to the original campaign-menu file
+    campaign_menu.write_text(build_campaign_menu(updated))
 
 
 def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
@@ -321,18 +322,18 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 
     # Validate
 
-    # Is the template available?
-    if template not in available_templates():
-        msg = f"Template {template} does not exist ..."
-        log.warn(msg)
-        raise ValueError(msg)
-
     # Does the campaign already exist?
     campaign_dir = _campaign_dir(name)
     if campaign_dir.is_dir():
         msg = f"Campaign directory {campaign_dir} exists ..."
         log.warn(msg)
-        raise ValueError(msg)
+        raise RuntimeError(msg)
+
+    # Is the template available?
+    if template not in available_templates():
+        msg = f"Template {template} does not exist ..."
+        log.warn(msg)
+        raise RuntimeError(msg)
 
     # Create
 
@@ -340,8 +341,7 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     log.info(f"Creating campaign directory {campaign_dir} ...")
     campaign_dir.mkdir(parents=True)
 
-    add_campaign_to_bsw_menu(campaign_dir)
-    build_campaign_directory_tree(campaign_dir)
+    # Create campaign configuration file with runtime metadata
     metadata = MetaData(
         username=getpass.getuser(),
         template=template,
@@ -349,21 +349,32 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
         beg=beg.isoformat(),
         end=end.isoformat(),
     )
-    create_campaign_configuration_file(campaign_dir, metadata)
+    create_campaign_configuration_file(metadata)
+
+    # Create campaign directory
+    build_campaign_directory_tree(name)
+
+    # Make campaign visible in Bernese campaign menu
+    add_campaign_to_bsw_menu(name)
 
 
 def change_environment_variables(changes: list[dict[str, Any]]) -> None:
+    if not isinstance(changes, list):
+        log.debug("Expected list instance, got {changes!r} ...")
+        return
+
     for change in changes:
         variable = change.get("variable")
-        # Anything can be given in the YAML document, but only a single-word
-        # string is acceptable as variable name.
         if not (s := str(variable)) == variable or s.strip() != s or s.split()[0] != s:
+            log.debug(
+                f"Only a single-word string is acceptable as variable name. Got {variable!r} ..."
+            )
             continue
         value = str(change.get("value"))
         os.environ[variable] = value
 
 
-def load(name: str) -> dict[str, Any]:
+def load_campaign(name: str) -> dict[str, Any]:
     """
     Load a given campaign configuration.
 
@@ -375,8 +386,7 @@ def load(name: str) -> dict[str, Any]:
         )
     c = configuration.load(ifname)
     if (changes := c.get("environment")) is not None:
-        if isinstance(changes, list):
-            change_environment_variables(changes)
+        change_environment_variables(changes)
     return c
 
 
@@ -408,7 +418,7 @@ def clean(name: str) -> None:
 
     """
     # Are there any directories specified?
-    c = load(name)
+    c = load_campaign(name)
     paths: list[str] | None = c.get("clean")
     if not paths:
         return
@@ -418,6 +428,7 @@ def clean(name: str) -> None:
     # Take those selected
     existing_chosen = [path for (name, path) in dirs.items() if name in paths]
 
+    # TODO: Move I/O to the CLI
     print("\n".join(existing_chosen))
     proceed = input("Proceed (y/[n]): ").lower() == "y"
     if not proceed:

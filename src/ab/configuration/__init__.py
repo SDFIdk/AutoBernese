@@ -108,7 +108,6 @@ _POP: Final = (
     "bsw_files",
     "env",
     "runtime",
-    "campaign",
 )
 
 
