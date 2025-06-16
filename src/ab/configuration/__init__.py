@@ -95,10 +95,7 @@ import functools
 
 import yaml
 
-from ab.configuration import (
-    constructors,
-    loadgps_setvar,
-)
+from ab.configuration import constructors
 from ab import pkg
 
 
@@ -160,9 +157,16 @@ def loads(raw: str, /) -> ConfigurationType:
     return yaml.safe_load(raw)
 
 
+def loadgps_setvar_sourced() -> bool:
+    for key in pkg.bsw_env_vars.read_text().splitlines():
+        if key not in os.environ:
+            return False
+    return True
+
+
 @functools.cache
 def _core() -> ConfigurationType:
-    if not loadgps_setvar.sourced():
+    if not loadgps_setvar_sourced():
         raise SystemExit(
             "Please source `BERN54/LOADGPS.setvar` before running AutoBernese ..."
         )
