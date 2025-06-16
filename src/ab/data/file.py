@@ -6,7 +6,7 @@ Copy local files
 from pathlib import Path
 import shutil
 import logging
-from typing import Iterable
+from collections.abc import Iterable
 
 from ab import configuration
 from ab.paths import resolve_wildcards

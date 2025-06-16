@@ -5,9 +5,7 @@ Date handling and specific tools for conversion between different formats.
 
 import datetime as dt
 from dataclasses import dataclass
-from collections.abc import (
-    Iterable,
-)
+from collections.abc import Iterable
 from typing import (
     Protocol,
     Any,

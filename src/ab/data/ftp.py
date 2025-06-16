@@ -13,8 +13,8 @@ from ftplib import (
     FTP,
     error_perm,
 )
-from typing import (
-    Any,
+from typing import Any
+from collections.abc import (
     Iterable,
     Iterator,
 )

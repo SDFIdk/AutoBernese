@@ -4,10 +4,8 @@ Handle data sources
 """
 
 import os
-from typing import (
-    Any,
-    Iterable,
-)
+from typing import Any
+from collections.abc import Iterable
 from dataclasses import dataclass
 import math
 from pathlib import Path
