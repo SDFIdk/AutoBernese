@@ -20,7 +20,6 @@ def ensure_string(s: str) -> str:
     return s
 
 
-# def run_bpe(**parameters: dict[str, str]) -> object:
 def run_bpe(
     pcf_file: str,
     campaign: str,
