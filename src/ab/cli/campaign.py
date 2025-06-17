@@ -1,3 +1,8 @@
+"""
+Command-line interface for working with Bernese campaigns
+
+"""
+
 import logging
 from pathlib import Path
 import json
@@ -18,7 +23,10 @@ from ab.cli import (
     _input,
     about,
 )
-from ab import configuration
+from ab import (
+    configuration,
+    files as _files,
+)
 from ab.configuration import tasks as _tasks
 from ab.bsw import campaign as _campaign
 from ab.data import source as _source
@@ -100,7 +108,7 @@ def templates(template: str | None) -> None:
 
     else:
         log.debug(f"Show raw template {template!r} ...")
-        print(_campaign.load_template(template))
+        print(_campaign.read_template(template))
 
 
 @campaign.command
@@ -294,7 +302,26 @@ def run(campaign_name: str, identifier: list[str]) -> None:
 @click.argument("campaign_name", type=str)
 def clean(campaign_name: str) -> None:
     """
-    Clean campaign sub directories specified in the campaign configuration.
+    Delete content in specified campaign directories.
 
     """
-    _campaign.clean(campaign_name)
+    # Are there any directories specified?
+    c = _campaign.just_load(campaign_name)
+    paths = c.get("clean")
+    if not paths:
+        return
+
+    dirs = _campaign.subdirectories(campaign_name)
+
+    # Take those selected
+    existing_chosen = [path for (name, path) in dirs.items() if name in paths]
+
+    print("Deleting the following paths:")
+    print("\n".join(existing_chosen))
+    proceed = _input.prompt_proceed()
+    if not proceed:
+        raise SystemExit
+
+    # And delete their contents, but not the directories
+    for path in existing_chosen:
+        _files.delete_directory_content(path)
