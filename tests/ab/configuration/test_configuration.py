@@ -42,12 +42,12 @@ def test_load():
     ifname_common = dir_ / "common.yaml"
     ifname_campaign = dir_ / "campaign.yaml"
 
-    # Verify that core sections are removed
+    # Verify that core sections are removed, when filename is provided
     env_common = load(ifname_common)
     for key in _POP:
         assert (
             key not in env_common
-        ), f"Expected {key!r} to not be in rendered configuration {ifname_common.stem}"
+        ), f"Expected {key!r} to not be in rendered configuration {ifname_common.stem!r}"
 
     # Any other section is allowed
     assert env_common.get("troposphere") is not None

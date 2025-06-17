@@ -103,18 +103,14 @@ constructors.add()
 
 type ConfigurationType = dict[str, Any]
 
-_POP: Final = (
+_POP: Final = {
     "bsw_env",
     "bsw_files",
     "env",
     "runtime",
-)
-
-
-def clean(config: dict[str, Any]) -> dict[str, Any]:
-    for key in _POP:
-        config.pop(key)
-    return config
+    "campaign",
+}
+"Set of keys to remove from configuration, if so specified."
 
 
 def loads(raw: str, /) -> ConfigurationType:
@@ -231,11 +227,27 @@ def update(
     return {**base, **overrides}
 
 
+def clean(
+    config: ConfigurationType, spare: Iterable[str] | None = None, /
+) -> ConfigurationType:
+    """
+    Remove keys from configuration unless spared by the optional argument.
+
+    """
+    popable = _POP
+    if spare is not None:
+        popable -= set(spare)
+    for key in popable:
+        config.pop(key)
+    return config
+
+
 @functools.cache
 def load(
     *args: Path | str,
     use_common: bool = True,
     keep_env: bool = False,
+    keys_spared: Iterable[str] | None = None,
 ) -> ConfigurationType:
     """
     Extend core + common configuration with given configuration file(s) allowing
@@ -276,7 +288,7 @@ def load(
     if keep_env or not args:
         return updated
 
-    return clean(updated)
+    return clean(updated, keys_spared)
 
 
 def set_up_runtime_environment():

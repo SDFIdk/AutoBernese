@@ -308,6 +308,7 @@ def clean(campaign_name: str) -> None:
     # Are there any directories specified?
     c = _campaign.just_load(campaign_name)
     paths = c.get("clean")
+
     if not paths:
         return
 
@@ -316,7 +317,7 @@ def clean(campaign_name: str) -> None:
     # Take those selected
     existing_chosen = [path for (name, path) in dirs.items() if name in paths]
 
-    print("Deleting the following paths:")
+    print("Deleting content in the following directories:")
     print("\n".join(existing_chosen))
     proceed = _input.prompt_proceed()
     if not proceed:

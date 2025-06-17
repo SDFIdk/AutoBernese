@@ -285,7 +285,12 @@ def build_campaign_directory_tree(name: str) -> None:
         log.debug(f"Campaign directory {path!r} is not a directory ...")
         return
 
-    directories = just_load(name).get("campaign", {}).get("directories")
+    # Load configuration with campaign directory tree settings spared.
+    keys_spared = ("campaign",)
+    c = configuration.load(_campaign_config(name), keys_spared=keys_spared)
+    # (Alternatively, calling conaifuration.load() without the campaign config
+    # file path, the setting will also be spared.)
+    directories = c.get("campaign", {}).get("directories")
 
     if directories is None:
         msg = f"List of campaign directories to create is empty ..."
