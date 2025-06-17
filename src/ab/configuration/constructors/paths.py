@@ -83,7 +83,7 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
         raw = loader.construct_scalar(node)
         if not isinstance(raw, str):
             raise RuntimeError(f"Expected {raw!r} to be a string.")
-        path: Path = Path(raw)
+        path = Path(raw)
     else:
         # We use loader.construct_object, since there may be YAML aliases inside.
         multiple: list[str | Path] = [loader.construct_object(v) for v in node.value]

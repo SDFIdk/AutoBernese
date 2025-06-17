@@ -31,8 +31,8 @@ _MODULE: Final = sys.modules[__name__]
 _SHORTCUTS: dict[str, Callable] = {
     "RunBPE": bpe.run_bpe,
     "Compress": compress.gzip,
+    "SFTPUpload": sftp.upload,
     # Tasks to come
-    # "UploadSFTP": transfer.upload_sftp_batch,
     # "Sitelogs2STAFile": sta.create_sta_file_from_sitelogs,
     # "BuildTroposphereGrdFiles": vmf.nonexisting_builder,
 }
