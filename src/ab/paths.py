@@ -1,3 +1,9 @@
+"""
+Work with path wildcards
+
+"""
+
+from typing import Any
 from collections.abc import Iterable
 from pathlib import Path
 
