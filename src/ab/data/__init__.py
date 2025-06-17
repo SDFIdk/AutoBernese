@@ -3,7 +3,10 @@ Transfer and manage local and remote data sources.
 
 """
 
-from dataclasses import dataclass
+from dataclasses import (
+    dataclass,
+    field,
+)
 
 
 @dataclass
@@ -12,6 +15,7 @@ class TransferStatus:
     downloaded: int = 0
     failed: int = 0
     not_found: int = 0
+    exceptions: list[Exception] = field(repr=False, default_factory=list)
 
     def __add__(self, other) -> "TransferStatus":
         self.existing += other.existing

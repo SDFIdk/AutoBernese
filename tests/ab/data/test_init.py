@@ -30,7 +30,13 @@ def test_radd_download_statusses():
     assert result2 == expected2, f"Expected {result2!r} to be {expected2!r} ..."
 
 
-def test_download_status_repr():
+def test_download_status_asdict():
     result = asdict(TransferStatus(3, 3))
-    expected = {"existing": 3, "downloaded": 3, "failed": 0, "not_found": 0}
+    expected = {
+        "existing": 3,
+        "downloaded": 3,
+        "failed": 0,
+        "not_found": 0,
+        "exceptions": [],
+    }
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
