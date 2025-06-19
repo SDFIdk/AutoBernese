@@ -102,6 +102,7 @@ from ab import pkg
 constructors.add()
 
 type ConfigurationType = dict[str, Any]
+type SectionListItemType = dict[str, Any]
 
 _POP: Final = {
     "bsw_env",
