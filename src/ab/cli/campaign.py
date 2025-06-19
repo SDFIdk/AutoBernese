@@ -80,9 +80,7 @@ def ls(verbose: bool) -> None:
     """
     log.debug("List existing campaigns ...")
     print("Existing campaigns registered in the BSW campaign list:")
-    # print("\n".join(_campaign.ls(verbose)))
     campaign_infos = _campaign.ls(verbose)
-    # print(json.dumps([asdict(ci) for ci in campaign_infos]))
     fstr = "{directory: <40s} {size: >10s} {template} {version} {username} {created}"
     lines = []
     for campaign_info in campaign_infos:
