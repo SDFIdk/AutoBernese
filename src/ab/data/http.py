@@ -51,6 +51,6 @@ def download(source: Source) -> TransferStatus:
             continue
 
         ofname.write_bytes(response.content)
-        status.downloaded += 1
+        status.success += 1
 
     return status

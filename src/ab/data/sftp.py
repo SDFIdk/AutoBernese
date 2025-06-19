@@ -9,7 +9,6 @@ from typing import (
     Any,
     Final,
 )
-import itertools as it
 from pathlib import Path
 import subprocess as sub
 import logging
@@ -28,22 +27,8 @@ PUT: Final = "put {fname} {remote_dir}"
 def update_status(
     status: TransferStatus, result: sub.CompletedProcess
 ) -> TransferStatus:
-
     if result.returncode == 0:
-        status.downloaded += len(result.stdout.splitlines())
-
-    # c = lambda s: s.replace("sftp> ", "")
-    # print("stdout:")
-    # print(c(result.stdout))
-
-    # print()
-    # print("stderr:")
-    # print(c(result.stderr))
-
-    # print()
-    # print("return code:")
-    # print(result.returncode)
-    # print("TODO: Check that the files exists on the server ...")
+        status.success += len(result.stdout.splitlines())
     return status
 
 
@@ -109,6 +94,6 @@ def upload(host: str, pairs: list[LocalRemotePairType]) -> TransferStatus:
     except sub.CalledProcessError as e:
         status.exceptions.append(e)
 
-    print(status)
+    log.info(status)
 
     return status

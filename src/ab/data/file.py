@@ -51,6 +51,6 @@ def download(source: Source) -> TransferStatus:
                 status.failed += 1
                 continue
 
-            status.downloaded += 1
+            status.success += 1
 
     return status

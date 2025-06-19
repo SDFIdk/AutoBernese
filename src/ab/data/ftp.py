@@ -165,7 +165,7 @@ def download(source: Source) -> TransferStatus:
                         status.failed += 1
                         continue
 
-                    status.downloaded += 1
+                    status.success += 1
 
         except KeyboardInterrupt:
             log.info(f"Interrupted by user. Closing FTP connection ...")

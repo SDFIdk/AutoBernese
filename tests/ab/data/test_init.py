@@ -34,7 +34,7 @@ def test_download_status_asdict():
     result = asdict(TransferStatus(3, 3))
     expected = {
         "existing": 3,
-        "downloaded": 3,
+        "success": 3,
         "failed": 0,
         "not_found": 0,
         "exceptions": [],
