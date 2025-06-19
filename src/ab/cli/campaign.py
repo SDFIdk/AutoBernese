@@ -21,15 +21,18 @@ import humanize
 
 from ab.cli import (
     _input,
+    _filter,
     about,
 )
 from ab import (
     configuration,
     files as _files,
 )
-from ab.configuration import tasks as _tasks
+from ab.configuration import (
+    sources as _sources,
+    tasks as _tasks,
+)
 from ab.bsw import campaign as _campaign
-from ab.data import source as _source
 
 
 log = logging.getLogger(__name__)
@@ -159,16 +162,14 @@ def sources(
     Print the campaign-specific sources.
 
     """
-    sources: list[_source.Source] = _campaign.load(name).get("sources", [])
-
-    if identifier is not None and len(identifier) > 0:
-        sources = [source for source in sources if source.identifier in identifier]
-
-    if not sources:
-        msg = f"No sources found ..."
-        print(msg)
+    raw_sources = _filter.get_raw(_campaign.load(name), "sources", identifier)
+    if not raw_sources:
+        msg = f"No sources in campaign ..."
         log.info(msg)
+        print(msg)
         return
+
+    sources = _sources.load_all(raw_sources)
 
     if not verbose:
         formatted = (f"{source}" for source in sources)
@@ -185,32 +186,17 @@ def sources(
     print("\n".join(formatted))
 
 
-def load_raw_tasks(
-    name: str, identifiers: list[str] | None = None
-) -> list[dict[str, Any]]:
-    raw = _campaign.load(name).get("tasks", [])
-    if not raw:
-        msg = f"No tasks found"
-        print(msg)
-        log.info(msg)
-
-    if identifiers is None or len(identifiers) == 0:
-        return raw
-
-    return [raw_item for raw_item in raw if raw_item.get("identifier") in identifiers]
-
-
 @campaign.command(name="tasks")
-@click.argument("campaign_name", type=str)
+@click.argument("name", type=str)
 @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option("--verbose", "-v", is_flag=True, help="Print realised task data.")
-def tasks_command(campaign_name: str, identifier: list[str], verbose: bool) -> None:
+def tasks_command(name: str, identifier: list[str], verbose: bool) -> None:
     """
     Show tasks for a campaign.
 
     """
 
-    raw_task_defs = load_raw_tasks(campaign_name, identifier)
+    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifier)
 
     if not raw_task_defs:
         return
@@ -237,7 +223,7 @@ def run(campaign_name: str, identifier: list[str]) -> None:
 
     """
 
-    raw_task_defs = load_raw_tasks(campaign_name, identifier)
+    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifier)
 
     if not raw_task_defs:
         return

@@ -11,12 +11,15 @@ import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab.cli import _input
+from ab.cli import (
+    _input,
+    _filter,
+)
 from ab import configuration
+from ab.configuration import sources as _sources
 from ab.bsw import campaign as _campaign
 from ab.data import (
     TransferStatus,
-    source as _source,
     ftp as _ftp,
     http as _http,
     file as _file,
@@ -61,22 +64,17 @@ def download(
     else:
         config = configuration.load()
 
-    sources: list[_source.Source] = config.get("sources", [])
-    if not sources:
-        msg = f"Source list empty ..."
-        print(msg)
-        log.debug(msg)
-        return
+    # Load raw configuration items
+    raw_sources = _filter.get_raw(config, "sources", identifier)
 
-    # Select based on identifiers, if any
-    if len(identifier) > 0:
-        sources = [source for source in sources if source.identifier in identifier]
-
-    if not sources:
+    if not raw_sources:
         msg = f"No sources matching selected identifiers ..."
         print(msg)
         log.debug(msg)
         return
+
+    # Build instances
+    sources = _sources.load_all(raw_sources)
 
     # Remove sources with an unsupported protocol
     sources = [source for source in sources if source.protocol in PROTOCOLS]
@@ -105,7 +103,6 @@ def download(
     log.info(msg)
 
     # Set force attribute
-    source: _source.Source
     if force:
         for source in sources:
             source.max_age = 0
