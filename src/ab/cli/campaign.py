@@ -230,9 +230,9 @@ def tasks_command(name: str, identifier: list[str], verbose: bool) -> None:
 
 
 @campaign.command
-@click.argument("campaign_name", type=str)
+@click.argument("name", type=str)
 @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
-def run(campaign_name: str, identifier: list[str]) -> None:
+def run(name: str, identifier: list[str]) -> None:
     """
     Resolve and run all or specified campaign tasks.
 
@@ -300,20 +300,20 @@ def run(campaign_name: str, identifier: list[str]) -> None:
 
 
 @campaign.command
-@click.argument("campaign_name", type=str)
-def clean(campaign_name: str) -> None:
+@click.argument("name", type=str)
+def clean(name: str) -> None:
     """
     Delete content in specified campaign directories.
 
     """
     # Are there any directories specified?
-    c = _campaign.just_load(campaign_name)
+    c = _campaign.just_load(name)
     paths = c.get("clean")
 
     if not paths:
         return
 
-    dirs = _campaign.subdirectories(campaign_name)
+    dirs = _campaign.subdirectories(name)
 
     # Take those selected
     existing_chosen = [path for (name, path) in dirs.items() if name in paths]
