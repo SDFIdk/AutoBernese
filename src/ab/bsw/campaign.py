@@ -309,7 +309,7 @@ def build_campaign_directory_tree(name: str) -> None:
             continue
 
         # We are creating a new directory in an existing one
-        path_full = campaign_dir / directory_name
+        path_full = path / directory_name
         path_full.mkdir()
 
         # Any specified file paths are copied over to the new directory
