@@ -83,7 +83,9 @@ def ls(verbose: bool) -> None:
     campaign_infos = _campaign.ls(verbose)
     fstr = "{directory: <40s} {size: >10s} {template} {version} {username} {created}"
     lines = []
+    registered_dirs = []
     for campaign_info in campaign_infos:
+        registered_dirs.append(Path(campaign_info.directory))
         if campaign_info.size > 0:
             size = humanize.naturalsize(campaign_info.size, binary=True)
         else:
@@ -94,6 +96,21 @@ def ls(verbose: bool) -> None:
         }
         lines.append(fstr.format(**kwargs))
     print("\n".join(lines))
+
+    if verbose:
+        project_dir = _campaign.project_dir()
+        all_dirs = list(project_dir.glob("*/"))
+        all_dirs_and_files = project_dir.glob("*")
+
+        extraneous_dirs = sorted(set(all_dirs) - set(registered_dirs))
+        extraneous_files = sorted(set(all_dirs_and_files) - set(all_dirs))
+
+        print()
+        print("All directories in the campaign directory container:")
+        print("\n".join(str(path) for path in extraneous_dirs))
+        print()
+        print("All extraneous files in the campaign directory container:")
+        print("\n".join(str(path) for path in extraneous_files))
 
 
 @campaign.command
