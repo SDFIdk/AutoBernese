@@ -3,42 +3,41 @@ Configuration tools to build TaskDefinition instances
 
 """
 
-from typing import (
-    Any,
-    Final,
-)
-from collections.abc import (
-    Callable,
-    Iterable,
-)
+from typing import Final
+from collections.abc import Callable
 import sys
 
-from ab.tasks import (
-    TaskDefinition,
-    ArgumentsType,
+from ab.configuration import (
+    SectionListItemType,
+    dispatchers,
 )
+from ab.tasks import TaskDefinition
 from ab.imports import import_function
 from ab.data import compress
 from ab.bsw import bpe
 from ab.data import sftp
-from ab.station import sta
-from ab import vmf
+
+# from ab.station import sta
+# from ab import vmf
 
 
 _MODULE: Final = sys.modules[__name__]
 "This module"
 
 _SHORTCUTS: dict[str, Callable] = {
+    # Use as value for `run` key
     "RunBPE": bpe.run_bpe,
-    "gzipCompress": compress.gzip,
-    "gzipCompressGlob": compress.gzip_glob,
+    "Compress": compress.gzip,
+    "CompressGlob": compress.gzip_glob,
     "SFTPUpload": sftp.upload,
     # Tasks to come
     # "CopyToSAVEDISK":
     # "Sitelogs2STAFile": sta.create_sta_file_from_sitelogs,
     # "BuildTroposphereGrdFiles": vmf.nonexisting_builder,
+    # Use as value for `dispatch_with` key
+    "DispatchCompress": dispatchers.gzip_dispatch,
 }
-"Shortcut names for API-level functions or pre-processing functions."
+"Shortcut names for API-level functions or pre-processing functions [dispatchers]."
 
 
 def get_func(name: str) -> Callable:
@@ -52,7 +51,7 @@ def get_func(name: str) -> Callable:
         raise NameError(name)
 
 
-def load(kwargs: ArgumentsType) -> TaskDefinition:
+def load(kwargs: SectionListItemType) -> TaskDefinition:
 
     key = "run"
     if not key in kwargs:
@@ -66,5 +65,5 @@ def load(kwargs: ArgumentsType) -> TaskDefinition:
     return TaskDefinition(**kwargs)
 
 
-def load_all(raw: list[ArgumentsType]) -> list[TaskDefinition]:
+def load_all(raw: list[SectionListItemType]) -> list[TaskDefinition]:
     return [load(kwargs) for kwargs in raw]
