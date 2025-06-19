@@ -92,10 +92,13 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     # Avoid relative paths `dir/../dir2`
     path = path.absolute()
 
+    # Match against possible wildcards or just path
     resolved = list(resolve_wildcards(path))
 
+    # NOTE: Non-existing files are resolvable, but we need path instances for
+    # functionality that might create those paths.
     if not resolved:
-        EnvironmentError(f"Path {path!r} could not be resolved.")
+        return path
 
     if len(resolved) > 1:
         return resolved

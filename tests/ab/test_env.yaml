@@ -1,0 +1,37 @@
+# Bernese
+- VERSION: "VERSION"
+- F_VERS: "F_VERS"
+- F_VERS_LIST: "F_VERS_LIST"
+- C
+- SRC
+- LG
+- FG
+- XG
+- XQ
+- SPT
+- BPE
+- EXE
+- SUP
+- DOC: [RELEASE.TXT]
+- HLP
+- PAN: [MENU_CMP.INP]
+- GLOBAL
+- MODEL
+- CONFIG
+- USR
+- OPT
+- PCF
+- SCR
+- BPE_SERVER_HOST: "BPE_SERVER_HOST"
+- U
+- T
+- P
+- D
+- S
+- QTBERN
+- OS: "OS"
+- OS_NAME: "OS_NAME"
+- CGROUP: "CGROUP"
+
+# AutoBernese
+- autobernese: ['templates']
