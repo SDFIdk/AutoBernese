@@ -288,8 +288,6 @@ def build_campaign_directory_tree(name: str) -> None:
     # Load configuration with campaign directory tree settings spared.
     keys_spared = ("campaign",)
     c = configuration.load(_campaign_config(name), keys_spared=keys_spared)
-    # (Alternatively, calling conaifuration.load() without the campaign config
-    # file path, the setting will also be spared.)
     directories = c.get("campaign", {}).get("directories")
 
     if directories is None:
@@ -297,7 +295,6 @@ def build_campaign_directory_tree(name: str) -> None:
         log.error(msg)
         raise RuntimeError(msg)
 
-    # Create required campaign-directory tree
     log.info(f"Create required campaign-directory tree ...")
     for directory_info in directories:
         # Validation
@@ -408,11 +405,10 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 
     # Create
 
-    # Create campaign directory
     log.info(f"Creating campaign directory {path} ...")
     path.mkdir(parents=True)
 
-    # Create campaign configuration file with runtime metadata
+    log.info(f"Create campaign configuration file with runtime metadata ...")
     metadata = MetaData(
         username=getpass.getuser(),
         template=template,
@@ -422,8 +418,8 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     )
     create_campaign_configuration_file(metadata)
 
-    # Create campaign directory
+    log.info("Build campaign directory tree ...")
     build_campaign_directory_tree(name)
 
-    # Make campaign visible in Bernese campaign menu
+    log.info("Add campaign to Bernese-campaign menu ...")
     add_campaign_to_bsw_menu(name)
