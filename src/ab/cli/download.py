@@ -10,6 +10,10 @@ from dataclasses import asdict
 import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
+from rich.console import Console
+from rich.table import Table
+from rich.live import Live
+from rich import box
 
 from ab.cli import (
     _input,
@@ -86,12 +90,24 @@ def download(
         return
 
     # Print preamble, before asking to proceed
-    preamble = "Downloading the following sources\n"
-    sz = max(len(source.identifier) for source in sources)
-    preamble += "\n".join(
-        f"{source.identifier: >{sz}s}: {source.description}" for source in sources
-    )
-    print(preamble)
+    # preamble = "Downloading the following sources\n"
+    # sz = max(len(source.identifier) for source in sources)
+    # preamble += "\n".join(
+    #     f"{source.identifier: >{sz}s}: {source.description}" for source in sources
+    # )
+    # print(preamble)
+    table = Table(title="Downloading the following sources", box=box.HORIZONTALS)
+    table.add_column("Identifier", no_wrap=True)
+    table.add_column("Description")
+    table.add_column("Local resolution count", justify="right")
+    for source in sources:
+        table.add_row(
+            source.identifier,
+            source.description,
+            str(len(source.resolve())),
+        )
+    console = Console()
+    console.print(table)
 
     # Ask
     if not _input.prompt_proceed():
@@ -107,19 +123,48 @@ def download(
         for source in sources:
             source.max_age = 0
 
-    status_total: TransferStatus = TransferStatus()
-    for source in sources:
-        msg = f"Download: {source.identifier}: {source.description}"
-        print(f"[black on white]{msg}[/]")
-        log.info(msg)
-        agent = PROTOCOLS[source.protocol]
-        status = agent.download(source)
-        status_total += status
-        print(asdict(status))
+    # Prepare output layout
+    table = Table(title="Transfer Status", box=box.HORIZONTALS)
+    table.add_column("Identifier", no_wrap=True)
+    table.add_column("Proto")
+    for key in asdict(TransferStatus()):
+        table.add_column(key, justify="right")
 
-    else:
-        msg = "Finished downloading sources ..."
-        print(f"\n{msg}")
-        log.debug(msg)
-        print(f"Overall status:")
-        print(asdict(status_total))
+    with Live(table, console=console, screen=False, refresh_per_second=20):
+
+        status_total: TransferStatus = TransferStatus()
+        for source in sources:
+            msg = f"Download: {source.identifier}: {source.description}"
+            log.info(msg)
+            agent = PROTOCOLS[source.protocol]
+            status = agent.download(source)
+            status_total += status
+
+            args = [source.identifier, source.protocol] + [
+                f"{total}" for total in asdict(status).values()
+            ]
+            table.add_row(*args)
+
+        else:
+            log.debug("Finished downloading sources ...")
+            # Add a line and print the totals
+            table.add_section()
+            args = ["", ""] + [f"{total}" for total in asdict(status_total).values()]
+            table.add_row(*args)
+
+    # status_total: TransferStatus = TransferStatus()
+    # for source in sources:
+    #     msg = f"Download: {source.identifier}: {source.description}"
+    #     print(f"[black on white]{msg}[/]")
+    #     log.info(msg)
+    #     agent = PROTOCOLS[source.protocol]
+    #     status = agent.download(source)
+    #     status_total += status
+    #     print(asdict(status))
+
+    # else:
+    #     msg = "Finished downloading sources ..."
+    #     print(f"\n{msg}")
+    #     log.debug(msg)
+    #     print(f"Overall status:")
+    #     print(asdict(status_total))
