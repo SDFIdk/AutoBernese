@@ -206,7 +206,7 @@ def merge(*filenames: Path | str) -> str:
 
 
 def update(
-    raw: ConfigurationType, /, *, base: ConfigurationType = _core()
+    raw: ConfigurationType, /, *, base: ConfigurationType | None = None
 ) -> ConfigurationType:
     """
     Update `base` configuration with allowed sections from the `raw`
@@ -214,6 +214,9 @@ def update(
     is pre-loaded to obtain this information.
 
     """
+    if base is None:
+        base = _core()
+
     if not isinstance(base, dict):
         raise TypeError(f"Configuration is not a dictionary ...")
 
