@@ -1,5 +1,5 @@
 """
-Module for downloading files over FTP.
+Transfer files over FTP
 
 """
 
@@ -13,8 +13,8 @@ from ftplib import (
     FTP,
     error_perm,
 )
-from typing import (
-    Any,
+from typing import Any
+from collections.abc import (
     Iterable,
     Iterator,
 )
@@ -23,7 +23,7 @@ import functools
 import logging
 
 from ab import configuration
-from ab.data import DownloadStatus
+from ab.data import TransferStatus
 from ab.data.source import Source
 from ab.data.stats import already_updated
 
@@ -64,7 +64,7 @@ def list_files(ftp: FTP, path: str, *, ix_column: int = 8) -> list[str]:
         return [line.split()[ix_column] for line in lines if not line.startswith("d")]
 
 
-def download(source: Source) -> DownloadStatus:
+def download(source: Source) -> TransferStatus:
     """
     Download paths resolved from a Source instance.
 
@@ -85,7 +85,7 @@ def download(source: Source) -> DownloadStatus:
         For now, the algorithm does not look inside any directory.
 
     """
-    status = DownloadStatus()
+    status = TransferStatus()
 
     # Log on to the host first, since we need to probe for files directories
     with FTP(source.host) as ftp:
@@ -165,7 +165,7 @@ def download(source: Source) -> DownloadStatus:
                         status.failed += 1
                         continue
 
-                    status.downloaded += 1
+                    status.success += 1
 
         except KeyboardInterrupt:
             log.info(f"Interrupted by user. Closing FTP connection ...")

@@ -1,24 +1,13 @@
-!!! warning "TODO"
-
-    *   How to add a campaign configuration (to an existing campaign)
-    *   How to manage campaign-configuration templates for common campaign types.
 
 ## Download common and campaign-specific data
 
-AutoBernese can download external data sources via FTP and HTTP which are
-specified in either [`autobernese.yaml`](configuration-files.md) or any campaign
-configuration `campaign.yaml` in a campaign directory. Basically, specified
-sources lets you download one or more files from a remote path and put it in a
-directory of your choice.
+AutoBernese can transfer external data from sources via FTP, HTTP and the
+filesystem. Sources can be defined in either [the common or the campaign
+configuration file](configuration-files.md). The source definition is meant to
+be both concrete and abstract, so that is is possible to define a concrete path
+or use paramaters to download one or more files that match a given pattern or
+set of parameters by using the Python string format syntax.
 
-These examples demonstrate the use of the custom YAML tag `!Source` that
-AutoBernese uses to define sources that users want to download,
-before the campaign is run.
-
-Sources are specified in the same way in both kinds of configuration, and
-defining their parameters with some of the advanced syntax depends solely on the
-context being either the common AutoBernese configuration or a given campaign
-configuration.
 
 ## `Source` parameters
 
@@ -73,8 +62,7 @@ source. This is put into the given destination directory.
     ```yaml
     sources:
 
-    - !Source
-      identifier: EUREF_STA
+    - identifier: EUREF_STA
       description: EUREF STA file
       url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
       destination: /path/to/DATAPOOL/station
@@ -86,8 +74,7 @@ source. This is put into the given destination directory.
     ```yaml
     sources:
 
-    - !Source
-      identifier: EUREF_STA
+    - identifier: EUREF_STA
       description: EUREF STA file
       url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
       destination: !Path [*D, station]
@@ -110,16 +97,14 @@ under the remote path will be downloaded to the destination directory.
     ```yaml
     sources:
 
-    - !Source
-      identifier: BSW_MODEL
+    - identifier: BSW_MODEL
       description: BSW Model data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
       destination: /path/to/BERN54/GLOBAL/MODEL
       filenames: ['*']
       max_age: 1
 
-    - !Source
-      identifier: BSW_CONFIG
+    - identifier: BSW_CONFIG
       description: BSW Configuration data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
       destination: /path/to/BERN54/GLOBAL/CONFIG
@@ -132,16 +117,14 @@ under the remote path will be downloaded to the destination directory.
     ```yaml
     sources:
 
-    - !Source
-      identifier: BSW_MODEL
+    - identifier: BSW_MODEL
       description: BSW Model data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
       destination: *MODEL
       filenames: ['*']
       max_age: 1
 
-    - !Source
-      identifier: BSW_CONFIG
+    - identifier: BSW_CONFIG
       description: BSW Configuration data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
       destination: *CONFIG
@@ -166,8 +149,7 @@ get all files with a given file extension.
     ```yaml
     sources:
 
-    - !Source
-      identifier: ANTENNA_FILES
+    - identifier: ANTENNA_FILES
       description: Universal and BSW-specific antenna files
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
       destination: /path/to/DATAPOOL/REF54
@@ -184,8 +166,7 @@ get all files with a given file extension.
     ```yaml
     sources:
 
-    - !Source
-      identifier: ANTENNA_FILES
+    - identifier: ANTENNA_FILES
       description: Universal and BSW-specific antenna files
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/REF/
       destination: !Path [*D, REF54]
@@ -208,8 +189,7 @@ with a wildcard, e.g. `*.EPH.Z`.
     ```yaml
     sources:
 
-    - !Source
-      identifier: ION_BIA_2022
+    - identifier: ION_BIA_2022
       description: Ionosphere and satellite-bias files
       url: ftp://ftp.aiub.unibe.ch/CODE/2022/
       destination: /path/to/DATAPOOL/CODE/2022
@@ -219,8 +199,7 @@ with a wildcard, e.g. `*.EPH.Z`.
       - '*.BIA.gz'
       - '*.BIA.Z'
 
-    - !Source
-      identifier: ION_SAT_2023
+    - identifier: ION_SAT_2023
       description: Ionosphere and satellite-bias files
       url: ftp://ftp.aiub.unibe.ch/CODE/2023/
       destination: /path/to/DATAPOOL/CODE/2023
@@ -236,8 +215,7 @@ with a wildcard, e.g. `*.EPH.Z`.
     ```yaml
     sources:
 
-    - !Source
-      identifier: ION_SAT
+    - identifier: ION_SAT
       description: Ionosphere and satellite-bias files
       url: ftp://ftp.aiub.unibe.ch/CODE/{year}/
       destination: !Path [*D, CODE, '{year}']
@@ -262,8 +240,7 @@ a directory listing from an HTTP URI.
     ```yaml
     sources:
 
-    - !Source
-      identifier: VMF3_1x1
+    - identifier: VMF3_1x1
       description: TU Wien Vienna Mapping Model 3
       url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/2023/
       filenames:
@@ -280,8 +257,7 @@ a directory listing from an HTTP URI.
     ```yaml
     sources:
 
-    - !Source
-      identifier: VMF3_1x1
+    - identifier: VMF3_1x1
       description: TU Wien Vienna Mapping Model 3
       url: https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}/VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}
       destination: !Path [*D, VMF3, '1x1_OP', '{date.year}']

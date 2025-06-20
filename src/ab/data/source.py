@@ -3,11 +3,9 @@ Handle data sources
 
 """
 
-from os.path import join
-from typing import (
-    Any,
-    Iterable,
-)
+import os
+from typing import Any
+from collections.abc import Iterable
 from dataclasses import dataclass
 import math
 from pathlib import Path
@@ -17,10 +15,8 @@ from urllib.parse import (
 )
 import logging
 
-from ab.parameters import (
-    resolvable,
-    permutations,
-)
+from ab.parameters import permutations
+
 
 log = logging.getLogger(__name__)
 
@@ -168,18 +164,18 @@ class Source:
         self.destination = Path(self.destination)
 
         # String version for formatting
-        self.url_: str = str(self.url)
-        self.destination_: str = str(self.destination)
+        self.url_ = str(self.url)
+        self.destination_ = str(self.destination)
 
         # Have each component
-        self._parsed: ParseResult = urlparse(self.url_)
-        self.protocol: str = self._parsed.scheme
+        self._parsed = urlparse(self.url_)
+        self.protocol = self._parsed.scheme
         # In order to ensure clear API semantics for `self.protocol`, override
         # default (and correct) result (``) in `ParseResult.scheme`, when the
         # path is local (begins with `/`).
         if self.protocol == "" and self.url_.startswith("/"):
             self.protocol = "file"
-        self.host: str = self._parsed.netloc
+        self.host = self._parsed.netloc
 
     def resolve(self) -> list[RemoteLocalPair]:
         """
@@ -190,14 +186,8 @@ class Source:
 
         """
         if self.filenames:
-            # Example: ftp://example.com/subdir/{year}/
-            #           with filenames: ['filename_*.txt', 'othername_{year}.foo']
-            urls = [join(self.url_, filename) for filename in self.filenames]
+            urls = [os.path.join(self.url_, filename) for filename in self.filenames]
         else:
-            # Example: https://example.com/filename.txt
-            # Example: ftp://example.com/filename.txt
-            # Example: ftp://example.com/subdir/{pattern}/filename{numbers}.txt ,
-            #           given parameters {'pattern': ['a', 'b'], 'numbers': [1, 2]}
             urls = [self.url_]
 
         if self.parameters is None:

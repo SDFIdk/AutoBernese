@@ -8,7 +8,6 @@ from yaml_env_tag import construct_env_tag  # type: ignore
 
 from ab.configuration.constructors import (
     paths,
-    sources,
     dates,
 )
 
@@ -20,8 +19,6 @@ _tag_constructor_map = (
     ("!Path", paths.path_constructor),
     ("!PathStr", paths.path_as_str_constructor),
     ("!Parent", paths.parent_constructor),
-    # Download sources
-    ("!Source", sources.source_constructor),
     # Use parameters
     ("!DateRange", dates.date_range_constructor),
     ("!AsGPSDate", dates.date_to_gps_date_constructor),

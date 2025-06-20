@@ -340,22 +340,19 @@ is added to the [AutoBernese runtime directory](../concepts.md).
     ```yaml linenums="1"
     sources:
 
-    - !Source
-      identifier: EUREF_STA
+    - identifier: EUREF_STA
       description: EUREF STA file
       url: ftp://epncb.oma.be/pub/station/general/EUREF.STA
       destination: !Path [*D, station]
 
-    - !Source
-      identifier: BSW_MODEL
+    - identifier: BSW_MODEL
       description: BSW Model data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/MODEL/
       destination: *MODEL
       filenames: ['*']
       max_age: 1
 
-    - !Source
-      identifier: BSW_CONFIG
+    - identifier: BSW_CONFIG
       description: BSW Configuration data
       url: ftp://ftp.aiub.unibe.ch/BSWUSER54/CONFIG/
       destination: *CONFIG
@@ -450,12 +447,11 @@ campaign. This is explained in more detail in the section [Download sources][DOC
     # (...)
     sources:
 
-    - !Source
-    identifier: RINEX_EPN
-    description: RINEX data
-    url: ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy:03d}
-    destination: !Path [*D, RINEX, '{date.gps_week}']
-    filenames:
+    - identifier: RINEX_EPN
+      description: RINEX data
+      url: ftp://ftp.epncb.oma.be/pub/obs/{date.year}/{date.doy:03d}
+      destination: !Path [*D, RINEX, '{date.gps_week}']
+      filenames:
     - '{station}_{date.year}{date.doy:03d}0000_01D_30S_MO.crx.gz'
     parameters:
         station:

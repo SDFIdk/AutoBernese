@@ -10,7 +10,7 @@ import itertools as it
 
 type ArgumentsType = dict[str, Any]
 type ParametersType = dict[str, Iterable[Any]]
-type PermutationType = dict[Any, Any]
+type PermutationType = dict[str, Any]
 
 
 def permutations(parameters: ParametersType) -> list[PermutationType]:
@@ -87,17 +87,18 @@ def resolve(
     ]
 
 
-def format_strings(structure: Any, parameters: ParametersType) -> Any:
+def format_strings(structure: Any, permutation: PermutationType) -> Any:
 
     if isinstance(structure, dict):
         return {
-            key: format_strings(value, parameters) for (key, value) in structure.items()
+            key: format_strings(value, permutation)
+            for (key, value) in structure.items()
         }
 
     if isinstance(structure, list):
-        return [format_strings(value, parameters) for value in structure]
+        return [format_strings(value, permutation) for value in structure]
 
     if isinstance(structure, str):
-        return structure.format_map(parameters)
+        return structure.format_map(permutation)
 
     return structure

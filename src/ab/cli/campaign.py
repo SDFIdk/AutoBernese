@@ -1,3 +1,8 @@
+"""
+Command-line interface for working with Bernese campaigns
+
+"""
+
 import logging
 from pathlib import Path
 import json
@@ -16,22 +21,21 @@ import humanize
 
 from ab.cli import (
     _input,
+    _filter,
     about,
 )
-from ab import configuration
-from ab.configuration import tasks as _tasks
+from ab import (
+    configuration,
+    files as _files,
+)
+from ab.configuration import (
+    sources as _sources,
+    tasks as _tasks,
+)
 from ab.bsw import campaign as _campaign
-from ab.data import source as _source
 
 
 log = logging.getLogger(__name__)
-
-
-def require_loadgps_setvar_sourced() -> None:
-    if not configuration.LOADGPS_setvar_sourced():
-        msg = "Not all variables in LOADGPS.setvar are set ..."
-        print(f"[white on red]{msg}[/]")
-        raise SystemExit
 
 
 @click.group(cls=ClickAliasedGroup, invoke_without_command=True)
@@ -41,7 +45,6 @@ def campaign(ctx: click.Context) -> None:
     Create campaigns and manage campaign-specific sources and run BPE tasks.
 
     """
-    require_loadgps_setvar_sourced()
     _campaign.init_template_dir()
     if ctx.invoked_subcommand is None:
         click.echo(ctx.get_help())
@@ -77,12 +80,12 @@ def ls(verbose: bool) -> None:
     """
     log.debug("List existing campaigns ...")
     print("Existing campaigns registered in the BSW campaign list:")
-    # print("\n".join(_campaign.ls(verbose)))
     campaign_infos = _campaign.ls(verbose)
-    # print(json.dumps([asdict(ci) for ci in campaign_infos]))
     fstr = "{directory: <40s} {size: >10s} {template} {version} {username} {created}"
     lines = []
+    registered_dirs = []
     for campaign_info in campaign_infos:
+        registered_dirs.append(Path(campaign_info.directory))
         if campaign_info.size > 0:
             size = humanize.naturalsize(campaign_info.size, binary=True)
         else:
@@ -93,6 +96,21 @@ def ls(verbose: bool) -> None:
         }
         lines.append(fstr.format(**kwargs))
     print("\n".join(lines))
+
+    if verbose:
+        project_dir = _campaign.project_dir()
+        all_dirs = list(project_dir.glob("*/"))
+        all_dirs_and_files = project_dir.glob("*")
+
+        extraneous_dirs = sorted(set(all_dirs) - set(registered_dirs))
+        extraneous_files = sorted(set(all_dirs_and_files) - set(all_dirs))
+
+        print()
+        print("All directories in the campaign directory container:")
+        print("\n".join(str(path) for path in extraneous_dirs))
+        print()
+        print("All extraneous files in the campaign directory container:")
+        print("\n".join(str(path) for path in extraneous_files))
 
 
 @campaign.command
@@ -108,7 +126,7 @@ def templates(template: str | None) -> None:
 
     else:
         log.debug(f"Show raw template {template!r} ...")
-        print(_campaign.load_template(template))
+        print(_campaign.read_template(template))
 
 
 @campaign.command
@@ -150,61 +168,50 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 
 @campaign.command
 @click.argument("name", type=str)
+@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option("--verbose", "-v", is_flag=True, help="Print more details.")
-def sources(name: str, verbose: bool = False) -> None:
+def sources(
+    name: str, identifier: list[str] | None = None, verbose: bool = False
+) -> None:
     """
     Print the campaign-specific sources.
 
     """
-    sources: list[_source.Source] | None = _campaign.load(name).get("sources", [])
-
-    if not sources:
-        msg = f"No sources found"
-        print(msg)
+    raw_sources = _filter.get_raw(_campaign.load(name), "sources", identifier)
+    if not raw_sources:
+        msg = f"No sources in campaign ..."
         log.info(msg)
+        print(msg)
         return
 
-    formatted = (
-        f"""\
-{source.identifier=}
-{source.url=}
-{source.destination=}
-{source.protocol=}
-"""
-        for source in sources
-    )
+    sources = _sources.load_all(raw_sources)
 
-    if verbose:
-        join = lambda pairs: "\n".join(
+    if not verbose:
+        formatted = (f"{source}" for source in sources)
+
+    else:
+        join_pairs = lambda pairs: "\n".join(
             f"{p.path_remote} -> {p.path_local}/{p.fname}" for p in pairs
         )
         formatted = (
-            f"{info}{join(source.resolve())}\n"
+            f"{info}{join_pairs(source.resolve())}\n"
             for (source, info) in zip(sources, formatted)
         )
 
-    print("\n".join(sorted(formatted)))
-
-
-def load_raw_tasks(name: str) -> list[dict[str, Any]]:
-    raw = _campaign.load(name).get("tasks", [])
-    if not raw:
-        msg = f"No tasks found"
-        print(msg)
-        log.info(msg)
-    return raw
+    print("\n".join(formatted))
 
 
 @campaign.command(name="tasks")
-@click.argument("campaign_name", type=str)
+@click.argument("name", type=str)
+@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
 @click.option("--verbose", "-v", is_flag=True, help="Print realised task data.")
-def tasks_command(campaign_name: str, verbose: bool) -> None:
+def tasks_command(name: str, identifier: list[str], verbose: bool) -> None:
     """
     Show tasks for a campaign.
 
     """
 
-    raw_task_defs = load_raw_tasks(campaign_name)
+    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifier)
 
     if not raw_task_defs:
         return
@@ -223,15 +230,15 @@ def tasks_command(campaign_name: str, verbose: bool) -> None:
 
 
 @campaign.command
-@click.argument("campaign_name", type=str)
+@click.argument("name", type=str)
 @click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
-def run(campaign_name: str, identifier: list[str]) -> None:
+def run(name: str, identifier: list[str]) -> None:
     """
     Resolve and run all or specified campaign tasks.
 
     """
 
-    raw_task_defs = load_raw_tasks(campaign_name)
+    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifier)
 
     if not raw_task_defs:
         return
@@ -241,18 +248,6 @@ def run(campaign_name: str, identifier: list[str]) -> None:
 
     # Create all combinations and group by task definition
     task_defs = _tasks.load_all(raw_task_defs)
-
-    # Take only user selection
-    if len(identifier) > 0:
-        task_defs = [
-            task_def
-            for task_def in task_defs
-            # Check if the string value on the left is contained in the list of
-            # strings on the right. This unfortunate naming is a compromise that
-            # ensures that click makes readable CLI documentation, but means
-            # that the semantics become unclear in the code.
-            if task_def.identifier in identifier
-        ]
 
     # For display purposes
     # Resolve and pre-process arguments and instantiate the tasks
@@ -305,10 +300,30 @@ def run(campaign_name: str, identifier: list[str]) -> None:
 
 
 @campaign.command
-@click.argument("campaign_name", type=str)
-def clean(campaign_name: str) -> None:
+@click.argument("name", type=str)
+def clean(name: str) -> None:
     """
-    Clean campaign sub directories specified in the campaign configuration.
+    Delete content in specified campaign directories.
 
     """
-    _campaign.clean(campaign_name)
+    # Are there any directories specified?
+    c = _campaign.just_load(name)
+    paths = c.get("clean")
+
+    if not paths:
+        return
+
+    dirs = _campaign.subdirectories(name)
+
+    # Take those selected
+    existing_chosen = [path for (name, path) in dirs.items() if name in paths]
+
+    print("Deleting content in the following directories:")
+    print("\n".join(existing_chosen))
+    proceed = _input.prompt_proceed()
+    if not proceed:
+        raise SystemExit
+
+    # And delete their contents, but not the directories
+    for path in existing_chosen:
+        _files.delete_directory_content(path)

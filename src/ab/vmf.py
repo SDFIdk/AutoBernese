@@ -10,8 +10,8 @@ that day into a single file with data for that entire day.
 from typing import (
     Any,
     Final,
-    Iterable,
 )
+from collections.abc import Iterable
 import datetime as dt
 from pathlib import Path
 from dataclasses import dataclass

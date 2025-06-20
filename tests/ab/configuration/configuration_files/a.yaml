@@ -1,0 +1,5 @@
+section_1:
+- &letter a
+
+section_2:
+  foo: bar

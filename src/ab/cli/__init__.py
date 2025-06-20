@@ -39,9 +39,9 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
 
     2.  Download and organise data for general or campaign-specific use.
 
-    3.  Run the BPE for campaigns with an AutoBernese configuration.
+    3.  Run campaign-specific tasks like the Bernese Processing Engine.
 
-    4.  Do various other things related to GNSS-data processing.
+    4.  Do other things related to Bernese and GNSS-data processing.
 
     """
 

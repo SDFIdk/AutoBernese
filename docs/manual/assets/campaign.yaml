@@ -141,8 +141,7 @@ tasks:
 
 sources:
 
-- !Source
-  identifier: ITRF14
+- identifier: ITRF14
   description: IERS data needed for the EXAMPLE campaign
   url: https://datacenter.iers.org/products/reference-systems/terrestrial/itrf/itrf2014/
   filenames:

@@ -8,6 +8,8 @@ from pathlib import Path
 import shutil
 import gzip as _gzip
 
+from ab.paths import resolve_wildcards
+
 
 def gzip(fname: str | Path) -> None:
     ifname = Path(fname)
@@ -18,3 +20,8 @@ def gzip(fname: str | Path) -> None:
     with open(ifname, "rb") as f_in:
         with _gzip.open(ofname, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
+
+
+def gzip_glob(fname: str | Path) -> None:
+    for resolved in resolve_wildcards(fname):
+        gzip(resolved)

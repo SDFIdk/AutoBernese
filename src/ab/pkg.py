@@ -15,7 +15,7 @@ with resources.as_file(module) as base:
 
     # Configuration module
     env = base.joinpath("configuration/env.yaml")
-    configuration = base.joinpath("configuration/autobernese.yaml")
+    bsw_env_vars = base.joinpath("configuration/bsw_env_vars")
 
     # Country codes
     country_codes = base.joinpath("country_code/ISO-3166-1-alpha-3.yaml")

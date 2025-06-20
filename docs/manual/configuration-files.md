@@ -173,14 +173,14 @@ With this file, users may configure the following:
 ### Data-source specification and local directory structure
 
 ```yaml title="Data source management settings in autobernese.yaml" linenums="22"
---8<-- "docs/manual/assets/autobernese.yaml:22:89"
+--8<-- "docs/manual/assets/autobernese.yaml:22:84"
 ```
 
 
 ### Station site-log files to use for STA-file creation
 
 ```yaml title="Station site-log data to STA-file settings in autobernese.yaml" linenums="91"
---8<-- "docs/manual/assets/autobernese.yaml:91:94"
+--8<-- "docs/manual/assets/autobernese.yaml:86:89"
 ```
 
 
@@ -507,8 +507,7 @@ this (and in this case, other) campaigns.
 ```yaml
 sources:
 
-- !Source
-  identifier: ITRF14
+- identifier: ITRF14
   description: IERS data needed for the EXAMPLE campaign
   url: https://datacenter.iers.org/products/reference-systems/terrestrial/itrf/itrf2014/
   filenames:

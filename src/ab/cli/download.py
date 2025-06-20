@@ -1,37 +1,44 @@
 """
-Command-line interface for downloading external data
+Command-line interface for downloading external and local data sources
 
 """
 
 import logging
 from types import ModuleType
-from dataclasses import (
-    asdict,
-)
+from dataclasses import asdict
 
 import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
+from rich.console import Console
+from rich.table import Table
+from rich.live import Live
+from rich import box
 
 from ab.cli import (
     _input,
+    _filter,
 )
-from ab import (
-    configuration,
-)
-from ab.bsw import (
-    campaign as _campaign,
-)
+from ab import configuration
+from ab.configuration import sources as _sources
+from ab.bsw import campaign as _campaign
 from ab.data import (
-    DownloadStatus,
-    source as _source,
-    ftp,
-    http,
-    file,
+    TransferStatus,
+    ftp as _ftp,
+    http as _http,
+    file as _file,
 )
 
 
 log = logging.getLogger(__name__)
+
+
+PROTOCOLS: dict[str, ModuleType] = dict(
+    ftp=_ftp,
+    http=_http,
+    https=_http,
+    file=_file,
+)
 
 
 @click.command
@@ -53,7 +60,7 @@ def download(
     identifier: list[str], force: bool = False, campaign: str | None = None
 ) -> None:
     """
-    Download all sources in the autobernese configuration file.
+    Download all sources in the AutoBernese configuration file.
 
     """
     if campaign is not None:
@@ -61,68 +68,103 @@ def download(
     else:
         config = configuration.load()
 
-    sources: list[_source.Source] = config.get("sources", [])
-    if not sources:
-        msg = f"No sources found in configuration ..."
+    # Load raw configuration items
+    raw_sources = _filter.get_raw(config, "sources", identifier)
+
+    if not raw_sources:
+        msg = f"No sources matching selected identifiers ..."
         print(msg)
         log.debug(msg)
-        raise SystemExit
+        return
 
-    # Filter if asked to
-    if len(identifier) > 0:
-        sources = [source for source in sources if source.identifier in identifier]
+    # Build instances
+    sources = _sources.load_all(raw_sources)
 
-    # Check again after filtering
+    # Remove sources with an unsupported protocol
+    sources = [source for source in sources if source.protocol in PROTOCOLS]
+
     if not sources:
-        msg = f"No sources matching selected identifiers ({', '.join(identifier)}) ..."
+        msg = f"No sources with supported protocols ..."
         print(msg)
         log.debug(msg)
-        raise SystemExit
+        return
 
     # Print preamble, before asking to proceed
-    preamble = "Downloading the following sources\n"
-    sz = max(len(source.identifier) for source in sources)
-    preamble += "\n".join(
-        f"{source.identifier: >{sz}s}: {source.description}" for source in sources
-    )
-    print(preamble)
+    # preamble = "Downloading the following sources\n"
+    # sz = max(len(source.identifier) for source in sources)
+    # preamble += "\n".join(
+    #     f"{source.identifier: >{sz}s}: {source.description}" for source in sources
+    # )
+    # print(preamble)
+    table = Table(title="Downloading the following sources", box=box.HORIZONTALS)
+    table.add_column("Identifier", no_wrap=True)
+    table.add_column("Description")
+    table.add_column("Local resolution count", justify="right")
+    for source in sources:
+        table.add_row(
+            source.identifier,
+            source.description,
+            str(len(source.resolve())),
+        )
+    console = Console()
+    console.print(table)
 
     # Ask
     if not _input.prompt_proceed():
-        raise SystemExit
+        return
 
     # Resolve sources
     s = "s" if len(sources) > 1 else ""
     msg = f"Resolving {len(sources)} source{s} ..."
     log.info(msg)
 
-    source: _source.Source
-    status_total: DownloadStatus = DownloadStatus()
-    for source in sources:
-        msg = f"Download: {source.identifier}: {source.description}"
-        print(f"[black on white]{msg}[/]")
-        log.info(msg)
-
-        if force:
+    # Set force attribute
+    if force:
+        for source in sources:
             source.max_age = 0
 
-        agent: ModuleType
-        if source.protocol == "ftp":
-            agent = ftp
-        elif source.protocol in ("http", "https"):
-            agent = http
-        elif source.protocol == "file":
-            agent = file
+    # Prepare output layout
+    table = Table(title="Transfer Status", box=box.HORIZONTALS)
+    table.add_column("Identifier", no_wrap=True)
+    table.add_column("Proto")
+    for key in asdict(TransferStatus()):
+        table.add_column(key, justify="right")
 
-        status = agent.download(source)
-        status_total += status
+    with Live(table, console=console, screen=False, refresh_per_second=20):
 
-        print(asdict(status))
+        status_total: TransferStatus = TransferStatus()
+        for source in sources:
+            msg = f"Download: {source.identifier}: {source.description}"
+            log.info(msg)
+            agent = PROTOCOLS[source.protocol]
+            status = agent.download(source)
+            status_total += status
 
-    else:
-        msg = "Finished downloading sources ..."
-        print(msg)
-        log.debug(msg)
+            args = [source.identifier, source.protocol] + [
+                f"{total}" for total in asdict(status).values()
+            ]
+            table.add_row(*args)
 
-        print(f"Overall status:")
-        print(asdict(status_total))
+        else:
+            log.debug("Finished downloading sources ...")
+            # Add a line and print the totals
+            table.add_section()
+            args = ["", ""] + [f"{total}" for total in asdict(status_total).values()]
+            table.add_row(*args)
+
+    # status_total: TransferStatus = TransferStatus()
+    # for source in sources:
+    #     msg = f"Download: {source.identifier}: {source.description}"
+    #     print(f"[black on white]{msg}[/]")
+    #     log.info(msg)
+    #     agent = PROTOCOLS[source.protocol]
+    #     status = agent.download(source)
+    #     status_total += status
+    #     print(asdict(status))
+
+    # else:
+    #     msg = "Finished downloading sources ..."
+    #     print(f"\n{msg}")
+    #     log.debug(msg)
+    #     print(f"Overall status:")
+    #     print(asdict(status_total))
