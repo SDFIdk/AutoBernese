@@ -213,6 +213,8 @@ def update(
     configuration. Allowed sections are defined in the core configuration which
     is pre-loaded to obtain this information.
 
+    If `base` is not set, the pre-loaded core configuration is used as base.
+
     """
     if base is None:
         base = _core()
