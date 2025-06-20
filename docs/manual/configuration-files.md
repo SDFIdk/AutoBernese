@@ -4,10 +4,10 @@ settings.
 
 The active configuration files are read into AutoBernese in the following order,
 each file overriding the previous, when merging is possible: 1) core
-functionality and defult settings, 2) common user-defined settings and defaults,
-and 3) campaign-specific settings, created anew or from a template based on a
-previous campaign. The campaign-specific settings are only read, when working
-with a campaign.
+functionality and default settings, 2) common user-defined settings and
+defaults, and 3) campaign-specific settings, created anew or from a template
+based on a previous campaign. The campaign-specific settings are only read, when
+working with a campaign.
 
 In addition, AutoBernese also has a template system that enables users to set up
 re-usable campaign settings for common *campaign types* and use these templates
@@ -96,7 +96,7 @@ configuration file `autobernese.yaml` or, for some of them, the
 campaign-specific configuration file; both described further below.
 
 ```yaml linenums="44"
---8<-- "src/ab/configuration/env.yaml:44:75"
+--8<-- "src/ab/configuration/env.yaml:44:78"
 ```
 
 As there may be more than one Bernese installation on a system, the AutoBernese
@@ -122,8 +122,8 @@ The files in the AutoBernese runtime directory include:
 The `campaign` section determines the default directory structure of a new
 campaign. This section is overridable by the common configuration.
 
-```yaml linenums="70"
---8<-- "src/ab/configuration/env.yaml:77"
+```yaml linenums="79"
+--8<-- "src/ab/configuration/env.yaml:79:99"
 ```
 
 
@@ -299,20 +299,22 @@ campaign covers.
 
     This is particularly useful for specifying a BPE task to be run for the
     campaign, since the campaign name, thanks to the YAML specification, need not be
-    repeated explicitly, but can be written once. Similarly, as illustrated below,
-    one may use the beginning and end dates to define the beginning and end date for
-    which a given task needs to be run.
+    repeated explicitly, but can be written once. Similarly, as illustrated, one may
+    use the beginning and end dates to define the beginning and end date for which a
+    given task needs to be run.
 
 
 ### The `environment` section
 
 Adding an `environment` section to a campaign configuration, you are able to set
-or update environment variables for the given campaign at runtime.
+or update environment variables for the given campaign at runtime. The variables
+are set after the campaign configuration has been loaded, so it affects only
+actions invoked by AutoBernese afterwards which rely on these variables.
 
-In this way, campaign-specific input can be defined in a single location from
+For Bernese, campaign-specific input can be defined in a single location from
 which values are created/updated at runtime, 1) dynamically, changing
-directories, before running Bernese from AutoBernese, and 2) propagating input
-data to `.PCF` files and scripts using them.
+directories, before running Bernese, and 2) propagating input data to `.PCF`
+files and scripts using them.
 
 This addresses three issues:
 
@@ -482,6 +484,11 @@ Requirements:
     pointed to by `dispatch_with` to be pre-processed or to convert their input
     to match the signature of the API-level function.
 
+    **The point of the dispatch function is to make independent API-level calls
+    move up to a corresponding task so that the task runner may handle the
+    delegation of ressources at a finer level.**
+
+
 *   Keyword arguments inside the `arguments` section contain arguments readable
     by the function in `run` or, if used, `dispatch_with`.
 
@@ -490,8 +497,60 @@ Requirements:
     of values that the parameter may take inside any of the argument string
     template formats.
 
-
 [PYDOC-FORMAT-STRINGS]: https://docs.python.org/3/library/string.html#formatstrings
+
+!!! info "More examples using built-in `run` and `dispatch_with` shortcuts"
+
+    === "`Compress`"
+
+        This example uses `Compress` which points to a function that takes a concrete
+        path. The `dispatch_with` key uses a shortcut to a dispatch function which
+        resolves any wildcards in the given paths.
+
+        ```yaml title="Example of a task definition"
+        tasks:
+
+        - identifier: GZIP
+          description: Compress results using gzip
+          run: Compress
+          dispatch_with: DispatchCompress
+          arguments:
+            fname: !PathStr [*P, *campaign, '{filename}']
+          parameters:
+            filename:
+            - /OUT/*.PRC
+            - /SOL/*.SNX
+            - /ATM/*.TRO
+        ```
+
+    === "`SFTPUload`"
+
+        This example uses `SFTPUpload` which points to a function that takes the list of
+        files and the single remote directory and transfers them in a batch operation to
+        the server.
+
+        ```yaml title="Example of a task definition"
+        tasks:
+
+        - identifier: SFTP_TO_COLLABORATION
+          description: Upload campaign results to collaboration directory
+          run: SFTPUpload
+          arguments:
+            host: ftp.example.com
+            pairs:
+            - filename: !PathStr [*P, *campaign, '{filename}']
+            remote_dir: !PathStr [Collaboration/GNSS/, '{date.gps_week}']
+          parameters:
+            date: [*beg]
+            filename:
+            - /STA/*.CRD
+            - /OUT/*.PRC.gz
+            - /OUT/*.SUM
+            - /SOL/*.SNX.gz
+            - /ATM/*.TRO.gz
+        ```
+
+
 
 
 ### The `sources` section
