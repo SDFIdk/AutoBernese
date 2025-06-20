@@ -62,16 +62,23 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     Return types
     ------------
 
-    Any element in the path or sequence of path components, may use the common
-    wildcard `*` to specify any matching files.
+    Any element in the path or sequence of path components may use
+    system-specific wildcards like `*` to obtain files and directories.
 
     In this case, the constructor will return not one single Path instance, but
     a list of all matches found, except when only one result is found. In that
     case that single Path instance is returned.
 
-    However, if the wildcard is used as the first character of the first
-    element, it must be explicitly written as a string to prevent the YAML
-    parser from interpreting it as an alias to a YAML anchor.
+    All paths are resolved using the the `Path.glob` method in Python's
+    `pathlib`. (Note that this implementation of `glob` differs from that in the
+    traditional built-in module `glob`.) This means that nothing will be
+    returned, if the file or directory is not there, when the path is resolved.
+    In this case, the constructor returns the Path instance created from the
+    input.
+
+    If the wildcard `*` is used as the first character of the first element, the
+    entry must be explicitly written as a string to prevent the YAML parser from
+    interpreting it as an alias to a YAML anchor.
 
     """
     if not isinstance(node, (yaml.ScalarNode, yaml.SequenceNode)):
@@ -87,6 +94,10 @@ def path_constructor(loader: yaml.Loader, node: yaml.Node) -> Path | list[Path]:
     else:
         # We use loader.construct_object, since there may be YAML aliases inside.
         multiple: list[str | Path] = [loader.construct_object(v) for v in node.value]
+        if not all(isinstance(part, (str, Path)) for part in multiple):
+            raise RuntimeError(
+                f"Expected all parts to be strings or Path instances. Got {multiple!r} ..."
+            )
         path = Path(*multiple)
 
     # Avoid relative paths `dir/../dir2`
