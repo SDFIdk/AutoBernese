@@ -5,34 +5,101 @@ Built-in command-line too sftp is assumed to exist.
 
 """
 
-from typing import (
-    Any,
-    Final,
+from typing import Final
+from collections.abc import Iterable
+from dataclasses import (
+    dataclass,
+    asdict,
 )
+import itertools as it
 from pathlib import Path
 import subprocess as sub
 import logging
 
-from ab.paths import resolve_wildcards
+from ab.paths import (
+    resolve_wildcards,
+    _parents,
+)
 from ab.data import TransferStatus
 
 
 log = logging.getLogger(__name__)
 
-type LocalRemotePairType = dict[str, Path | str]
+type LocalRemoteType = dict[str, Path | str]
+"Type for local file and remote directory as dict"
+
+MKDIR: Final = "-mkdir {remote_dir}"
+"SFTP-command structure for making a directory with a prefixed hyphen to suppress errors."
 
 PUT: Final = "put {fname} {remote_dir}"
+"SFTP-command structure for transfering a file to a remote directory"
+
+
+@dataclass
+class LocalRemote:
+    fname: str | Path | None = None
+    remote_dir: str | Path | None = None
+
+    @property
+    def valid(self) -> bool:
+        if self.fname is None:
+            return False
+
+        if self.remote_dir is None:
+            return False
+
+        return True
+
+    def resolve_local(self) -> list["LocalRemote"]:
+        if not self.valid:
+            return []
+
+        # NOTE: type comment avoids MyPy complaining about type of `self.fname`
+        # which `self.valid` has already made sure is note the case.
+        return [
+            LocalRemote(resolved, self.remote_dir)
+            for resolved in resolve_wildcards(self.fname)  # type: ignore
+        ]
+
+
+def _mkdir_commands(paths: Iterable[str]) -> list[str]:
+    """
+    Return list of commands to create each full path, part by part.
+
+    """
+    return [
+        MKDIR.format(remote_dir=part)
+        for unique in sorted(set(paths))
+        for part in _parents(unique)
+    ]
 
 
 def update_status(
     status: TransferStatus, result: sub.CompletedProcess
 ) -> TransferStatus:
+    """
+    Assuming that each line is a successful transfer message, when the return
+    code is zero.
+
+    NOTE: This is not accounting for any failures.
+
+    """
     if result.returncode == 0:
         status.success += len(result.stdout.splitlines())
     return status
 
 
-def upload(host: str, pairs: list[LocalRemotePairType]) -> TransferStatus:
+def _batch(host: str, commands: str) -> sub.CompletedProcess:
+    return sub.run(
+        ["sftp", "-b", "-", host],
+        input=commands,
+        text=True,
+        check=True,
+        capture_output=True,
+    )
+
+
+def upload(host: str, pairs: list[LocalRemoteType]) -> TransferStatus:
     """
     Using settings provided, upload pairs of local file/remote destination
     directory.
@@ -53,47 +120,41 @@ def upload(host: str, pairs: list[LocalRemotePairType]) -> TransferStatus:
 
     status = TransferStatus()
 
-    expanded = []
-    for raw in pairs:
-        filename = raw.get("filename")
-        remote_dir = raw.get("remote_dir")
+    log.info("Build LocalRemote instances from input ...")
+    candidates = [LocalRemote(**pair) for pair in pairs]
 
-        if filename is None:
-            status.failed += 1
-            log.warn(f"Local filename is `None` ({remote_dir=}). Skiping entry ...")
-            continue
+    log.info("Get usable input (valid dict structure) ...")
+    extracted = [candidate for candidate in candidates if candidate.valid]
+    status.failed += len(candidates) - len(extracted)
 
-        if remote_dir is None:
-            status.failed += 1
-            log.warn(f"Remote directory is `None` ({filename=}). Skiping entry ...")
-            continue
+    log.info("Get all local filenames ...")
+    resolvable = [
+        resolved
+        for candidate in extracted
+        if len(resolved := candidate.resolve_local())
+    ]
+    status.failed += len(resolvable) - len(extracted)
+    resolved = list(it.chain(*resolvable))
 
-        resolved = list(resolve_wildcards(filename))
-        # No wildcard used and returned file was the same as input which we have to check
-        if len(resolved) == 1 and not Path(resolved[0]).is_file():
-            status.failed += 1
-            continue
+    log.info(f"Prepare commands to build remote directory tree ...")
+    remote_dirs = [str(lr.remote_dir) for lr in resolved]
+    cmd_mkdir = "\n".join(_mkdir_commands(remote_dirs))
 
-        for fname in resolved:
-            # Any file paths here exists, since they were resolved by `pathlib`
-            expanded.append(dict(fname=fname, remote_dir=remote_dir))
-            log.info(f"Added {fname} to SFTP batch upload ({remote_dir=})")
-
-    commands = "\n".join(PUT.format(**pair) for pair in expanded)
+    log.info("Prepare commands to transfer local files to remote directories ...")
+    cmd_put = "\n".join(PUT.format(**asdict(lr)) for lr in resolved)
 
     try:
-        result = sub.run(
-            ["sftp", "-b", "-", host],
-            input=commands,
-            text=True,
-            check=True,
-            capture_output=True,
-        )
+        log.info(f"Batch-create directories on {host} ...")
+        result = _batch(host, cmd_mkdir)
+        status = update_status(status, result)
+
+        log.info(f"Batch-transfer local files to {host} ...")
+        result = _batch(host, cmd_put)
         status = update_status(status, result)
 
     except sub.CalledProcessError as e:
+        log.warn(f"Subprocess failed with error {e}")
         status.exceptions.append(e)
 
     log.info(status)
-
     return status

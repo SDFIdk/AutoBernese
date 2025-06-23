@@ -488,7 +488,6 @@ Requirements:
     move up to a corresponding task so that the task runner may handle the
     delegation of ressources at a finer level.**
 
-
 *   Keyword arguments inside the `arguments` section contain arguments readable
     by the function in `run` or, if used, `dispatch_with`.
 
@@ -504,8 +503,30 @@ Requirements:
     === "`Compress`"
 
         This example uses `Compress` which points to a function that takes a concrete
-        path. The `dispatch_with` key uses a shortcut to a dispatch function which
-        resolves any wildcards in the given paths.
+        path. If the filenames are fully specified, the task definition only needs the
+        `run` key.
+
+        ```yaml title="Example of a task definition"
+        tasks:
+
+        - identifier: GZIP
+          description: Compress results using gzip
+          run: Compress
+          arguments:
+            fname: !PathStr [*P, *campaign, '{filename}']
+          parameters:
+            filename:
+            - /OUT/MY.PRC
+            - /SOL/MY.SNX
+            - /ATM/MY.TRO
+        ```
+
+    === "`Compress` (wildcards)"
+
+        If the filenames are given with wildcards, the `dispatch_with` key must be set
+        to `DispatchCompress` which is a shortcut to a function that resolves any
+        wildcards in the given paths.
+
 
         ```yaml title="Example of a task definition"
         tasks:
@@ -523,11 +544,13 @@ Requirements:
             - /ATM/*.TRO
         ```
 
-    === "`SFTPUload`"
+    === "`SFTPUpload`"
 
         This example uses `SFTPUpload` which points to a function that takes the list of
         files and the single remote directory and transfers them in a batch operation to
         the server.
+
+        The remote directory tree is created, before the files are transferred.
 
         ```yaml title="Example of a task definition"
         tasks:
@@ -538,8 +561,8 @@ Requirements:
           arguments:
             host: ftp.example.com
             pairs:
-            - filename: !PathStr [*P, *campaign, '{filename}']
-            remote_dir: !PathStr [Collaboration/GNSS/, '{date.gps_week}']
+            - fname: !PathStr [*P, *campaign, '{filename}']
+              remote_dir: !PathStr [Collaboration/GNSS/, '{date.gps_week}']
           parameters:
             date: [*beg]
             filename:
@@ -549,8 +572,6 @@ Requirements:
             - /SOL/*.SNX.gz
             - /ATM/*.TRO.gz
         ```
-
-
 
 
 ### The `sources` section
