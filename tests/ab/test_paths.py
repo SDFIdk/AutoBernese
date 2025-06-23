@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from ab.paths import resolve_wildcards
+from ab.paths import (
+    resolve_wildcards,
+    _parts,
+    _parents,
+)
 
 
 def test_resolve_wildcards_with_wildcards(tmp_path):
@@ -122,4 +126,36 @@ def test_empty_result_for_non_existing_file():
     ifname = Path("foo.bar")
     expected = []
     result = list(resolve_wildcards(ifname))
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_parts():
+    input_ = "/A/B/C"
+    expected = ["A", "B", "C"]
+    result = _parts(input_)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+    input_ = "A/B/C/"
+    expected = ["A", "B", "C"]
+    result = _parts(input_)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+    input_ = "./A/B/C/."
+    expected = ["A", "B", "C"]
+    result = _parts(input_)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_parents():
+    input_ = "/A/B/C"
+    expected = [
+        "A",
+        "A/B",
+        "A/B/C",
+    ]
+    result = _parents(input_)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+    input_ = "A/B/C/"
+    result = _parents(input_)
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
