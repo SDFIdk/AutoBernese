@@ -15,7 +15,7 @@ from ab import (
     configuration,
     dates,
 )
-from ab.bsw import campaign
+from ab.bsw import campaign as _campaign
 from ab.station import sta
 
 
@@ -34,6 +34,7 @@ def station() -> None:
 @click.option(
     "-c",
     "--campaign",
+    "name",
     required=False,
     default=None,
     type=str,
@@ -70,7 +71,7 @@ def station() -> None:
     help="Path to optional output path and filename for the STA file.",
 )
 def sitelogs2sta(
-    campaign: str,
+    name: str,
     config: Path,
     sitelogs: tuple[Path],
     individually_calibrated: tuple[str],
@@ -146,29 +147,29 @@ def sitelogs2sta(
     """
     arguments: dict[str, Any] | None = None
     if config is not None:
-        msg = f"Create STA file with arguments in file {config.absolute()}."
+        ifname = config.absolute()
+        msg = f"Create STA file with arguments in file {ifname} ..."
         log.info(msg)
         print(msg)
-        arguments = configuration.with_env(config)
+        arguments = configuration.load(ifname).get("station")
+        print(arguments)
 
     elif sitelogs:
-        log.info(f"Create STA file from given arguments.")
+        log.info(f"Create STA file from given arguments ...")
         arguments = dict(
             sitelogs=list(sitelogs),
             individually_calibrated=individually_calibrated,
             output_sta_file=output_filename,
         )
 
-    elif campaign is not None:
-        msg = (
-            f"Create STA file from arguments in configuration for campaing {campaign}."
-        )
+    elif name is not None:
+        msg = f"Create STA file from arguments in configuration for campaing {name} ..."
         log.info(msg)
         print(msg)
-        arguments = campaign.load(campaign).get("station")
+        arguments = _campaign.load(name).get("station")
 
     elif configuration.load().get("station") is not None:
-        msg = f"Create STA file from arguments in the common user configuration `autobernese.yaml`."
+        msg = f"Create STA file from arguments in the common user configuration `autobernese.yaml` ..."
         log.info(msg)
         print(msg)
         arguments = configuration.load().get("station")
@@ -179,4 +180,7 @@ def sitelogs2sta(
         log.info(msg)
         return
 
+    msg = f"Creating STA file from arguments {arguments!r} ..."
+    log.info(msg)
+    print(msg)
     sta.create_sta_file_from_sitelogs(**arguments)

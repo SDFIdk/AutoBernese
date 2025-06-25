@@ -4,21 +4,23 @@ Date handling and specific tools for conversion between different formats.
 """
 
 import datetime as dt
-from dataclasses import dataclass
-from collections.abc import Iterable
 from typing import (
-    Protocol,
     Any,
+    Final,
 )
+
+
+END_INCLUDED: Final = 1
+"Add this to `range` in `date_range` to include both start and end date in range."
 
 
 def date_range(
     beg: dt.date | dt.datetime,
-    end: dt.date | dt.datetime,
+    end: dt.date | dt.datetime | None = None,
     /,
     *,
     extend_end_by: int = 0,
-) -> Iterable[dt.date]:
+) -> list[dt.date]:
     """
     By default, returns a range of dates between and including the given start
     and end dates.
@@ -27,18 +29,33 @@ def date_range(
     have the method `toordinal`.
 
     """
-    if isinstance(beg, dt.datetime):
-        beg = beg.date()
-    if isinstance(end, dt.datetime):
-        end = end.date()
+    # Range validation
     if extend_end_by < 0:
         raise ValueError(f"{extend_end_by=}, but must be zero or greater.")
+
+    # Allowing end to be None to obtain today's date
+    if end is None:
+        end = dt.date.today()
+
+    # Type validation
+    if not isinstance(beg, (dt.date, dt.datetime)):
+        raise TypeError(f"Excpected {beg=} to be `dt.datetime` or `dt.date` ...")
+
+    if not isinstance(end, (dt.date, dt.datetime)):
+        raise TypeError(f"Excpected {end=} to be `dt.datetime` or `dt.date` ...")
+
+    # Casting, if needed, to date instances which have the ordinal-properties.
+    if isinstance(beg, dt.datetime):
+        beg = beg.date()
+
+    if isinstance(end, dt.datetime):
+        end = end.date()
 
     return [
         dt.date.fromordinal(n)
         for n in range(
             beg.toordinal(),
-            end.toordinal() + 1 + extend_end_by,
+            end.toordinal() + END_INCLUDED + extend_end_by,
         )
     ]
 
@@ -172,5 +189,5 @@ class GPSDate(dt.datetime):
         )
 
 
-def dates_to_gps_date(dates: Iterable[dt.date]) -> list[GPSDate]:
+def dates_to_gps_date(dates: list[dt.date]) -> list[GPSDate]:
     return [GPSDate.from_date(date) for date in dates]

@@ -3,20 +3,23 @@ Command-line interface for troposphere-delay model data
 
 """
 
-import logging
-from pathlib import Path
+import os
 import datetime as dt
-from dataclasses import (
-    dataclass,
+from pathlib import Path
+from functools import (
+    partial,
+    wraps,
 )
+from dataclasses import dataclass
+import logging
+from typing import Final
+import multiprocessing as mp
 
 import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab.cli import (
-    _input,
-)
+from ab.cli import _input
 from ab import (
     configuration,
     vmf,
@@ -24,6 +27,9 @@ from ab import (
 
 
 log = logging.getLogger(__name__)
+
+
+N_CPUS: Final = len(os.sched_getaffinity(0))
 
 
 @click.group(cls=ClickAliasedGroup)
@@ -36,38 +42,46 @@ def troposphere() -> None:
 
 @dataclass
 class CLITroposphereInput:
-    ipath: Path
-    opath: Path
+    ipath: Path | str
+    opath: Path | str
     beg: dt.date
     end: dt.date
+    ifname: Path | str
+    ofname: Path | str
 
 
-def __get_troposphere_args(
-    ipath: Path | None, opath: Path | None, beg: dt.date | None, end: dt.date | None
+def parse_args(
+    ipath: str | None,
+    opath: str | None,
+    beg: dt.date | None,
+    end: dt.date | None,
+    ifname: str | None,
+    ofname: str | None | None,
 ) -> CLITroposphereInput:
-    if ipath is None:
-        c_tro = configuration.load().get("troposphere")
-        if c_tro is None:
-            raise SystemExit(
-                f"Missing section `troposphere` from common configuration."
-            )
-        ipath = c_tro.get("ipath")
-        if c_tro is None:
-            raise SystemExit(
-                f"Missing input-path section `ipath` from `troposphere` section."
-            )
+    """
+    Parse generic input from command-line interface and set missing data.
 
+    """
+    section = configuration.load().get("troposphere")
+
+    # Core configuration has this section; common configuration may update it ...
+    assert section is not None
+
+    ipath = ipath or section.get("ipath")
+    if ipath is None:
+        raise SystemExit(f"Missing input-path from command or configuration ...")
+
+    opath = opath or section.get("opath")
     if opath is None:
-        c_tro = configuration.load().get("troposphere")
-        if c_tro is None:
-            raise SystemExit(
-                f"Missing section `troposphere` from common configuration."
-            )
-        opath = c_tro.get("opath")
-        if c_tro is None:
-            raise SystemExit(
-                f"Missing output-path section `opath` from `troposphere` section."
-            )
+        raise SystemExit(f"Missing output-path from command or configuration ...")
+
+    ifname = ifname or section.get("ifname")
+    if ifname is None:
+        raise SystemExit(f"Missing hour-file format from command or configuration ...")
+
+    ofname = ofname or section.get("ofname")
+    if ofname is None:
+        raise SystemExit(f"Missing day-file format from command or configuration ...")
 
     if beg is None:
         beg = dt.date.today()
@@ -75,130 +89,150 @@ def __get_troposphere_args(
     if end is None:
         end = beg + dt.timedelta(days=1)
 
-    return CLITroposphereInput(ipath, opath, beg, end)
+    return CLITroposphereInput(ipath, opath, beg, end, ifname, ofname)
+
+
+def common_options(func):
+    """
+    A single decorator for common options
+
+    Source: https://stackoverflow.com/a/70852267
+
+    """
+
+    @click.option(
+        "-i",
+        "--ipath",
+        type=str,
+    )
+    @click.option(
+        "-o",
+        "--opath",
+        type=str,
+    )
+    @click.option(
+        "-b",
+        "--beg",
+        type=_input.date,
+        help=f"Format: {_input.DATE_FORMAT}",
+    )
+    @click.option(
+        "-e",
+        "--end",
+        type=_input.date,
+        help=f"Format: {_input.DATE_FORMAT}",
+    )
+    @click.option(
+        "-h",
+        "--hour-file-format",
+        "ifname",
+        type=str,
+    )
+    @click.option(
+        "-d",
+        "--day-file-format",
+        "ofname",
+        type=str,
+    )
+    @wraps(func)
+    def wrapper_common_options(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper_common_options
+
+
+def cli_wrapper(builder: vmf.DayFileBuilder, method: str, action: str) -> None:
+    """
+    Single-process executor which prints status to the terminal
+
+    """
+    msg = f"{action}ing {builder.day_file} ..."
+    log.info(msg)
+    failed_msg = getattr(builder, method)()
+    if failed_msg:
+        print(f"{msg} [red]FAILED[/red]")
+        print(f"  Error: {failed_msg}")
+    print(f"{msg} [green]SUCCESS[/green]")
+
+
+def dispatch(
+    args: CLITroposphereInput, method: str, action: str, *, timeout: float = 1
+) -> None:
+    log.info(f"{action} VMF files for chosen interval {args.beg} to {args.end} ...")
+    builders = vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end)
+    wrappers = [partial(cli_wrapper, builder, method, action) for builder in builders]
+    try:
+        with mp.Pool(processes=N_CPUS) as pool:
+            multiple_results = [pool.apply_async(wrapper) for wrapper in wrappers]
+            [res.get(timeout=timeout) for res in multiple_results]
+    except KeyboardInterrupt:
+        msg = f"{action} interrupted by user ..."
+        log.info(msg)
+        print(msg)
 
 
 @troposphere.command
-# @click.option(
-#     "-i",
-#     "--ipath",
-#     type=str,
-# )
-# @click.option(
-#     "-o",
-#     "--opath",
-#     type=str,
-# )
-@click.option(
-    "-b",
-    "--beg",
-    type=_input.date,
-    help=f"Format: {_input.DATE_FORMAT}",
-)
-@click.option(
-    "-e",
-    "--end",
-    type=_input.date,
-    help=f"Format: {_input.DATE_FORMAT}",
-)
-def build(beg: dt.date | None, end: dt.date | None) -> None:
+@common_options
+def build(
+    ipath: str | None,
+    opath: str | None,
+    beg: dt.date | None,
+    end: dt.date | None,
+    ifname: str | None,
+    ofname: str | None,
+) -> None:
     """
-    Concatenate hour files (`H%H`) into dayfiles.
+    Concatenate hour files into day files.
 
     Build day file for each date for which there is data available.
 
     """
-    ipath: Path | None = None
-    opath: Path | None = None
-    args = __get_troposphere_args(ipath, opath, beg, end)
-    log.info(f"Build VMF3 files for chosen interval {args.beg} to {args.end} ...")
-    for builder in vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end):
-        msg = f"Building {builder.dayfile} ..."
-        log.info(msg)
-        print(msg, end=" ")
-        build_msg = builder.build()
-        if build_msg:
-            print("[red]FAILED[/red]")
-            print(f"  Error: {build_msg}")
-            continue
-        print("[green]SUCCESS[/green]")
+    args = parse_args(ipath, opath, beg, end, ifname, ofname)
+    dispatch(args, "build", "Build", timeout=10)
 
 
 @troposphere.command
-@click.option(
-    "-b",
-    "--beg",
-    type=_input.date,
-    help=f"Format: {_input.DATE_FORMAT}",
-)
-@click.option(
-    "-e",
-    "--end",
-    type=_input.date,
-    help=f"Format: {_input.DATE_FORMAT}",
-)
-def test(beg: dt.date | None, end: dt.date | None) -> None:
+@common_options
+def check(
+    ipath: str | None,
+    opath: str | None,
+    beg: dt.date | None,
+    end: dt.date | None,
+    ifname: str | None,
+    ofname: str | None,
+) -> None:
     """
-    Concatenate hour files (`H%H`) into dayfiles.
-
-    Build day file for each date for which there is data available.
+    Check that input hour files went into built day files.
 
     """
-    ipath: Path | None = None
-    opath: Path | None = None
-    args = __get_troposphere_args(ipath, opath, beg, end)
-    log.info(f"Test VMF3 files for chosen interval {args.beg} to {args.end} ...")
-    for builder in vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end):
-        msg = f"Testing {builder.dayfile} ..."
-        log.info(msg)
-        print(msg, end=" ")
-        test_msg = builder.test()
-        if test_msg:
-            print("[red]FAILED[/red]")
-            print(f"  Error: {test_msg}")
-            continue
-        print("[green]SUCCESS[/green]")
+    args = parse_args(ipath, opath, beg, end, ifname, ofname)
+    dispatch(args, "check", "Check", timeout=10)
 
 
 @troposphere.command
-# @click.option(
-#     "-i",
-#     "--ipath",
-#     type=str,
-# )
-# @click.option(
-#     "-o",
-#     "--opath",
-#     type=str,
-# )
-@click.option(
-    "-b",
-    "--beg",
-    type=_input.date,
-    help=f"Format: {_input.DATE_FORMAT}",
-)
-@click.option(
-    "-e",
-    "--end",
-    type=_input.date,
-    help=f"Format: {_input.DATE_FORMAT}",
-)
-def status(beg: dt.date | None, end: dt.date | None) -> None:
+@common_options
+def status(
+    ipath: str | None,
+    opath: str | None,
+    beg: dt.date | None,
+    end: dt.date | None,
+    ifname: str | None,
+    ofname: str | None,
+) -> None:
     """
-    Print availability of hour and day files in selected interval.
+    Show availability of hour and day files in selected interval.
 
     """
-    ipath: Path | None = None
-    opath: Path | None = None
-    args = __get_troposphere_args(ipath, opath, beg, end)
-    log.info(
-        f"Get VMF3 file status for files in chosen interval {args.beg} to {args.end} ..."
-    )
-    print(
-        [
-            vmf_file.status()
-            for vmf_file in vmf.day_file_builders(
-                args.ipath, args.opath, args.beg, args.end
-            )
-        ]
-    )
+    args = parse_args(ipath, opath, beg, end, ifname, ofname)
+    log.info(f"Show data status for chosen interval {args.beg} to {args.end} ...")
+    builders = vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end)
+    try:
+        with mp.Pool(processes=N_CPUS) as pool:
+            multiple_results = [
+                pool.apply_async(builder.status) for builder in builders
+            ]
+            print([res.get(timeout=1) for res in multiple_results])
+    except KeyboardInterrupt:
+        msg = "Status retrieval interrupted by user ..."
+        log.info(msg)
+        print(msg)
