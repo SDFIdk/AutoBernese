@@ -573,6 +573,77 @@ Requirements:
             - /ATM/*.TRO.gz
         ```
 
+    === "`Sitelogs2STAFile`"
+
+        This example uses `Sitelogs2STAFile` which builds a `.STA`-file from existing
+        sitelog-files.
+
+        The shortcut `Sitelogs2STAFile` points to a function that takes the same input
+        as the needed for the stand-alone command (see the command reference).
+
+        ```yaml title="Example of a task definition"
+        tasks:
+
+        - identifier: SITELOGS2STA_DNK
+          description: Derive STA file from sitelog files
+          run: Sitelogs2STAFile
+          arguments:
+            sitelogs: !Path [*D, sitelogs, '*dnk*log']
+            output_sta_file: !Path [*D, sitelogs_DNK.STA]
+        ```
+
+    === "`BuildVMF`"
+
+        This example uses `BuildVMF` which builds day files with the troposphere-model
+        data. Input files are assumed to exist.
+
+        The shortcut `BuildVMF` points to a function that takes a single
+        `DayFileBuilder` instance as input and thus requires a dispatch function to
+        convert the input arguments to something that the runner can run.
+
+        To learn more of how the input can be generated, see the command-line reference
+        on the stand-alone tools for doing the exact same thing.
+
+        ```yaml title="Example of a task definition"
+        tasks:
+
+        - identifier: BUILD_VMF
+          description: Build VMF GRD files from hour files
+          run: BuildVMF
+          dispatch_with: DispatchVMF
+          arguments:
+            ipath: *CORE_TROPO_OP_DIR_H
+            opath: *CORE_TROPO_OP_DIR_GRD
+            beg: *beg
+            end: *end
+        ```
+
+    === "`CheckVMF`"
+
+        This example uses `CheckVMF` which checks that day files were correctly
+        concatenated from the input troposphere-model data.
+
+        The shortcut `CheckVMF` points to a function that takes a single
+        `DayFileBuilder` instance as input and thus requires a dispatch function to
+        convert the input arguments to something that the runner can run.
+
+        To learn more of how the input can be generated, see the command-line reference
+        on the stand-alone tools for doing the exact same thing.
+
+        ```yaml title="Example of a task definition"
+        tasks:
+
+        - identifier: CHECK_VMF
+          description: Check VMF GRD files from hour files
+          run: CheckVMF
+          dispatch_with: DispatchVMF
+          arguments:
+            ipath: *CORE_TROPO_OP_DIR_H
+            opath: *CORE_TROPO_OP_DIR_GRD
+            beg: *beg
+            end: *end
+        ```
+
 
 ### The `sources` section
 

@@ -16,9 +16,8 @@ from ab.imports import import_function
 from ab.data import compress
 from ab.bsw import bpe
 from ab.data import sftp
-
-# from ab.station import sta
-# from ab import vmf
+from ab.station import sta
+from ab import vmf
 
 
 _MODULE: Final = sys.modules[__name__]
@@ -30,12 +29,15 @@ _SHORTCUTS: dict[str, Callable] = {
     "Compress": compress.gzip,
     "CompressGlob": compress.gzip_glob,
     "SFTPUpload": sftp.upload,
-    # Tasks to come
+    "Sitelogs2STAFile": sta.create_sta_file_from_sitelogs,
+    "BuildVMF": vmf.build,
+    "CheckVMF": vmf.check,
+    # Tasks to come:
     # "CopyToSAVEDISK":
-    # "Sitelogs2STAFile": sta.create_sta_file_from_sitelogs,
-    # "BuildTroposphereGrdFiles": vmf.nonexisting_builder,
+    #
     # Use as value for `dispatch_with` key
     "DispatchCompress": dispatchers.gzip_dispatch,
+    "DispatchVMF": dispatchers.vmf_dispatch,
 }
 "Shortcut names for API-level functions or pre-processing functions [dispatchers]."
 

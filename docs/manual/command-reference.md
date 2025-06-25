@@ -333,7 +333,7 @@ see the following.
 
 This example illustrates the case, where a manually adding the AutoBernese
 configuration file `autobernese.yaml` with some entries in the `source` section
-is added to the [AutoBernese runtime directory](../concepts.md).
+is added to the [AutoBernese runtime directory](configuration-files.md#runtime-settings).
 
 === "Configuration file segment"
 
@@ -641,7 +641,7 @@ ab campaign run <campaign-name>
 Adding [a `clean` section][CONF_CAMPAIGN_CLEAN] to the campaign configuration allows for easy
 cleaning of entire subdirectories in the campaign directory.
 
-[CONF_CAMPAIGN_CLEAN]: configuration-files.md#the-clean-section-not-shown
+[CONF_CAMPAIGN_CLEAN]: configuration-files.md#the-clean-section
 
 ```sh title="Command"
 ab c clean EXAMPLE
@@ -653,8 +653,6 @@ ab c clean EXAMPLE
 Proceed (y/[n]): y
 # List of deleted files
 ```
-
-
 
 
 ## Station-related utilities
@@ -674,45 +672,7 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  parse-sitelog  Parse sitelog and print it to the screen.
   sitelogs2sta   Create a STA file from sitelogs and other station info.
-```
-
-### Show what is parsed from a sitelog when creating a STA file.
-
-This command shows what is extracted from a site-log file, when creating a
-STA-file with the other command.
-
-```sh title="Command"
-ab station parse-sitelog $D/sitelogs/budp00dnk_20221113.log
-```
-
-```json title="Output"
-{
-  "sec1": {
-    "site_name": "Kobenhavn",
-    "four_character_id": "BUDP",
-    "domes": "10101M003",
-    "date_installed": "1999 10 28"
-  },
-  "sec2": {
-    "city_or_town": "Kobenhavn",
-    "country": "Denmark"
-  },
-  "sec3": [
-    {
-      "receiver_type": "ASHTECH Z-XII3",
-      "receiver_serial_number": "02259",
-      "firmware": "1D04/1L00",
-      "date_installed": "1999 01 06",
-      "date_removed": "2001 12 18"
-    },
-    // ...
-  ],
-  "sec4": [
-    // ...
-  ]
-}
 ```
 
 
@@ -779,11 +739,12 @@ ab station sitelogs2sta -c CAMPAIGN
 Thirdly, as this example demonstrates, you can build a STA file with a custom input YAML file located anywhere available on the filesystem. The following example also shows that the output file can be saved to your current working directory if not specific path is specified:
 
 ```yaml title="station.yaml"
-sitelogs:
-- BLAH00DNK_20230101.log
-- BLUH00DNK_20220101.log
-individually_calibrated: [BLUH]
-output_sta_file: sitelogs.STA
+station:
+  sitelogs:
+  - BLAH00DNK_20230101.log
+  - BLUH00DNK_20220101.log
+  individually_calibrated: [BLUH]
+  output_sta_file: sitelogs.STA
 ```
 
 ```sh title="Command"
@@ -793,7 +754,7 @@ ab station sitelogs2sta -f station.yaml
 
 #### Create stations.STA from command-line arguments
 
-finally, it is also possible to give all the settings to the command as
+Finally, it is also possible to give all the settings to the command as
 command-line arguments:
 
 ```sh title="Command"
@@ -819,46 +780,65 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  build   Concatenate hour files (`H%H`) into dayfiles.
+  build   Concatenate hour files into dayfiles.
+  check   Test that input hour files went into built dayfiles.
   status  Print availability of hour and day files in selected interval.
 ```
 
-The two sub commands `status` and `build` provide a status on the availability
-of input files (six-hour interval model data) and the existence of the output
-file storing the concatenated content of a complete day from midnight to
-midnight (both midnights included).
+The sub command `status` checks whether input files (six-hour interval model
+data) and the output file (concatenated content from the input files) exist.
+
+The sub command `build` concatenates the *hour files* and saves the result in
+the output *day file*. It follows the requirement for Bernese that the day file
+contains hour file content from the given date as well as the content of the
+first hour file generated at midnight the following date.
+
+The `check` sub command is for controlling the quality of existing day files by
+checking that a given unique line in each day file exists and at the right line
+number. Thus, this also requires that the input files exist.
 
 The tool needs locations for the downloaded data and the output files as well as
 the interval dates so it can examine (`status`) the input and output or produce
 (`build`) the output files.
 
-The `status` and `build` commands have the same call signature with the following logic:
 
-*   Specify input path, output path and start and end dates to see status or build output.
+The three sub commands have the same call signature with the following logic:
 
-*   If either of (or both) the input path `ipath` or the output path `opath` are
-    not given, look for them in the common user configuration
-    (`autobernese.yaml`), where they should be defined in the following way
-    (using our path scheme, yours may differ):
+*   Specify input path, output path, start and end dates, as well as hour-file
+    name format and day-file name format.
+
+*   The input path `ipath`, output path `opath`, hour-file format `ifname` and
+    day-file format `ofname` can be left out to be read from the configuration
+    file in use. The core configuration has our own defaults. If other paths or
+    filrname formats are needed, they can be defined in the common configuration
+    (`autobernese.yaml`), where they should be defined in the following way:
 
     ```yaml title="`autobernese.yaml`"
     # (...)
     troposphere:
       ipath: /path/to/your/DATAPOOL/VMF3/1x1_OP_H/{date.year}
       opath: /path/to/your/DATAPOOL/VMF3/1x1_OP_GRD/{date.year}
+      ifname: 'VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}'
+      ofname: 'VMF3_{date.year}{date.doy:03d}0.GRD'
     # (...)
     ```
 
-    Or even so, using the AutoBernese YAML aliases:
-
+    Or even so, using the AutoBernese YAML aliases, in this example using `*D` to
+    reference the path to DATAPOOL area:
 
     ```yaml title="`autobernese.yaml`"
     # (...)
     troposphere:
       ipath: !Path [*D, VMF3, '1x1_OP_H', '{date.year}']
       opath: !Path [*D, VMF3, '1x1_OP_GRD', '{date.year}']
+      ifname: 'VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}'
+      ofname: 'VMF3_{date.year}{date.doy:03d}0.GRD'
     # (...)
     ```
+
+Below are given examples of how to use the commands, where the filename formats
+are left out, and thus being set to those set in the core or common
+configuration.
 
 
 ### Build day files
@@ -876,9 +856,14 @@ Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ...
   Error: Missing input files for VMF3DayFile(date=GPSDate(2023, 1, 2), ...) ...
 ```
 
-Under the hood, the actual full file paths to the input and output files are reated in the same way as you would define them in a AutoBernese `Source` configuration in your common or campaign-specific configuration file. The filepaths are thus created from a template path, where each filename is generated from an input date. Now, the name of the date instances is `date`.
+Under the hood, the actual full file paths to the input and output files are
+created in the same way as you would define them in a AutoBernese `Source`
+configuration in your common or campaign-specific configuration file. The
+filepaths are thus created from a template path, where each filename is
+generated from an input date. Now, the name of the date instances is `date`.
 
-With this information, a user is able to use this in the input path given as the command-line input in the following way:
+With this information, a user is able to use this in the input path given as the
+command-line input in the following way:
 
 ```sh title="Command"
 ab troposphere build -i "${D}/VMF3/1x1_OP_H/{date.year}" -o "${D}/VMF3/1x1_OP_GRD/{date.year}" -b 2023-01-01 -e 2023-01-02
