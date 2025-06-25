@@ -7,14 +7,14 @@ that day into a single file with data for that entire day.
 
 """
 
-from typing import (
-    Any,
-    Final,
-)
-from collections.abc import Iterable
+from typing import Final
+from collections.abc import Iterator
 import datetime as dt
 from pathlib import Path
 from dataclasses import dataclass
+
+# import linecache
+from itertools import islice
 import logging
 
 from ab.dates import (
@@ -24,38 +24,80 @@ from ab.dates import (
 )
 from ab.parameters import (
     permutations,
+    ParametersType,
+    PermutationType,
 )
 
 
 log = logging.getLogger(__name__)
 
-# First date with data on the source server.
-_EARLIEST: Final = dt.date(2008, 1, 1)
-_LATEST: Final = dt.date.today() - dt.timedelta(days=1)
+
+# Filename structure
 
 _FSTR_IFNAME: Final = "VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
+"Default filename structure for the hour files obtained."
+
 _FSTR_OFNAME: Final = "VMF3_{date.year}{date.doy:03d}0.GRD"
+"Default output name for the day files that this module builds."
 
 _HOURS: Final = ["00", "06", "12", "18"]
+"Hours during the day at which source files are supplied."
 
 
-def _input_filepaths(path: Path, date: dt.date | dt.datetime) -> list[Path]:
+# Quality assurrance and control
+
+N_FILES_H: Final = 5
+"Number of input hour files"
+
+N_LINES_H: Final = 64807
+"Number of lines in an hour file"
+
+IX_LINE_MAX: Final = N_LINES_H - 1
+"Line index of the last line in an hour file"
+
+INDEX_EPOCH_LINE: Final = 3
+"Index of a line that is unique to each hour file"
+
+
+def _input_filepaths(
+    path: Path, fname: Path | str, date: dt.date | dt.datetime
+) -> list[Path]:
     """
     Return file paths ending with H00, H06, H12 and H18 for given date and
     filename ending with H00 for the following date
 
     """
-    parameters: dict[str, Iterable[Any]] = dict(date=[date], hour=_HOURS)
-    permutations_ = permutations(parameters)
-    permutations_.append(dict(date=date + dt.timedelta(1), hour=_HOURS[0]))
-    return [
-        Path(str(path / _FSTR_IFNAME).format(**permutation))
-        for permutation in permutations_
-    ]
+    parameters: ParametersType = dict(date=[date], hour=_HOURS)
+    extra: PermutationType = dict(date=date + dt.timedelta(1), hour=_HOURS[0])
+    permutations_ = permutations(parameters) + [extra]
+    fstr = str(path / fname)
+    return [Path(fstr.format(**permutation)) for permutation in permutations_]
+
+
+def _output_filepath(
+    path: Path, fname: Path | str, date: dt.date | dt.datetime
+) -> Path:
+    """
+    Return file path for the output file for the given date.
+
+    """
+    return Path(str(path / fname).format(date=date))
 
 
 def concatenate(*parts: str) -> str:
+    """
+    Concatenate string content without separator
+
+    """
     return ("{}" * len(parts)).format(*parts)
+
+
+@dataclass
+class VMFDataStatus:
+    date: str
+    input_available: bool
+    output_file_exists: bool
+    output_file: str
 
 
 @dataclass
@@ -63,18 +105,33 @@ class DayFileBuilder:
     date: GPSDate
     ipath: Path | str
     opath: Path | str
+    ifname: Path | str = _FSTR_IFNAME
+    ofname: Path | str = _FSTR_OFNAME
 
     def __post_init__(self) -> None:
+        """
+        Build paths, but not checking for existence
+
+        """
         self.ipath = Path(self.ipath)
         self.opath = Path(self.opath)
-        self.hour_files: list[Path] = _input_filepaths(self.ipath, self.date)
-        self.dayfile: Path = Path(str(self.opath / _FSTR_OFNAME).format(date=self.date))
+        self.hour_files = _input_filepaths(self.ipath, self.ifname, self.date)
+        self.day_file = _output_filepath(self.opath, self.ofname, self.date)
 
     @property
-    def input_available(self):
+    def input_available(self) -> bool:
+        """
+        Validate existence of necessary input files
+
+        """
         return all(path.is_file() for path in self.hour_files)
 
     def build(self) -> str:
+        """
+        Build output path and file based on existing input files and check that
+        output file contains input data.
+
+        """
         msg = ""
         if not self.input_available:
             msg = f"Missing some or all input HOUR files ..."
@@ -83,11 +140,11 @@ class DayFileBuilder:
 
         # Build
         contents = [ifname.read_text() for ifname in self.hour_files]
-        self.dayfile.resolve().parent.mkdir(exist_ok=True, parents=True)
-        self.dayfile.write_text(concatenate(*contents))
+        self.day_file.resolve().parent.mkdir(exist_ok=True, parents=True)
+        self.day_file.write_text(concatenate(*contents))
 
-        # Quality control: Check that the unique epoch line in each hour file is
-        # included in the concatenated day file.
+        # Quality control on live Python instances: Check that the unique epoch
+        # line in each hour file is included in the concatenated day file.
         epoch_lines = []
         for lines in contents:
             for ix, line in enumerate(lines):
@@ -95,7 +152,7 @@ class DayFileBuilder:
                     epoch_lines.append(line)
                     break
 
-        dayfile_content = self.dayfile.read_text()
+        dayfile_content = self.day_file.read_text()
         missing = []
         for epoch_line in epoch_lines:
             if not epoch_line in dayfile_content:
@@ -106,21 +163,32 @@ class DayFileBuilder:
 
         return msg
 
-        if not self.dayfile.is_file():
-            msg = f"Failed to create output file {self.dayfile} ..."
+        if not self.day_file.is_file():
+            msg = f"Failed to create output file {self.day_file} ..."
 
         return msg
 
-    def test(self) -> str:
-        import linecache
-        from itertools import islice
+    def check(self) -> str:
+        """
+        Load input and output files and make reasonably sure that content of
+        input files are correctly copied to the output file.
 
-        N_FILES_H = 5
-        N_LINES_H = 64807
-        IX_LINE_MAX = N_LINES_H - 1
+        """
+        # Default return message
+        msg = ""
 
-        INDEX_EPOCH_LINE = 3
+        # Check that the operation can be performed
+        s = self.status()
 
+        if not s.input_available:
+            msg = f"Missing input files ..."
+            return msg
+
+        elif not s.output_file_exists:
+            msg = f"Missing output file ..."
+            return msg
+
+        # Set up and begin checks
         # Offsets are relative to the position of last extraction
         INDEX_OFFSETS_ITERATOR = [
             INDEX_EPOCH_LINE,
@@ -129,17 +197,6 @@ class DayFileBuilder:
             IX_LINE_MAX,
             IX_LINE_MAX,
         ]
-
-        msg = ""
-        s = self.status()
-
-        if not s["input_available"]:
-            msg = f"Missing input files ..."
-            return msg
-
-        elif not s["output_file_exists"]:
-            msg = f"Missing output file ..."
-            return msg
 
         epoch_lines = []
         for ifname in self.hour_files:
@@ -165,7 +222,7 @@ class DayFileBuilder:
             return msg
 
         # 1)
-        # dayfile_content = self.dayfile.read_text()
+        # dayfile_content = self.day_file.read_text()
         # missing = []
         # for epoch_line in epoch_lines:
         #     if not epoch_line in dayfile_content:
@@ -173,7 +230,7 @@ class DayFileBuilder:
 
         # 2)
         extracted_lines = []
-        with open(self.dayfile) as fp:
+        with open(self.day_file) as fp:
             for ix in INDEX_OFFSETS_ITERATOR:
                 # fp.seek(0)
                 for line in islice(fp, ix, ix + 1):
@@ -204,19 +261,37 @@ class DayFileBuilder:
 
         return msg
 
-    def status(self) -> dict[str, Any]:
-        return dict(
-            date=self.date.isoformat()[:10],
-            input_available=self.input_available,
-            output_file_exists=self.dayfile.is_file(),
-            output_file=str(self.dayfile),
+    def status(self) -> VMFDataStatus:
+        """
+        Return data structure with status for input and output data.
+
+        """
+        return VMFDataStatus(
+            self.date.isoformat()[:10],
+            self.input_available,
+            self.day_file.is_file(),
+            str(self.day_file),
         )
 
 
 def day_file_builders(
     ipath: Path | str, opath: Path | str, beg: dt.date, end: dt.date
-) -> Iterable[DayFileBuilder]:
+) -> Iterator[DayFileBuilder]:
+    """
+    Return an iterator of DayFileBuilder instances with fixed input and output
+    paths and dates ranging between beginning and end date both inclusive.
+
+    """
+    print(ipath, opath, beg, end)
     return (
         DayFileBuilder(date, ipath, opath)
         for date in dates_to_gps_date(date_range(beg, end))
     )
+
+
+def build(builder: DayFileBuilder) -> str:
+    return builder.build()
+
+
+def check(builder: DayFileBuilder) -> str:
+    return builder.check()
