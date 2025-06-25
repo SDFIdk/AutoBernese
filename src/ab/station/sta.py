@@ -453,7 +453,6 @@ def create_sta_file_from_sitelogs(
     sitelogs: list[Path | str],
     individually_calibrated: list[str] | None = None,
     output_sta_file: Path | str | None = None,
-    **_: dict[Any, Any],
 ) -> None:
     """
     Combine data from given sitelog files into a STA-file.
