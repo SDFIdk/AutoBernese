@@ -1,3 +1,8 @@
+"""
+Date constructors
+
+"""
+
 import datetime as dt
 import functools
 
@@ -88,27 +93,19 @@ def date_range_constructor(
     loader: yaml.Loader, node: yaml.MappingNode
 ) -> list[GPSDate]:
     """
-    Construct a list of GPSDate instances based on given beginning and end dates
-    (both inclusive).
+    Construct GPSDate instances based on start and end dates (both inclusive) as
+    well as how much to extend end date with, if any.
 
     """
     if not isinstance(node, yaml.MappingNode):
         raise TypeError(f"Node type {node!r} not supported for tag ...")
-
     d = loader.construct_mapping(node)
-
     beg = d.get("beg")
-    if not isinstance(beg, (dt.datetime, dt.date)):
-        raise TypeError(f"Expected {beg!r} to be a date or datetime instance ...")
-
+    assert isinstance(
+        beg, (dt.date, dt.datetime)
+    )  # Remember that this only wors for debug mode.
     end = d.get("end")
-    if not isinstance(end, (dt.datetime, dt.date)):
-        raise TypeError(f"Expected {end!r} to be a date or datetime instance ...")
-
     extend_end_by = d.get("extend_end_by", 0)
-    if not isinstance(extend_end_by, int):
-        raise TypeError(f"Expected {extend_end_by!r} to be an integer ...")
-
     return dates_to_gps_date(date_range(beg, end, extend_end_by=extend_end_by))
 
 
