@@ -282,7 +282,6 @@ def day_file_builders(
     paths and dates ranging between beginning and end date both inclusive.
 
     """
-    print(ipath, opath, beg, end)
     return (
         DayFileBuilder(date, ipath, opath)
         for date in dates_to_gps_date(date_range(beg, end))
