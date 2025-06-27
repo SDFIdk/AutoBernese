@@ -1,8 +1,8 @@
 
 ## Running AutoBernese
 
-With AutoBernese installed, you have a new command `ab` available, which lets
-you explore the rest of the available functionality based on the help system. By
+With AutoBernese installed, one have a new command `ab` available, which lets
+one explore the rest of the available functionality based on the help system. By
 itself it also does a few house-hold things. These latter side effects are
 described below.
 
@@ -129,26 +129,18 @@ data models on [the configuration-file page][DOCS-CONFIG].
 
 [DOCS-CONFIG]: configuration-files.md
 
-<!-- Sort of like using variables in a computer
-program. -->
-
-<!-- This means that repeating some value can be done by referring to the value in
-another place. -->
-
 The static document, while being easy to create this way, does
 make it harder to read and find potential errors in, when the data structure in
 the document becomes larger or more complex in what is re-used, and how.
 
-The following commands lets you have a look at the rendered AutoBernese
+The following commands lets one have a look at the rendered AutoBernese
 configuration file.
 
 
 ### `ab config`
 
-Let us look at the rendered AutoBernese configuration file, where among other
-things, we can see the Bernese-installation environment that AutoBernese has
-access to.
-
+Look at the rendered AutoBernese configuration file, where one can see the
+Bernese-installation environment that AutoBernese has access to.
 
 <!-- The following command prints the content of the section [`bsw_env`]
 of the AutoBernese-configuration file containing the environment variables that
@@ -178,8 +170,8 @@ the software uses: -->
             'D': '/mnt/refgps/bsw/dev/DATAPOOL',
             'P': '/home/bsw/prod/data/CAMPAIGN54',
             'S': '/mnt/refgps/bsw/dev/SAVEDISK',
-            'U': '/home/e088195/bsw/dev/user',
-            'T': '/home/e088195/bsw/dev/temp'
+            'U': '/home/username/bsw/dev/user',
+            'T': '/home/username/bsw/dev/temp'
         },
         # (...)
     }
@@ -187,7 +179,7 @@ the software uses: -->
 
 !!! attention
 
-    As seen above, you see that not all the variables set in BSW's `LOADGPS.setvar`
+    As seen above, one see that not all the variables set in BSW's `LOADGPS.setvar`
     script are included, but this is all that AutoBernese is using for now.
 
 
@@ -293,7 +285,7 @@ configuration. Below is the command for downloading sources for a given
 campaign.
 
 The built-in configuration contains no sources, so running the command without a
-user-supplied configuration file in the AutoBernese runtime directory, you will
+user-supplied configuration file in the AutoBernese runtime directory, one will
 see the following.
 
 **Example 1**
@@ -544,7 +536,9 @@ Commands:
 ```
 
 
-### List existing Bernese campaigns
+### `ab campaign ls`
+
+List existing Bernese campaigns:
 
 ```sh title="Command"
 ab campaign ls
@@ -555,7 +549,9 @@ Existing campaigns registered in the BSW campaign list:
 /home/bsw/prod/data/CAMPAIGN54/EXAMPLE
 ```
 
-### List AutoBernese details of each Bernese campaign
+### `ab campaign ls -v`
+
+List AutoBernese details of each Bernese campaign:
 
 List campaign templates and template content.
 
@@ -569,7 +565,9 @@ Existing campaigns registered in the BSW campaign list:
 ```
 
 
-### List available campaign-configuration templates
+### `ab campaign templates`
+
+List available campaign-configuration templates:
 
 ```sh title="Command"
 ab campaign templates
@@ -580,7 +578,9 @@ default
 ```
 
 
-### Show content of the campaign-configuration template
+### `ab campaign templates <template-name>`
+
+Show content of the campaign-configuration template:
 
 ```sh title="Command"
 ab campaign templates default
@@ -592,51 +592,55 @@ sources: []
 ```
 
 
-## Create a campaign
+### `ab campaign create`
+
+Create a campaign:
 
 ```sh title="Command"
 ab campaign create WK2222 -b 2022-08-07 -e 2022-08-13
 ab campaign create WK2222 -t <template-name> -b 2022-08-07 -e 2022-08-13
+ab campaign create WK2222 -g 2222
 ```
 
-``` title="Output"
-```
+The following figure illustrates how the campaign metadata is added above the
+content of the campaign template file content to create the campaign
+configuration file for the new campaign.
 
 <div class="result" markdown>
   ![Creating a campaign-configuration file](assets/create-campaign-configuration.png)
 </div>
 
 
-## Show the sources specified for a given campaign
+### `ab campaign sources <campaign-name>`
+
+Show the sources specified for a given campaign:
 
 ```sh title="Command"
 ab campaign sources <campaign-name>
 ```
 
-``` title="Output"
-```
 
+### `ab campaign tasks <campaign-name>`
 
-## Show the runnable tasks for a given campaign
+Show task definitions for a given campaign:
 
 ```sh title="Command"
 ab campaign tasks <campaign-name>
 ```
 
-``` title="Output"
-```
 
+### `ab campaign run <campaign-name>`
 
-## Run tasks for a given campaign
+Run tasks for a given campaign:
 
 ```sh title="Command"
 ab campaign run <campaign-name>
+ab campaign run <campaign-name> -i <identifier-1> -i <identifier-2>
 ```
 
-``` title="Output"
-```
+### `ab campaign clean <campaign-name>`
 
-## Delete sub directory content in given campaign
+Delete sub directory content in given campaign:
 
 Adding [a `clean` section][CONF_CAMPAIGN_CLEAN] to the campaign configuration allows for easy
 cleaning of entire subdirectories in the campaign directory.
@@ -644,7 +648,7 @@ cleaning of entire subdirectories in the campaign directory.
 [CONF_CAMPAIGN_CLEAN]: configuration-files.md#the-clean-section
 
 ```sh title="Command"
-ab c clean EXAMPLE
+ab campaign clean EXAMPLE
 ```
 
 ```sh title="Output"
@@ -654,10 +658,40 @@ Proceed (y/[n]): y
 # List of deleted files
 ```
 
+### `ab campaign register <campaign-name>`
+
+Register *existing* campaign in CAMPAIGN54 directory in Bernese-campaign menu:
+
+```sh title="Command"
+ab campaign register <campaign-name>
+ab campaign register <campaign-name-1> <campaign-name-2> <campaign-name-...>
+```
+
+```sh title="Output"
+Adding /home/bsw/prod/data/CAMPAIGN54/<campaign-name-1>
+Adding /home/bsw/prod/data/CAMPAIGN54/<campaign-name-2>
+# ...
+```
+
+### `ab campaign unregister <campaign-name>`
+
+Unregister, existing or not, campaign names from Bernese-campaign menu:
+
+```sh title="Command"
+ab campaign unregister <campaign-name>
+ab campaign unregister <campaign-name-1> <campaign-name-2> <campaign-name-...>
+```
+
+```sh title="Output"
+Removing /home/bsw/prod/data/CAMPAIGN54/<campaign-name-1>
+Removing /home/bsw/prod/data/CAMPAIGN54/<campaign-name-2>
+# ...
+```
+
 
 ## Station-related utilities
 
-The station command sub group has two commands:
+The station namespace has the following commands:
 
 ```sh title="Command"
 ab station
@@ -678,14 +712,12 @@ Commands:
 
 ### Create STA file from sitelogs
 
-As part of our internal pre-processing, we create a single STA-file from
-relevant site-log files.
+AutoBernese can create a single STA-file from a list of site-log files.
 
-This can be done in four different ways depending on the input the command
-receives.
+This can be done in four different ways depending on the command-line input.
 
 
-#### No arguments
+#### `ab station sitelogs2sta`
 
 Running the command with no arguments:
 
@@ -699,7 +731,7 @@ rendered AutoBernese configuration file.
 The default settings in the built-in configuration file are:
 
 
-```yaml title="`station` section of the built-in configuration file"
+```yaml title="station section of the built-in configuration file"
 --8<-- "src/ab/configuration/env.yaml:107:117"
 ```
 
@@ -708,9 +740,13 @@ with no individually-calibrated instrumentation, and the output file
 `sitelogs.STA` is placed in the directory `$D/station`.
 
 
-#### Using campaign-specific settings
+#### `ab station sitelogs2sta -c <campaign-name>`
 
-You may add the same section in your campaign-specific configuration file and provide the name of the campaign to the command in order to use this as your input.
+Using campaign-specific settings.
+
+You may add the same section in your campaign-specific configuration file and
+provide the name of the campaign to the command in order to use this as your
+input.
 
 ```yaml title="`campaign.yaml`"
 station:
@@ -722,21 +758,24 @@ station:
   output_sta_file: !Path [*P, *campaign*, STA, campaign.STA]
 ```
 
-This has the implications that you may use the YAML aliases available in the
+This has the implications that one may use the YAML aliases available in the
 campaign configuration as well as thos in the common configuration.
 
-As seen in the example configuration above, you may then create the STA file
+As seen in the example configuration above, one may then create the STA file
 directly inside your campaing's STA directory. If your campaign has the name
-`CAMPAIGN`, the command you type will then be:
+`CAMPAIGN`, the command one type will then be:
 
 ```sh title="Command"
 ab station sitelogs2sta -c CAMPAIGN
 ```
 
 
-#### Create stations.STA from custom configuration file
+#### `ab station sitelogs2sta -f <custom-configuration-file>`
 
-Thirdly, as this example demonstrates, you can build a STA file with a custom input YAML file located anywhere available on the filesystem. The following example also shows that the output file can be saved to your current working directory if not specific path is specified:
+Thirdly, one can build a `.STA` file with a custom input YAML file located
+anywhere available on the filesystem. The following example also shows that the
+output file can be saved to your current working directory if not specific path
+is specified:
 
 ```yaml title="station.yaml"
 station:
@@ -752,7 +791,7 @@ ab station sitelogs2sta -f station.yaml
 ```
 
 
-#### Create stations.STA from command-line arguments
+#### `ab station sitelogs2sta -i <sitelog> -k <station-id> -o <STA-file>`
 
 Finally, it is also possible to give all the settings to the command as
 command-line arguments:
@@ -841,12 +880,13 @@ are left out, and thus being set to those set in the core or common
 configuration.
 
 
-### Build day files
+### `ab troposphere build -i <ipath> -o <opath> -b <beg> -e <end> -h <iformat> -d <oformat>`
 
 Build day files from previously-downloaded hour files for the given interval.
 
 ```sh title="Command"
 ab troposphere build -i $D/VMF3/1x1_OP_H/2022 -o $D/VMF3/1x1_OP_GRD/2022 -b 2023-01-01 -e 2023-01-02
+ab troposphere build -i $D/VMF3/1x1_OP_H/2022 -o $D/VMF3/1x1_OP_GRD/2022 -b 2023-01-01 -e 2023-01-02 -h 'VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}' -d 'VMF3_{date.year}{date.doy:03d}0.GRD'
 ```
 
 ``` title="Output"
@@ -857,7 +897,7 @@ Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ...
 ```
 
 Under the hood, the actual full file paths to the input and output files are
-created in the same way as you would define them in a AutoBernese `Source`
+created in the same way as one would define them in a AutoBernese `Source`
 configuration in your common or campaign-specific configuration file. The
 filepaths are thus created from a template path, where each filename is
 generated from an input date. Now, the name of the date instances is `date`.
@@ -894,7 +934,7 @@ Building /home/bsw/prod/data/DATAPOOL/VMF3/1x1_OP_GRD/2023/VMFG_20230020.GRD ...
 ```
 
 
-### Status
+### `ab troposphere status -b <beg> -e <end>`
 
 Show the status of day files and input they are based on for the given interval.
 
@@ -945,67 +985,69 @@ Commands:
   ymd      Show date information based on date.
 ```
 
-=== "`ymd`"
+### `ab dateinfo ymd <ymd>`
 
-    ```sh title="Command"
-    ab dateinfo ymd 2022-08-07
-    ```
+```sh title="Command"
+ab dateinfo ymd 2022-08-07
+```
 
-    ```json title="Output"
-    {
-      "weekday": "Sunday",
-      "timestamp": "2022-08-07",
-      "doy": 219,
-      "iso_week": 31,
-      "iso_weekday": 7,
-      "gps_week": 2222,
-      "gps_weekday": 0,
-      "gps_week_beg": "2022-08-07",
-      "gps_week_end": "2022-08-13"
-    }
-    ```
+```json title="Output"
+{
+    "weekday": "Sunday",
+    "timestamp": "2022-08-07",
+    "doy": 219,
+    "iso_week": 31,
+    "iso_weekday": 7,
+    "gps_week": 2222,
+    "gps_weekday": 0,
+    "gps_week_beg": "2022-08-07",
+    "gps_week_end": "2022-08-13"
+}
+```
 
-=== "`ydoy`"
+### `ab dateinfo ydoy <ydoy>`
 
-    ```sh title="Command"
-    ab dateinfo ydoy 2022 219
-    ```
+```sh title="Command"
+ab dateinfo ydoy 2022 219
+```
 
-    ```json title="Output"
-    {
-      "weekday": "Sunday",
-      "timestamp": "2022-08-07",
-      "doy": 219,
-      "iso_week": 31,
-      "iso_weekday": 7,
-      "gps_week": 2222,
-      "gps_weekday": 0,
-      "gps_week_beg": "2022-08-07",
-      "gps_week_end": "2022-08-13"
-    }
-    ```
+```json title="Output"
+{
+    "weekday": "Sunday",
+    "timestamp": "2022-08-07",
+    "doy": 219,
+    "iso_week": 31,
+    "iso_weekday": 7,
+    "gps_week": 2222,
+    "gps_weekday": 0,
+    "gps_week_beg": "2022-08-07",
+    "gps_week_end": "2022-08-13"
+}
+```
 
-=== "`gpsweek`"
+### `ab dateinfo gpsweek <gps-week>`
 
-    ```sh title="Command"
-    ab dateinfo gpsweek 2222
-    ```
+```sh title="Command"
+ab dateinfo gpsweek 2222
+```
 
-    ```json title="Output"
-    {
-      "weekday": "Sunday",
-      "timestamp": "2022-08-07",
-      "doy": 219,
-      "iso_week": 31,
-      "iso_weekday": 7,
-      "gps_week": 2222,
-      "gps_weekday": 0,
-      "gps_week_beg": "2022-08-07",
-      "gps_week_end": "2022-08-13"
-    }
-    ```
+```json title="Output"
+{
+    "weekday": "Sunday",
+    "timestamp": "2022-08-07",
+    "doy": 219,
+    "iso_week": 31,
+    "iso_weekday": 7,
+    "gps_week": 2222,
+    "gps_weekday": 0,
+    "gps_week_beg": "2022-08-07",
+    "gps_week_end": "2022-08-13"
+}
+```
 
-## Examine the Logfile to get more verbose output
+## Tailing the AutoBernese log file
+
+Examine the tail of the AutoBernese log file to get more verbose output using:
 
 ```sh title="Command"
 ab logs

@@ -280,9 +280,8 @@ def build_campaign_directory_tree(name: str) -> None:
     Files not existing are skipped.
 
     """
-    path = campaign_dir(name)
-    if not path.is_dir():
-        log.debug(f"Campaign directory {path!r} is not a directory ...")
+    if not dir_exists(name):
+        log.error(f"Campaign directory {name} does not exist ...")
         return
 
     # Load configuration with campaign directory tree settings spared.
@@ -295,7 +294,8 @@ def build_campaign_directory_tree(name: str) -> None:
         log.error(msg)
         raise RuntimeError(msg)
 
-    log.info(f"Create required campaign-directory tree ...")
+    path = campaign_dir(name)
+    log.info(f"Create required campaign-directory tree at {path!r}...")
     for directory_info in directories:
         # Validation
         directory_name = directory_info.get("name")
@@ -350,23 +350,23 @@ def add_campaign_to_bsw_menu(name: str) -> None:
     campaign-menu file in the Bernese-installation directory.
 
     """
-    path = campaign_dir(name)
-    if not path.is_dir():
-        msg = f"Campaign directory {path!r} is not a directory ..."
+    if not dir_exists(name):
+        msg = f"Campaign directory {name} does not exist ..."
         log.warn(msg)
         return
 
     # Load existing campaign-menu file
+    path = campaign_dir(name)
     campaign_menu = campaign_menu_file()
-    raw = campaign_menu.read_text()
 
-    # Create a backup file just as Bernese does
-    # This might be unnecessary, but, for now, we just mimic its behaviour
-    campaign_menu.with_suffix(".bck").write_text(raw)
+    # Backup menu file
+    # Might be unnecessary, but, for now, we just mimic its behaviour
+    create_backup_file(campaign_menu)
 
     # Update the campaign list
 
     # Put existing Bernese campaign paths into a set to get unique paths
+    raw = campaign_menu.read_text()
     existing = set(_extract_campaign_list(raw))
 
     # Add new path to this set and sort updates to get a list
@@ -376,24 +376,18 @@ def add_campaign_to_bsw_menu(name: str) -> None:
     campaign_menu.write_text(build_campaign_menu(updated))
 
 
+def dir_exists(name: str) -> bool:
+    return campaign_dir(name).is_dir()
+
+
 def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     """
     Create a campaign.
 
     """
-    # Store the intention
-    log.info(f"Creating campaign with the following input:")
-    log.info(f"{name=}")
-    log.info(f"{template=}")
-    log.info(f"{beg=}")
-    log.info(f"{end=}")
-
-    # Validate
-
     # Does the campaign already exist?
-    path = campaign_dir(name)
-    if path.is_dir():
-        msg = f"Campaign directory {path} exists ..."
+    if dir_exists(name):
+        msg = f"Campaign {name} exists ..."
         log.warn(msg)
         return
 
@@ -403,8 +397,16 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
         log.warn(msg)
         return
 
+    # Store the intention
+    log.info(f"Creating campaign with the following input:")
+    log.info(f"{name=}")
+    log.info(f"{template=}")
+    log.info(f"{beg=}")
+    log.info(f"{end=}")
+
     # Create
 
+    path = campaign_dir(name)
     log.info(f"Creating campaign directory {path} ...")
     path.mkdir(parents=True)
 
@@ -423,3 +425,49 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
 
     log.info("Add campaign to Bernese-campaign menu ...")
     add_campaign_to_bsw_menu(name)
+
+
+def create_backup_file(ifname: Path) -> None:
+    """
+    Create a backup file just as Bernese does.
+
+    As such, it does not check, if the destination file already exists.
+
+    This might be unnecessary.
+
+    """
+    if not ifname.is_file():
+        log.info(f"File {ifname} does not exist ...")
+        return
+
+    shutil.copyfile(ifname, ifname.with_suffix(".bck"))
+
+
+def remove_campaign_from_bsw_menu(name: str) -> None:
+    """
+    Remove campaign from campaign list in Bernese-campaign menu file.
+
+    Resolve campaign-directory path and remove it from the list of campaigns in
+    the campaign-menu file in the Bernese-installation directory.
+
+    Ignores whether directory exists or not.
+
+    """
+    # Load existing campaign-menu file
+    path = campaign_dir(name)
+    campaign_menu = campaign_menu_file()
+
+    # Backup menu file
+    # Might be unnecessary, but, for now, we just mimic its behaviour
+    create_backup_file(campaign_menu)
+
+    # Update the campaign list
+
+    # Put existing Bernese campaign paths into a set to get unique paths
+    existing = set(_extract_campaign_list(campaign_menu.read_text()))
+
+    # Remove path to this set and sort updates to get a list
+    updated = sorted(existing - {f"{path}"})
+
+    # Write the formatted updates to the original campaign-menu file
+    campaign_menu.write_text(build_campaign_menu(updated))

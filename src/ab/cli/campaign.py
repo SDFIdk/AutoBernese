@@ -33,6 +33,7 @@ from ab.configuration import (
     tasks as _tasks,
 )
 from ab.bsw import campaign as _campaign
+from ab.dates import GPSDate
 
 
 log = logging.getLogger(__name__)
@@ -140,29 +141,60 @@ def templates(template: str | None) -> None:
     help="Template for campaign configuration If not given, the default configuration is used.",
 )
 @click.option(
+    "-g",
+    "--gps-week",
+    type=int,
+    required=False,
+    help=f"GPS-week number",
+)
+@click.option(
     "-b",
     "--beg",
     type=_input.date,
-    required=True,
-    help=f"Format: {_input.DATE_FORMAT}",
+    required=False,
+    help=f"First date in campaign. Format: {_input.DATE_FORMAT}",
 )
 @click.option(
     "-e",
     "--end",
     type=_input.date,
-    required=True,
-    help=f"Format: {_input.DATE_FORMAT}",
+    required=False,
+    help=f"Last date in campaign. Format: {_input.DATE_FORMAT}",
 )
-def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
+def create(
+    name: str,
+    template: str,
+    gps_week: int | None = None,
+    beg: dt.date | None = None,
+    end: dt.date | None = None,
+) -> None:
     """
     Create a Bernese campaign with directory content based on the specified
     template and add campaign path to the list of available campaigns in the BSW
     campaign menu.
 
     """
-    msg = f"Create campaign {name=} using {template=} with {beg=} and {end=} ..."
+    if _campaign.dir_exists(name):
+        raise SystemExit(f"Campaign {name} already exists ...")
+
+    chosen_input = ""
+
+    if gps_week is not None:
+        chosen_input += f"{gps_week=} giving "
+        beg = GPSDate.from_gps_week(gps_week)
+        end = beg + dt.timedelta(days=7)
+
+    if beg is None or end is None:
+        msg = f"Expected campaign interval given as either GPS week or start and end dates. ..."
+        log.error(msg)
+        raise SystemExit(msg)
+
+    chosen_input += f"{beg.isoformat()[:10]} and {end.isoformat()[:10]}"
+
+    msg = f"Create campaign {name=} using {template=} with {chosen_input} ..."
     print(msg)
     log.info(msg)
+
     _campaign.create(name, template, beg, end)
 
 
@@ -274,19 +306,21 @@ def run(name: str, identifier: list[str]) -> None:
     for task in all_tasks:
         msg = f"Running task {task.identifier} ..."
         log.info(msg)
-        print(msg)
+        print(msg, end=" ")
         try:
             task.run()
-            if task.result.finished:
-                postfix = " [green][ done ][/]"
+            result = task.result
+            log.info(f"Task {task.identifier} returned: {result.return_value!r} ...")
+            if result.finished and result.exception is None:
+                postfix = "[green][ done ][/]"
             else:
-                postfix = " [red][ error ][/]"
+                postfix = "[red][ error ][/]"
                 log.info(
-                    f"Task {task.identifier} failed with exception ({task.result.exception}) ..."
+                    f"Task {task.identifier} failed with exception ({result.exception}) ..."
                 )
             print(postfix)
-            # TODO: Log the result(ing value)?
-            # print(task.result)
+            if result.return_value:
+                print(f"Task return value: {result.return_value} ...")
 
         except KeyboardInterrupt:
             log.info(f"Task {task.identifier} interrupted by user ...")
@@ -327,3 +361,49 @@ def clean(name: str) -> None:
     # And delete their contents, but not the directories
     for path in existing_chosen:
         _files.delete_directory_content(path)
+
+
+@campaign.command
+@click.argument("names", nargs=-1, type=str)
+def register(names: tuple[str]) -> None:
+    """
+    Register existing campaign directory adding its name to the Bernese-campaign
+    menu.
+
+    """
+    if not names:
+        return
+
+    for name in names:
+        path = _campaign.campaign_dir(name)
+        if not path.is_dir():
+            msg = f"Skipping {path} - Campaign directory does not exist ..."
+            log.warn(msg)
+            print(msg)
+            continue
+        msg = f"Adding {path} to Bernese-campaign menu"
+        log.info(msg)
+        print(msg)
+        _campaign.add_campaign_to_bsw_menu(name)
+
+
+@campaign.command
+@click.argument("names", nargs=-1, type=str)
+def unregister(names: tuple[str]) -> None:
+    """
+    Unregister campaign in Bernese.
+
+    Removes campaign name from Bernese-campaign menu.
+
+    The campaign directory itself is untouched and does not need to exist.
+
+    """
+    if not names:
+        return
+
+    for name in names:
+        path = _campaign.campaign_dir(name)
+        msg = f"Removing {path} from Bernese-campaign menu"
+        log.info(msg)
+        print(msg)
+        _campaign.remove_campaign_from_bsw_menu(name)
