@@ -15,6 +15,7 @@ def get_raw(
     config: configuration.ConfigurationType,
     section: str,
     identifiers: list[str] | None = None,
+    exclude: list[str] | None = None,
 ) -> list[configuration.SectionListItemType]:
     """
     Get items in sections `sources` or `tasks` and take all or selected.
@@ -26,7 +27,14 @@ def get_raw(
         print(msg)
         log.info(msg)
 
-    if identifiers is None or len(identifiers) == 0:
-        return raw
+    if identifiers is not None and len(identifiers) > 0:
+        raw = [
+            raw_item for raw_item in raw if raw_item.get("identifier") in identifiers
+        ]
 
-    return [raw_item for raw_item in raw if raw_item.get("identifier") in identifiers]
+    if exclude is not None and len(exclude) > 0:
+        raw = [
+            raw_item for raw_item in raw if raw_item.get("identifier") not in exclude
+        ]
+
+    return raw

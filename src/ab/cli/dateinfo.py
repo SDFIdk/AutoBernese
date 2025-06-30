@@ -22,6 +22,7 @@ from ab import (
 
 from ab.cli import (
     _input,
+    _arguments,
 )
 
 
@@ -37,7 +38,7 @@ def dateinfo() -> None:
 
 
 @dateinfo.command
-@click.argument("date", type=_input.date)
+@_arguments.date
 def ymd(date: dt.date) -> None:
     """
     Show date information based on date.
@@ -48,7 +49,7 @@ def ymd(date: dt.date) -> None:
 
 
 @dateinfo.command
-@click.argument("week", type=int)
+@_arguments.week
 def gpsweek(week: int) -> None:
     """
     Show date information based on GPS week.
@@ -59,8 +60,8 @@ def gpsweek(week: int) -> None:
 
 
 @dateinfo.command
-@click.argument("year", type=int)
-@click.argument("doy", type=int)
+@_arguments.year
+@_arguments.doy
 def ydoy(year: int, doy: int) -> None:
     """
     Show date information based on Year and day of year [DOY].

@@ -19,7 +19,7 @@ import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab.cli import _input
+from ab.cli import _options
 from ab import (
     configuration,
     vmf,
@@ -100,40 +100,12 @@ def common_options(func):
 
     """
 
-    @click.option(
-        "-i",
-        "--ipath",
-        type=str,
-    )
-    @click.option(
-        "-o",
-        "--opath",
-        type=str,
-    )
-    @click.option(
-        "-b",
-        "--beg",
-        type=_input.date,
-        help=f"Format: {_input.DATE_FORMAT}",
-    )
-    @click.option(
-        "-e",
-        "--end",
-        type=_input.date,
-        help=f"Format: {_input.DATE_FORMAT}",
-    )
-    @click.option(
-        "-h",
-        "--hour-file-format",
-        "ifname",
-        type=str,
-    )
-    @click.option(
-        "-d",
-        "--day-file-format",
-        "ofname",
-        type=str,
-    )
+    @_options.ipath
+    @_options.opath
+    @_options.beg
+    @_options.end
+    @_options.hour_file_format
+    @_options.day_file_format
     @wraps(func)
     def wrapper_common_options(*args, **kwargs):
         return func(*args, **kwargs)

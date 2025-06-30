@@ -21,7 +21,10 @@ import humanize
 
 from ab.cli import (
     _input,
+    _output,
     _filter,
+    _arguments,
+    _options,
     about,
 )
 from ab import (
@@ -52,7 +55,7 @@ def campaign(ctx: click.Context) -> None:
 
 
 # @campaign.command
-# @click.argument("name", type=str)
+# @_arguments.name
 # def info(name: str) -> None:
 #     """
 #     Show campaign info
@@ -73,7 +76,7 @@ def campaign(ctx: click.Context) -> None:
 
 
 @campaign.command
-@click.option("--verbose", "-v", is_flag=True, help="Print more details.")
+@_options.verbose
 def ls(verbose: bool) -> None:
     """
     List existing campaigns
@@ -115,7 +118,7 @@ def ls(verbose: bool) -> None:
 
 
 @campaign.command
-@click.argument("template", default=None, type=str, required=False)
+@_arguments.template
 def templates(template: str | None) -> None:
     """
     List available campaign templates or show content of given template.
@@ -131,36 +134,11 @@ def templates(template: str | None) -> None:
 
 
 @campaign.command
-@click.argument("name", type=str)
-@click.option(
-    "-t",
-    "--template",
-    type=str,
-    default="default",
-    required=False,
-    help="Template for campaign configuration If not given, the default configuration is used.",
-)
-@click.option(
-    "-g",
-    "--gps-week",
-    type=int,
-    required=False,
-    help=f"GPS-week number",
-)
-@click.option(
-    "-b",
-    "--beg",
-    type=_input.date,
-    required=False,
-    help=f"First date in campaign. Format: {_input.DATE_FORMAT}",
-)
-@click.option(
-    "-e",
-    "--end",
-    type=_input.date,
-    required=False,
-    help=f"Last date in campaign. Format: {_input.DATE_FORMAT}",
-)
+@_arguments.name
+@_options.template
+@_options.gps_week
+@_options.beg
+@_options.end
 def create(
     name: str,
     template: str,
@@ -199,17 +177,21 @@ def create(
 
 
 @campaign.command
-@click.argument("name", type=str)
-@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
-@click.option("--verbose", "-v", is_flag=True, help="Print more details.")
+@_arguments.name
+@_options.identifiers
+@_options.exclude
+@_options.verbose
 def sources(
-    name: str, identifier: list[str] | None = None, verbose: bool = False
+    name: str,
+    identifiers: list[str] | None = None,
+    exclude: list[str] | None = None,
+    verbose: bool = False,
 ) -> None:
     """
     Print the campaign-specific sources.
 
     """
-    raw_sources = _filter.get_raw(_campaign.load(name), "sources", identifier)
+    raw_sources = _filter.get_raw(_campaign.load(name), "sources", identifiers, exclude)
     if not raw_sources:
         msg = f"No sources in campaign ..."
         log.info(msg)
@@ -233,18 +215,22 @@ def sources(
     print("\n".join(formatted))
 
 
-@campaign.command(name="tasks")
-@click.argument("name", type=str)
-@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
-@click.option("--verbose", "-v", is_flag=True, help="Print realised task data.")
-def tasks_command(name: str, identifier: list[str], verbose: bool) -> None:
+@campaign.command
+@_arguments.name
+@_options.identifiers
+@_options.exclude
+@_options.verbose
+def tasks(
+    name: str,
+    identifiers: list[str] | None = None,
+    exclude: list[str] | None = None,
+    verbose: bool = False,
+) -> None:
     """
     Show tasks for a campaign.
 
     """
-
-    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifier)
-
+    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifiers, exclude)
     if not raw_task_defs:
         return
 
@@ -262,17 +248,23 @@ def tasks_command(name: str, identifier: list[str], verbose: bool) -> None:
 
 
 @campaign.command
-@click.argument("name", type=str)
-@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
-def run(name: str, identifier: list[str]) -> None:
+@_arguments.name
+@_options.identifiers
+@_options.exclude
+def run(
+    name: str, identifiers: list[str] | None = None, exclude: list[str] | None = None
+) -> None:
     """
     Resolve and run all or specified campaign tasks.
 
     """
 
-    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifier)
+    raw_task_defs = _filter.get_raw(_campaign.load(name), "tasks", identifiers, exclude)
 
     if not raw_task_defs:
+        msg = "No selection to run ..."
+        log.info(msg)
+        print(msg)
         return
 
     # We have candidates
@@ -320,7 +312,9 @@ def run(name: str, identifier: list[str]) -> None:
                 )
             print(postfix)
             if result.return_value:
-                print(f"Task return value: {result.return_value} ...")
+                print(_output.title_divide("Task return value"))
+                print(result.return_value)
+                print(_output.divide())
 
         except KeyboardInterrupt:
             log.info(f"Task {task.identifier} interrupted by user ...")
@@ -334,7 +328,7 @@ def run(name: str, identifier: list[str]) -> None:
 
 
 @campaign.command
-@click.argument("name", type=str)
+@_arguments.name
 def clean(name: str) -> None:
     """
     Delete content in specified campaign directories.
@@ -364,11 +358,12 @@ def clean(name: str) -> None:
 
 
 @campaign.command
-@click.argument("names", nargs=-1, type=str)
+@_arguments.names
 def register(names: tuple[str]) -> None:
     """
-    Register existing campaign directory adding its name to the Bernese-campaign
-    menu.
+    Register existing campaign directory in Bernese-campaign menu.
+
+    Adds the campaign located in the camapgin directory to the menu file.
 
     """
     if not names:
@@ -388,10 +383,10 @@ def register(names: tuple[str]) -> None:
 
 
 @campaign.command
-@click.argument("names", nargs=-1, type=str)
+@_arguments.names
 def unregister(names: tuple[str]) -> None:
     """
-    Unregister campaign in Bernese.
+    Unregister campaign in Bernese-campaign menu.
 
     Removes campaign name from Bernese-campaign menu.
 

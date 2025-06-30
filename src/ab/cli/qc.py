@@ -9,9 +9,7 @@ import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab.qaqc import (
-    check_example,
-)
+from ab.qaqc import check_example
 
 
 log = logging.getLogger(__name__)

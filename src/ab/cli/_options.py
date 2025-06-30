@@ -1,0 +1,74 @@
+"""
+Common command-line options
+
+"""
+
+from typing import Final
+
+import click
+
+from ab.cli import _input
+
+
+FORMAT: Final = f"Format: {_input.DATE_FORMAT}"
+"Date-format help string"
+
+
+# Command output
+verbose = click.option("--verbose", "-v", is_flag=True, help="Print more details.")
+
+# Command attitude
+force = click.option(
+    "-f", "--force", help="Force action.", required=False, is_flag=True
+)
+
+# General input
+ipath = click.option("-i", "--ipath", type=str)
+opath = click.option("-o", "--opath", type=str)
+beg = click.option("-b", "--beg", type=_input.date, help=f"Start date. {FORMAT}")
+end = click.option("-e", "--end", type=_input.date, help=f"End date. {FORMAT}")
+
+# Campaign
+campaign = click.option(
+    "-c",
+    "--campaign",
+    "name",
+    help="Use specified campaign configuration.",
+    required=False,
+)
+template = click.option(
+    "-t",
+    "--template",
+    type=str,
+    default="default",
+    required=False,
+    help="Template for campaign configuration If not given, the default configuration is used.",
+)
+gps_week = click.option(
+    "-g", "--gps-week", type=int, required=False, help=f"GPS-week number"
+)
+
+# Tasks and sources
+identifiers = click.option(
+    "-i",
+    "--identifier",
+    "identifiers",
+    multiple=True,
+    type=str,
+    default=[],
+    required=False,
+    help="Use item with selected identifier. Exclude others not mentioned.",
+)
+exclude = click.option(
+    "-x",
+    "--exclude",
+    multiple=True,
+    type=str,
+    default=[],
+    required=False,
+    help="Exclude item with selected identifier. Include others not mentioned.",
+)
+
+# Troposphere
+hour_file_format = click.option("-h", "--hour-file-format", "ifname", type=str)
+day_file_format = click.option("-d", "--day-file-format", "ofname", type=str)

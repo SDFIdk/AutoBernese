@@ -10,9 +10,7 @@ import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab import (
-    configuration,
-)
+from ab import configuration
 
 
 log = logging.getLogger(__name__)

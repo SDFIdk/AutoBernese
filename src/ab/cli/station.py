@@ -1,5 +1,5 @@
 """
-Command-line interface for station sitelogs and STA files
+Command-line interface for station-related tools
 
 """
 
@@ -15,6 +15,7 @@ from ab import (
     configuration,
     dates,
 )
+from ab.cli import _options
 from ab.bsw import campaign as _campaign
 from ab.station import sta
 
@@ -31,15 +32,7 @@ def station() -> None:
 
 
 @station.command
-@click.option(
-    "-c",
-    "--campaign",
-    "name",
-    required=False,
-    default=None,
-    type=str,
-    help="Campaign-specific station data.",
-)
+@_options.campaign
 @click.option(
     "-f",
     "--config",
@@ -71,7 +64,7 @@ def station() -> None:
     help="Path to optional output path and filename for the STA file.",
 )
 def sitelogs2sta(
-    name: str,
+    campaign: str,
     config: Path,
     sitelogs: tuple[Path],
     individually_calibrated: tuple[str],
@@ -162,11 +155,11 @@ def sitelogs2sta(
             output_sta_file=output_filename,
         )
 
-    elif name is not None:
-        msg = f"Create STA file from arguments in configuration for campaing {name} ..."
+    elif campaign is not None:
+        msg = f"Create STA file from arguments in configuration for campaing {campaign} ..."
         log.info(msg)
         print(msg)
-        arguments = _campaign.load(name).get("station")
+        arguments = _campaign.load(campaign).get("station")
 
     elif configuration.load().get("station") is not None:
         msg = f"Create STA file from arguments in the common user configuration `autobernese.yaml` ..."
