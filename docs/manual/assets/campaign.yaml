@@ -48,8 +48,8 @@ tasks:
 
 - identifier: BASTST
   description: |-
-  run: RunBPE
     Baseline by baseline processing for trouble shooting
+  run: RunBPE
   arguments:
     pcf_file: BASTST
     campaign: *campaign
@@ -63,8 +63,8 @@ tasks:
 
 - identifier: CLKDET
   description: |-
-  run: RunBPE
     Zero-difference network solution providing clock corrections
+  run: RunBPE
   arguments:
     pcf_file: CLKDET
     campaign: *campaign
@@ -78,9 +78,9 @@ tasks:
 
 - identifier: IONDET
   description: |-
-  run: RunBPE
     Zero-difference network solution providing station-wise, regional, or global
     ionosphere maps and the related biases
+  run: RunBPE
   arguments:
     pcf_file: IONDET
     campaign: *campaign
@@ -94,9 +94,9 @@ tasks:
 
 - identifier: LEOPOD
   description: |-
-  run: RunBPE
     Precise Orbit Determination for a Low Earth Orbiting Satellites based on
     on-board GPS-measurements with phase ambiguity resolution
+  run: RunBPE
   arguments:
     pcf_file: LEOPOD
     campaign: *campaign
@@ -110,8 +110,8 @@ tasks:
 
 - identifier: SLRVAL
   description: |-
-  run: RunBPE
     Validation of an existing GNSS or LEO orbit using SLR measurements
+  run: RunBPE
   arguments:
     pcf_file: SLRVAL
     campaign: *campaign
@@ -125,9 +125,9 @@ tasks:
 
 - identifier: ITRF
   description: |-
-  run: RunBPE
     Derives a coordinate and linear velocity approximation from the ITRF
     solution containing non-linear PSD corrections
+  run: RunBPE
   arguments:
     pcf_file: ITRF
     campaign: *campaign
