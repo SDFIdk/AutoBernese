@@ -18,6 +18,7 @@ from rich import box
 from ab.cli import (
     _input,
     _filter,
+    _options,
 )
 from ab import configuration
 from ab.configuration import sources as _sources
@@ -42,22 +43,11 @@ PROTOCOLS: dict[str, ModuleType] = dict(
 
 
 @click.command
-@click.option("-i", "--identifier", multiple=True, type=str, default=[], required=False)
-@click.option(
-    "-f",
-    "--force",
-    help="Force the download of files that are already downloaded according to their maximum age.",
-    required=False,
-    is_flag=True,
-)
-@click.option(
-    "-c",
-    "--campaign",
-    help="Download campaign-specific sources as defined in given campaign configuration.",
-    required=False,
-)
+@_options.identifiers
+@_options.force
+@_options.campaign
 def download(
-    identifier: list[str], force: bool = False, campaign: str | None = None
+    identifiers: list[str], force: bool = False, campaign: str | None = None
 ) -> None:
     """
     Download all sources in the AutoBernese configuration file.
@@ -69,7 +59,7 @@ def download(
         config = configuration.load()
 
     # Load raw configuration items
-    raw_sources = _filter.get_raw(config, "sources", identifier)
+    raw_sources = _filter.get_raw(config, "sources", identifiers)
 
     if not raw_sources:
         msg = f"No sources matching selected identifiers ..."
@@ -89,13 +79,7 @@ def download(
         log.debug(msg)
         return
 
-    # Print preamble, before asking to proceed
-    # preamble = "Downloading the following sources\n"
-    # sz = max(len(source.identifier) for source in sources)
-    # preamble += "\n".join(
-    #     f"{source.identifier: >{sz}s}: {source.description}" for source in sources
-    # )
-    # print(preamble)
+    # Preamble
     table = Table(title="Downloading the following sources", box=box.HORIZONTALS)
     table.add_column("Identifier", no_wrap=True)
     table.add_column("Description")
@@ -109,7 +93,7 @@ def download(
     console = Console()
     console.print(table)
 
-    # Ask
+    # Ask to proceed or not
     if not _input.prompt_proceed():
         return
 
@@ -130,12 +114,14 @@ def download(
     for key in asdict(TransferStatus()):
         table.add_column(key, justify="right")
 
-    with Live(table, console=console, screen=False, refresh_per_second=20):
+    with Live(table, console=console, screen=False, refresh_per_second=4) as live:
 
         status_total: TransferStatus = TransferStatus()
         for source in sources:
             msg = f"Download: {source.identifier}: {source.description}"
             log.info(msg)
+            # live.console.print(msg)
+
             agent = PROTOCOLS[source.protocol]
             status = agent.download(source)
             status_total += status
@@ -151,20 +137,3 @@ def download(
             table.add_section()
             args = ["", ""] + [f"{total}" for total in asdict(status_total).values()]
             table.add_row(*args)
-
-    # status_total: TransferStatus = TransferStatus()
-    # for source in sources:
-    #     msg = f"Download: {source.identifier}: {source.description}"
-    #     print(f"[black on white]{msg}[/]")
-    #     log.info(msg)
-    #     agent = PROTOCOLS[source.protocol]
-    #     status = agent.download(source)
-    #     status_total += status
-    #     print(asdict(status))
-
-    # else:
-    #     msg = "Finished downloading sources ..."
-    #     print(f"\n{msg}")
-    #     log.debug(msg)
-    #     print(f"Overall status:")
-    #     print(asdict(status_total))

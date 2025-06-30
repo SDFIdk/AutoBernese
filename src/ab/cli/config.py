@@ -9,25 +9,20 @@ import click
 from click_aliases import ClickAliasedGroup  # type: ignore
 from rich import print
 
-from ab import (
-    configuration,
+from ab import configuration
+from ab.cli import (
+    _arguments,
+    _options,
 )
-from ab.bsw import (
-    campaign as _campaign,
-)
+from ab.bsw import campaign as _campaign
 
 
 log = logging.getLogger(__name__)
 
 
 @click.command
-@click.argument("section", default=None, type=str, required=False)
-@click.option(
-    "-c",
-    "--campaign",
-    help="See specific campaign configuration.",
-    required=False,
-)
+@_arguments.section
+@_options.campaign
 def config(section: str, campaign: str | None = None) -> None:
     """
     Show all or specified configuration section(s).
