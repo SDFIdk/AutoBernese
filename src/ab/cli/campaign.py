@@ -251,8 +251,12 @@ def tasks(
 @_arguments.name
 @_options.identifiers
 @_options.exclude
+@_options.yes
 def run(
-    name: str, identifiers: list[str] | None = None, exclude: list[str] | None = None
+    name: str,
+    identifiers: list[str] | None = None,
+    exclude: list[str] | None = None,
+    yes: bool = False,
 ) -> None:
     """
     Resolve and run all or specified campaign tasks.
@@ -318,18 +322,14 @@ def run(
 
         except KeyboardInterrupt:
             log.info(f"Task {task.identifier} interrupted by user ...")
-            log.info("Asking user to continue with remaining tasks or exit completely.")
-            exit_confirmed = input(
-                "Do you want to exit completely ([y]/n)"
-            ).lower() in ("", "y")
-            if exit_confirmed:
-                log.info("User confirmed breaking execution of remaining tasks.")
-                break
+            log.info(f"Stopping the rest of the task execution. ...")
+            break
 
 
 @campaign.command
 @_arguments.name
-def clean(name: str) -> None:
+@_options.yes
+def clean(name: str, yes: bool = False) -> None:
     """
     Delete content in specified campaign directories.
 

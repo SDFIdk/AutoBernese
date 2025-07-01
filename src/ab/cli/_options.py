@@ -14,6 +14,16 @@ FORMAT: Final = f"Format: {_input.DATE_FORMAT}"
 "Date-format help string"
 
 
+def set_yes(ctx, param, value):
+    if value is True:
+        _input.set_prompt_proceed_yes()
+
+
+# Command input
+yes = click.option(
+    "--yes", "-y", is_flag=True, help="Continue without asking.", callback=set_yes
+)
+
 # Command output
 verbose = click.option("--verbose", "-v", is_flag=True, help="Print more details.")
 
