@@ -44,22 +44,30 @@ PROTOCOLS: dict[str, ModuleType] = dict(
 
 @click.command
 @_options.identifiers
+@_options.exclude
 @_options.force
 @_options.campaign
+@_options.yes
 def download(
-    identifiers: list[str], force: bool = False, campaign: str | None = None
+    identifiers: list[str] | None,
+    exclude: list[str] | None = None,
+    force: bool = False,
+    name: str | None = None,
+    yes: bool = False,
 ) -> None:
     """
-    Download all sources in the AutoBernese configuration file.
+    Download sources in common or campaign configuration file.
 
     """
-    if campaign is not None:
-        config = _campaign.load(campaign)
+    if name is not None:
+        log.info(f"Using campaign configuration from {name} ...")
+        config = _campaign.load(name)
     else:
+        log.info(f"Using default configuration ...")
         config = configuration.load()
 
     # Load raw configuration items
-    raw_sources = _filter.get_raw(config, "sources", identifiers)
+    raw_sources = _filter.get_raw(config, "sources", identifiers, exclude)
 
     if not raw_sources:
         msg = f"No sources matching selected identifiers ..."

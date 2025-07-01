@@ -23,13 +23,13 @@ log = logging.getLogger(__name__)
 @click.command
 @_arguments.section
 @_options.campaign
-def config(section: str, campaign: str | None = None) -> None:
+def config(section: str, name: str | None = None) -> None:
     """
     Show all or specified configuration section(s).
 
     """
-    if campaign is not None:
-        config = _campaign.load(campaign)
+    if name is not None:
+        config = _campaign.load(name)
     else:
         config = configuration.load()
 

@@ -18,7 +18,7 @@ def test_add_download_statusses():
     assert result2 == expected2, f"Expected {result2!r} to be {expected2!r} ..."
 
 
-def test_radd_download_statusses():
+def test_radd_transfer_statusses():
     result = TransferStatus(1, 2)
     result += TransferStatus(2, 1)
     expected = TransferStatus(3, 3)
