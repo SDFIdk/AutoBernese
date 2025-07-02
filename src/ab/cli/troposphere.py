@@ -24,6 +24,7 @@ from ab import (
     configuration,
     vmf,
 )
+from ab.dates import gps_week_limits
 
 
 log = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ class CLITroposphereInput:
 def parse_args(
     ipath: str | None,
     opath: str | None,
+    gps_week: int | None,
     beg: dt.date | None,
     end: dt.date | None,
     ifname: str | None,
@@ -82,6 +84,9 @@ def parse_args(
     ofname = ofname or section.get("ofname")
     if ofname is None:
         raise SystemExit(f"Missing day-file format from command or configuration ...")
+
+    if gps_week is not None:
+        beg, end = gps_week_limits(gps_week)
 
     if beg is None:
         beg = dt.date.today()
@@ -148,6 +153,7 @@ def dispatch(
 def build(
     ipath: str | None,
     opath: str | None,
+    gps_week: int | None,
     beg: dt.date | None,
     end: dt.date | None,
     ifname: str | None,
@@ -159,7 +165,7 @@ def build(
     Build day file for each date for which there is data available.
 
     """
-    args = parse_args(ipath, opath, beg, end, ifname, ofname)
+    args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
     dispatch(args, "build", "Build", timeout=10)
 
 
@@ -168,6 +174,7 @@ def build(
 def check(
     ipath: str | None,
     opath: str | None,
+    gps_week: int | None,
     beg: dt.date | None,
     end: dt.date | None,
     ifname: str | None,
@@ -177,7 +184,7 @@ def check(
     Check that input hour files went into built day files.
 
     """
-    args = parse_args(ipath, opath, beg, end, ifname, ofname)
+    args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
     dispatch(args, "check", "Check", timeout=10)
 
 
@@ -186,6 +193,7 @@ def check(
 def status(
     ipath: str | None,
     opath: str | None,
+    gps_week: int | None,
     beg: dt.date | None,
     end: dt.date | None,
     ifname: str | None,
@@ -195,7 +203,7 @@ def status(
     Show availability of hour and day files in selected interval.
 
     """
-    args = parse_args(ipath, opath, beg, end, ifname, ofname)
+    args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
     log.info(f"Show data status for chosen interval {args.beg} to {args.end} ...")
     builders = vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end)
     try:

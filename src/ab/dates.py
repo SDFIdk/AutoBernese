@@ -108,8 +108,20 @@ def gps_weekday(date: dt.date | dt.datetime) -> int:
     return (date.weekday() + 1) % 7
 
 
-def date_from_gps_week(gps_week: str | int) -> dt.date:
+def date_from_gps_week(gps_week: int | str) -> dt.date:
     return GPS_EPOCH + dt.timedelta(7 * int(gps_week))
+
+
+def gps_week_limits(gps_week: int | str) -> tuple[dt.date, dt.date]:
+    beg = date_from_gps_week(gps_week)
+    end = beg + dt.timedelta(days=7)
+    return (beg, end)
+
+
+def gps_week_range(gps_week: int | str) -> list[dt.date]:
+    beg = date_from_gps_week(gps_week)
+    end = beg + dt.timedelta(days=7)
+    return date_range(beg, end)
 
 
 class GPSDate(dt.datetime):

@@ -36,7 +36,7 @@ from ab.configuration import (
     tasks as _tasks,
 )
 from ab.bsw import campaign as _campaign
-from ab.dates import GPSDate
+from ab.dates import gps_week_limits
 
 
 log = logging.getLogger(__name__)
@@ -159,11 +159,10 @@ def create(
 
     if gps_week is not None:
         chosen_input += f"{gps_week=} giving "
-        beg = GPSDate.from_gps_week(gps_week)
-        end = beg + dt.timedelta(days=7)
+        beg, end = gps_week_limits(gps_week)
 
     if beg is None or end is None:
-        msg = f"Expected campaign interval given as either GPS week or start and end dates. ..."
+        msg = f"Expected campaign interval given as either GPS week or start and end dates ..."
         log.error(msg)
         raise SystemExit(msg)
 
