@@ -11,6 +11,8 @@ from ab.dates import (
     gps_weekday,
     date_from_gps_week,
     GPSDate,
+    gps_week_limits,
+    gps_week_range,
 )
 
 
@@ -118,3 +120,30 @@ def test_GPSDate_two_digit_year():
     expected = 80
     result = date.y
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_gps_week_limits():
+    gps_week = 2222
+    to_expect = (
+        dt.date(2022, 8, 7),
+        dt.date(2022, 8, 13),
+    )
+    results = gps_week_limits(gps_week)
+    for result, expected in zip(results, to_expect):
+        assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_gps_week_range():
+    gps_week = 2222
+    expected_range = [
+        dt.date(2022, 8, 7),
+        dt.date(2022, 8, 8),
+        dt.date(2022, 8, 9),
+        dt.date(2022, 8, 10),
+        dt.date(2022, 8, 11),
+        dt.date(2022, 8, 12),
+        dt.date(2022, 8, 13),
+    ]
+    resulting_range = gps_week_range(gps_week)
+    for result, expected in zip(resulting_range, expected_range):
+        assert result == expected, f"Expected {result!r} to be {expected!r} ..."

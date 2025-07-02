@@ -114,14 +114,12 @@ def date_from_gps_week(gps_week: int | str) -> dt.date:
 
 def gps_week_limits(gps_week: int | str) -> tuple[dt.date, dt.date]:
     beg = date_from_gps_week(gps_week)
-    end = beg + dt.timedelta(days=7)
+    end = beg + dt.timedelta(days=6)
     return (beg, end)
 
 
 def gps_week_range(gps_week: int | str) -> list[dt.date]:
-    beg = date_from_gps_week(gps_week)
-    end = beg + dt.timedelta(days=7)
-    return date_range(beg, end)
+    return date_range(*gps_week_limits(gps_week))
 
 
 class GPSDate(dt.datetime):
