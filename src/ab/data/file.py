@@ -31,7 +31,7 @@ def download(source: Source) -> TransferStatus:
 
         # Loop over each file resolved
         for ifname in resolve_wildcards(pair.uri):
-            ofname = destination / ifname.name
+            ofname = destination / ifname.name.upper()
 
             if not ifname.is_file():
                 log.warning(f"File {ifname!r} not found ...")
