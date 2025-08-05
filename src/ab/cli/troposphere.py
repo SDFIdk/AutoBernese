@@ -109,6 +109,7 @@ def common_options(func):
 
     @_options.ipath
     @_options.opath
+    @_options.gps_week
     @_options.beg
     @_options.end
     @_options.hour_file_format
