@@ -149,7 +149,7 @@ the software uses: -->
 === "Configuration file segment"
 
     ```yaml  linenums="1"
-    --8<-- "src/ab/configuration/env.yaml::31"
+    --8<-- "src/ab/configuration/core.yaml::31"
     # (...)
     ```
 
@@ -229,7 +229,7 @@ AutoBernese runtime directory:
 ```yaml title="Configuration file segment" linenums="41"
 # (...)
 
---8<-- "src/ab/configuration/env.yaml:76:102"
+--8<-- "src/ab/configuration/core.yaml:76:102"
 
 # (...)
 ```
@@ -295,7 +295,7 @@ see the following.
     ```yaml  linenums="103"
     # (...)
 
-    --8<-- "src/ab/configuration/env.yaml:103:"
+    --8<-- "src/ab/configuration/core.yaml:103:"
     ```
 
 === "Rendered configuration"
@@ -732,7 +732,7 @@ The default settings in the built-in configuration file are:
 
 
 ```yaml title="station section of the built-in configuration file"
---8<-- "src/ab/configuration/env.yaml:107:117"
+--8<-- "src/ab/configuration/core.yaml:107:117"
 ```
 
 In this case, the sitelogs to use will be all the `.log` files in `$D/sitelogs`,

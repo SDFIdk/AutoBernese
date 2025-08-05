@@ -3,7 +3,8 @@ from ab import pkg
 
 
 def test_package_data_exist():
-    assert pkg.env.is_file()
+    assert pkg.core.is_file()
+    assert pkg.bsw_env_vars.is_file()
     assert pkg.country_codes.is_file()
     assert pkg.template_sta_file.is_file()
     assert pkg.bpe_runner.is_file()

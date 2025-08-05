@@ -17,7 +17,7 @@ The different types of configuration are shown in the table below:
 
 | Configuration     | File                   | Location                                               | Purpose                                                                             |
 | ----------------- | ---------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| Core              | `env.yaml`             | Inside the package                                     | Integrate with activated Bernese environment and provide core and default settings. |
+| Core              | `core.yaml`            | Inside the package                                     | Integrate with activated Bernese environment and provide core and default settings. |
 | Common            | `autobernese.yaml`     | AutoBernese runtime directory                          | Contain common data sources, campaign-creation setup and station sitelog settings.  |
 | Campaign          | `campaign.yaml`        | Campaign directory                                     | Campaign-specific environment, data sources and actions                             |
 | Campaign template | `<campaign-type>.yaml` | `templates` directory in AutoBernese runtime directory | Have pre-set campaign configuration for campaigns of the same type.                 |
@@ -58,7 +58,7 @@ relevant environment variables set by the `LOADGPS.setvar` script. The extracted
 values are made available for re-use in other parts of the configuration.
 
 ```yaml linenums="1"
---8<-- "src/ab/configuration/env.yaml::33"
+--8<-- "src/ab/configuration/core.yaml::33"
 ```
 
 The section is a YAML mapping whose items have values that are dynamically
@@ -83,7 +83,7 @@ file paths are derived by referencing the dynamically-loaded environment
 variables in the previous section.
 
 ```yaml linenums="35"
---8<-- "src/ab/configuration/env.yaml:35:42"
+--8<-- "src/ab/configuration/core.yaml:35:42"
 ```
 
 
@@ -96,7 +96,7 @@ configuration file `autobernese.yaml` or, for some of them, the
 campaign-specific configuration file; both described further below.
 
 ```yaml linenums="44"
---8<-- "src/ab/configuration/env.yaml:44:78"
+--8<-- "src/ab/configuration/core.yaml:44:78"
 ```
 
 As there may be more than one Bernese installation on a system, the AutoBernese
@@ -123,7 +123,7 @@ The `campaign` section determines the default directory structure of a new
 campaign. This section is overridable by the common configuration.
 
 ```yaml linenums="79"
---8<-- "src/ab/configuration/env.yaml:79:99"
+--8<-- "src/ab/configuration/core.yaml:79:99"
 ```
 
 
