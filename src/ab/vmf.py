@@ -34,12 +34,6 @@ log = logging.getLogger(__name__)
 
 # Filename structure
 
-_FSTR_IFNAME: Final = "VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}"
-"Default filename structure for the hour files obtained."
-
-_FSTR_OFNAME: Final = "VMF3_{date.year}{date.doy:03d}0.GRD"
-"Default output name for the day files that this module builds."
-
 _HOURS: Final = ["00", "06", "12", "18"]
 "Hours during the day at which source files are supplied."
 
@@ -105,8 +99,8 @@ class DayFileBuilder:
     date: GPSDate
     ipath: Path | str
     opath: Path | str
-    ifname: Path | str = _FSTR_IFNAME
-    ofname: Path | str = _FSTR_OFNAME
+    ifname: Path | str
+    ofname: Path | str
 
     def __post_init__(self) -> None:
         """
@@ -275,7 +269,12 @@ class DayFileBuilder:
 
 
 def day_file_builders(
-    ipath: Path | str, opath: Path | str, beg: dt.date, end: dt.date
+    ipath: Path | str,
+    opath: Path | str,
+    beg: dt.date,
+    end: dt.date,
+    ifname: Path | str,
+    ofname: Path | str,
 ) -> Iterator[DayFileBuilder]:
     """
     Return an iterator of DayFileBuilder instances with fixed input and output
@@ -283,7 +282,7 @@ def day_file_builders(
 
     """
     return (
-        DayFileBuilder(date, ipath, opath)
+        DayFileBuilder(date, ipath, opath, ifname, ofname)
         for date in dates_to_gps_date(date_range(beg, end))
     )
 

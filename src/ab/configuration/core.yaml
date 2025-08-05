@@ -105,28 +105,41 @@ troposphere:
   # configuration files.
   data:
 
-    OP:
-      hour_url: &CORE_TROPO_OP_URL_H https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}
-      hour_src_parameters: &CORE_TROPO_OP_SRC_PARAMETERS_FULL
-        date: !DateRange { beg: 2008-01-01, extend_end_by: 1 }
-        hour: ['00', '06', '12', '18']
-      hour_directory: &CORE_TROPO_OP_DIR_H !Path [*D, VMF3, '1x1_OP_H', '{date.year}']
-      grd_directory: &CORE_TROPO_OP_DIR_GRD !Path [*D, VMF3, '1x1_OP_GRD', '{date.year}']
-      hour_filename: &CORE_TROPO_OP_FNAME_H 'VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}'
-      grd_filename: &CORE_TROPO_OP_FNAME_GRD 'VMF3_{date.year}{date.doy:03d}0.GRD'
+    common:
+      hour_extensions: &CORE_HOUR_EXTENSIONS ['00', '06', '12', '18']
 
-    EI:
-      hour_url: &CORE_TROPO_EI_URL_H https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_EI/{date.year}
-      hour_src_parameters: &CORE_TROPO_EI_SRC_PARAMETERS_FULL
-        date: !DateRange { beg: 1997-01-01, end: 2007-12-31, extend_end_by: 1 }
-        hour: ['00', '06', '12', '18']
-      hour_directory: &CORE_TROPO_EI_DIR_H !Path [*D, VMF3, '1x1_EI_H', '{date.year}']
-      grd_directory: &CORE_TROPO_EI_DIR_GRD !Path [*D, VMF3, '1x1_EI_GRD', '{date.year}']
-      hour_filename: &CORE_TROPO_EI_FNAME_H 'VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}'
-      grd_filename: &CORE_TROPO_EI_FNAME_GRD 'VMF3_{date.year}{date.doy:03d}0.GRD'
+    VMF3_OP_1X1:
+      hour_url: &CORE_URL_H_VMF3_OP_1X1 https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_OP/{date.year}
+      date_beg: &CORE_DATE_BEG_VMF3_OP_1X1 2008-01-01
+      date_end: &CORE_DATE_END_VMF3_OP_1X1 null
+      hour_directory: &CORE_DIR_H_VMF3_OP_1X1 !Path [*D, VMF3, '1x1_OP_H', '{date.year}']
+      grd_directory: &CORE_DIR_GRD_VMF3_OP_1X1 !Path [*D, VMF3, '1x1_OP_GRD', '{date.year}']
+      hour_filename: &CORE_FNAME_H_VMF3_OP_1X1 'VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}'
+      grd_filename: &CORE_FNAME_GRD_VMF3_OP_1X1 'VMF3_{date.year}{date.doy:03d}0.GRD'
 
-  # Defaults
-  ipath: *CORE_TROPO_OP_DIR_H
-  opath: *CORE_TROPO_OP_DIR_GRD
-  ifname: *CORE_TROPO_OP_FNAME_H
-  ofname: *CORE_TROPO_OP_FNAME_GRD
+    VMF3_EI_1X1:
+      hour_url: &CORE_URL_H_VMF3_EI_1X1 https://vmf.geo.tuwien.ac.at/trop_products/GRID/1x1/VMF3/VMF3_EI/{date.year}
+      date_beg: &CORE_DATE_BEG_VMF3_EI_1X1 1997-01-01
+      date_end: &CORE_DATE_END_VMF3_EI_1X1 2007-12-31
+      hour_directory: &CORE_DIR_H_VMF3_EI_1X1 !Path [*D, VMF3, '1x1_EI_H', '{date.year}']
+      grd_directory: &CORE_DIR_GRD_VMF3_EI_1X1 !Path [*D, VMF3, '1x1_EI_GRD', '{date.year}']
+      hour_filename: &CORE_FNAME_H_VMF3_EI_1X1 'VMF3_{date.year}{date.month:02d}{date.day:02d}.H{hour}'
+      grd_filename: &CORE_FNAME_GRD_VMF3_EI_1X1 'VMF3_{date.year}{date.doy:03d}0.GRD'
+
+    VMF1_OP_2.5X2:
+      hour_url: &CORE_URL_H_VMF1_OP_2COMMA5X2 https://vmf.geo.tuwien.ac.at/trop_products/GRID/2.5x2/VMF1/VMF1_OP/{date.year}
+      date_beg: &CORE_DATE_BEG_VMF1_OP_2COMMA5X2 1985-01-01
+      date_end: &CORE_DATE_END_VMF1_OP_2COMMA5X2 null
+      hour_directory: &CORE_DIR_H_VMF1_OP_2COMMA5X2 !Path [*D, VMF1, '1x1_EI_H', '{date.year}']
+      grd_directory: &CORE_DIR_GRD_VMF1_OP_2COMMA5X2 !Path [*D, VMF1, '1x1_EI_GRD', '{date.year}']
+      hour_filename: &CORE_FNAME_H_VMF1_OP_2COMMA5X2 'VMFG_{date.year}{date.month:02d}{date.day:02d}.H{hour}'
+      grd_filename: &CORE_FNAME_GRD_VMF1_OP_2COMMA5X2 'VMFG_{date.year}{date.doy:03d}0.GRD'
+
+  # Default argumemts for the troposphere CLI
+  # Define your own in the common or campaign-specific configuration file.
+  ipath: *CORE_DIR_H_VMF3_OP_1X1
+  opath: *CORE_DIR_GRD_VMF3_OP_1X1
+  ifname: *CORE_FNAME_H_VMF3_OP_1X1
+  ofname: *CORE_FNAME_GRD_VMF3_OP_1X1
+  beg: *CORE_DATE_BEG_VMF3_OP_1X1
+  end: *CORE_DATE_END_VMF3_OP_1X1
