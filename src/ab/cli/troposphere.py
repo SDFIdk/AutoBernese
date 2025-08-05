@@ -77,6 +77,15 @@ def parse_args(
     if opath is None:
         raise SystemExit(f"Missing output-path from command or configuration ...")
 
+    if gps_week is not None:
+        beg, end = gps_week_limits(gps_week)
+
+    if beg is None:
+        beg = section.get("beg") or dt.date.today()
+
+    if end is None:
+        end = section.get("end") or beg + dt.timedelta(days=1)
+
     ifname = ifname or section.get("ifname")
     if ifname is None:
         raise SystemExit(f"Missing hour-file format from command or configuration ...")
@@ -85,16 +94,9 @@ def parse_args(
     if ofname is None:
         raise SystemExit(f"Missing day-file format from command or configuration ...")
 
-    if gps_week is not None:
-        beg, end = gps_week_limits(gps_week)
-
-    if beg is None:
-        beg = dt.date.today()
-
-    if end is None:
-        end = beg + dt.timedelta(days=1)
-
-    return CLITroposphereInput(ipath, opath, beg, end, ifname, ofname)
+    raw = CLITroposphereInput(ipath, opath, beg, end, ifname, ofname)
+    log.info(f"Run using the following input: {raw} ...")
+    return raw
 
 
 def common_options(func):
@@ -107,6 +109,7 @@ def common_options(func):
 
     @_options.ipath
     @_options.opath
+    @_options.gps_week
     @_options.beg
     @_options.end
     @_options.hour_file_format
@@ -136,7 +139,9 @@ def dispatch(
     args: CLITroposphereInput, method: str, action: str, *, timeout: float = 1
 ) -> None:
     log.info(f"{action} VMF files for chosen interval {args.beg} to {args.end} ...")
-    builders = vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end)
+    builders = vmf.day_file_builders(
+        args.ipath, args.opath, args.beg, args.end, args.ifname, args.ofname
+    )
     wrappers = [partial(cli_wrapper, builder, method, action) for builder in builders]
     try:
         with mp.Pool(processes=N_CPUS) as pool:
@@ -205,7 +210,9 @@ def status(
     """
     args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
     log.info(f"Show data status for chosen interval {args.beg} to {args.end} ...")
-    builders = vmf.day_file_builders(args.ipath, args.opath, args.beg, args.end)
+    builders = vmf.day_file_builders(
+        args.ipath, args.opath, args.beg, args.end, args.ifname, args.ofname
+    )
     try:
         with mp.Pool(processes=N_CPUS) as pool:
             multiple_results = [

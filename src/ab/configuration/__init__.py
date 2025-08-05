@@ -141,7 +141,7 @@ def _core() -> ConfigurationType:
         raise SystemExit(
             "Please source `BERN54/LOADGPS.setvar` before running AutoBernese ..."
         )
-    return loads(pkg.env.read_text())
+    return loads(pkg.core.read_text())
 
 
 def _runtime() -> dict[str, Any]:
@@ -274,7 +274,7 @@ def load(
 
     """
     # Core
-    filenames: list[Path | str] = [pkg.env]
+    filenames: list[Path | str] = [pkg.core]
 
     # Common
     ifname_common = _common_config()

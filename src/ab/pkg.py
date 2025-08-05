@@ -14,7 +14,7 @@ module = resources.files(ab)
 with resources.as_file(module) as base:
 
     # Configuration module
-    env = base.joinpath("configuration/env.yaml")
+    core = base.joinpath("configuration/core.yaml")
     bsw_env_vars = base.joinpath("configuration/bsw_env_vars")
 
     # Country codes

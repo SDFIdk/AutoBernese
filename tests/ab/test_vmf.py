@@ -1,16 +1,15 @@
 import datetime as dt
 from pathlib import Path
 
-from ab.vmf import (
-    _input_filepaths,
-    _FSTR_IFNAME,
-)
+from ab import configuration
+from ab.vmf import _input_filepaths
 
 
 def test_input_filenames():
     path = Path("{date.year}")
     date = dt.date(2023, 1, 1)
-    result_list = _input_filepaths(path, _FSTR_IFNAME, date)
+    ifname = configuration.load().get("troposphere").get("ifname")
+    result_list = _input_filepaths(path, ifname, date)
     expected_list = [
         Path("2023/VMF3_20230101.H00"),
         Path("2023/VMF3_20230101.H06"),
