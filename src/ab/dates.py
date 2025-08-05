@@ -39,10 +39,10 @@ def date_range(
 
     # Type validation
     if not isinstance(beg, (dt.date, dt.datetime)):
-        raise TypeError(f"Excpected {beg=} to be `dt.datetime` or `dt.date` ...")
+        raise TypeError(f"Expected {beg=} to be `dt.datetime` or `dt.date` ...")
 
     if not isinstance(end, (dt.date, dt.datetime)):
-        raise TypeError(f"Excpected {end=} to be `dt.datetime` or `dt.date` ...")
+        raise TypeError(f"Expected {end=} to be `dt.datetime` or `dt.date` ...")
 
     # Casting, if needed, to date instances which have the ordinal-properties.
     if isinstance(beg, dt.datetime):
