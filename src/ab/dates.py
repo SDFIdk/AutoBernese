@@ -14,6 +14,26 @@ END_INCLUDED: Final = 1
 "Add this to `range` in `date_range` to include both start and end date in range."
 
 
+def asdate(date: dt.datetime) -> dt.date:
+    """
+    Return a date instance from a datetime instance or the date itself, if the
+    input is actually a date instance.
+
+    Raises a TypeError, if the instance is neither a date or datetime instance.
+
+    """
+    # NOTE: The order of these checks is important, since `isinstance()` allows
+    # for a datetime instance be an instance of date. We want to specifically
+    # check for a datetime instance first, and then anything that derives from
+    # the date type such as GPSDate will be interpreted as a date and be
+    # returned without modification.
+    if isinstance(date, dt.datetime):
+        return date.date()
+    if isinstance(date, dt.date):
+        return date
+    raise TypeError(f"Expected input date to be datetime instance. Got {date!r} ...")
+
+
 def date_range(
     beg: dt.date | dt.datetime,
     end: dt.date | dt.datetime | None = None,
@@ -37,19 +57,10 @@ def date_range(
     if end is None:
         end = dt.date.today()
 
-    # Type validation
-    if not isinstance(beg, (dt.date, dt.datetime)):
-        raise TypeError(f"Expected {beg=} to be `dt.datetime` or `dt.date` ...")
-
-    if not isinstance(end, (dt.date, dt.datetime)):
-        raise TypeError(f"Expected {end=} to be `dt.datetime` or `dt.date` ...")
-
-    # Casting, if needed, to date instances which have the ordinal-properties.
-    if isinstance(beg, dt.datetime):
-        beg = beg.date()
-
-    if isinstance(end, dt.datetime):
-        end = end.date()
+    # Casting (+ implicitly type validating), if needed, to date instances which
+    # have the ordinal-properties.
+    beg = asdate(beg)
+    end = asdate(end)
 
     return [
         dt.date.fromordinal(n)
@@ -85,9 +96,7 @@ def gps_week(date: dt.date | dt.datetime) -> int:
     Calculate GPS-week number for given date.
 
     """
-    if isinstance(date, dt.datetime):
-        date = date.date()
-
+    date = asdate(date)
     if date < GPS_EPOCH:
         raise ValueError("Date must be on or after first GPS week. Got {date!r} ...")
 
