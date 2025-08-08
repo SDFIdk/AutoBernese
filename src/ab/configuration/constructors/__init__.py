@@ -9,6 +9,7 @@ from yaml_env_tag import construct_env_tag  # type: ignore
 from ab.configuration.constructors import (
     paths,
     dates,
+    strings,
 )
 
 
@@ -22,6 +23,8 @@ _tag_constructor_map = (
     # Use parameters
     ("!DateRange", dates.date_range_constructor),
     ("!AsGPSDate", dates.date_to_gps_date_constructor),
+    # Manipulate strings in sequences
+    ("!StringTransform", strings.string_transform_constructor),
 )
 
 
