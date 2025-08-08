@@ -93,7 +93,7 @@ def date_range_constructor(
     beg = d.get("beg")
     assert isinstance(
         beg, (dt.date, dt.datetime)
-    )  # Remember that this only wors for debug mode.
+    )  # Remember that this only works for debug mode.
     end = d.get("end")
     extend_end_by = d.get("extend_end_by", 0)
     return dates_to_gps_date(date_range(beg, end, extend_end_by=extend_end_by))
