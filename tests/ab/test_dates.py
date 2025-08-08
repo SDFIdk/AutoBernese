@@ -3,6 +3,7 @@ import datetime as dt
 import pytest
 
 from ab.dates import (
+    asdate,
     date_range,
     doy,
     doy2date,
@@ -14,6 +15,37 @@ from ab.dates import (
     gps_week_limits,
     gps_week_range,
 )
+
+
+def test_datetime_is_an_instance_of_date():
+    date = dt.datetime.now()
+    assert isinstance(date, dt.date)
+
+
+def test_asdate_with_date_instance():
+    input_date = dt.date(1991, 1, 1)
+    expected = input_date
+    result = asdate(input_date)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_asdate_with_datetime_instance():
+    input_datetime = dt.datetime(1991, 1, 1, 12, 0, 0)
+    expected = dt.date(1991, 1, 1)
+    result = asdate(input_datetime)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_asdate_with_GPSDate_instance():
+    input_date = GPSDate(1991, 1, 1)
+    expected = GPSDate(1991, 1, 1)
+    result = asdate(input_date)
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_asdate_with_incorrect_input_type():
+    with pytest.raises(TypeError) as info:
+        asdate(None)
 
 
 def test_date_range_simple():
@@ -33,6 +65,13 @@ def test_date_range_simple():
 
     for result, expected in zip(resulting_dates, expected_dates):
         assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_date_range_with_incorrect_input():
+    t0 = None
+    t1 = 2
+    with pytest.raises(TypeError) as info:
+        date_range(t0, t1)
 
 
 def test_date_range_extended_end():
@@ -72,6 +111,11 @@ def test_doy2date():
     for (year, doy_), expected in test_data:
         result = doy2date(year, doy_)
         assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_gps_week_with_incorrect_input():
+    with pytest.raises(ValueError) as info:
+        gps_week(dt.date(1980, 1, 5))
 
 
 def test_gps_week():
@@ -115,13 +159,6 @@ def test_date_from_gps_week():
     assert result == expected, f"Expected {result!r} to be {expected!r} ..."
 
 
-def test_GPSDate_two_digit_year():
-    date = GPSDate(1980, 1, 6)
-    expected = 80
-    result = date.y
-    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
-
-
 def test_gps_week_limits():
     gps_week = 2222
     to_expect = (
@@ -147,3 +184,17 @@ def test_gps_week_range():
     resulting_range = gps_week_range(gps_week)
     for result, expected in zip(resulting_range, expected_range):
         assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_GPSDate_two_digit_year():
+    date = GPSDate(1980, 1, 6)
+    expected = 80
+    result = date.y
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
+
+
+def test_GPSDate_conversion_to_date():
+    date = GPSDate(1980, 1, 6)
+    expected = dt.date(1980, 1, 6)
+    result = date.date()
+    assert result == expected, f"Expected {result!r} to be {expected!r} ..."
