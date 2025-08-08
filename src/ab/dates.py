@@ -55,7 +55,7 @@ def date_range(
 
     # Allowing end to be None to obtain today's date
     if end is None:
-        end = dt.date.today()
+        end = beg
 
     # Casting (+ implicitly type validating), if needed, to date instances which
     # have the ordinal-properties.
