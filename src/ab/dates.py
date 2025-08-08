@@ -14,6 +14,26 @@ END_INCLUDED: Final = 1
 "Add this to `range` in `date_range` to include both start and end date in range."
 
 
+def asdate(date: dt.datetime) -> dt.date:
+    """
+    Return a date instance from a datetime instance or the date itself, if the
+    input is actually a date instance.
+
+    Raises a TypeError, if the instance is neither a date or datetime instance.
+
+    """
+    # NOTE: The order of these checks is important, since `isinstance()` allows
+    # for a datetime instance be an instance of date. We want to specifically
+    # check for a datetime instance first, and then anything that derives from
+    # the date type such as GPSDate will be interpreted as a date and be
+    # returned without modification.
+    if isinstance(date, dt.datetime):
+        return date.date()
+    if isinstance(date, dt.date):
+        return date
+    raise TypeError(f"Expected input date to be datetime instance. Got {date!r} ...")
+
+
 def date_range(
     beg: dt.date | dt.datetime,
     end: dt.date | dt.datetime | None = None,
@@ -35,21 +55,12 @@ def date_range(
 
     # Allowing end to be None to obtain today's date
     if end is None:
-        end = dt.date.today()
+        end = beg
 
-    # Type validation
-    if not isinstance(beg, (dt.date, dt.datetime)):
-        raise TypeError(f"Expected {beg=} to be `dt.datetime` or `dt.date` ...")
-
-    if not isinstance(end, (dt.date, dt.datetime)):
-        raise TypeError(f"Expected {end=} to be `dt.datetime` or `dt.date` ...")
-
-    # Casting, if needed, to date instances which have the ordinal-properties.
-    if isinstance(beg, dt.datetime):
-        beg = beg.date()
-
-    if isinstance(end, dt.datetime):
-        end = end.date()
+    # Casting (+ implicitly type validating), if needed, to date instances which
+    # have the ordinal-properties.
+    beg = asdate(beg)
+    end = asdate(end)
 
     return [
         dt.date.fromordinal(n)
@@ -85,9 +96,7 @@ def gps_week(date: dt.date | dt.datetime) -> int:
     Calculate GPS-week number for given date.
 
     """
-    if isinstance(date, dt.datetime):
-        date = date.date()
-
+    date = asdate(date)
     if date < GPS_EPOCH:
         raise ValueError("Date must be on or after first GPS week. Got {date!r} ...")
 
@@ -122,7 +131,7 @@ def gps_week_range(gps_week: int | str) -> list[dt.date]:
     return date_range(*gps_week_limits(gps_week))
 
 
-class GPSDate(dt.datetime):
+class GPSDate(dt.date):
     """
     A GPSDate instance is a Python datetime instance with additional properties
     and a serialiser of particular data for that date or datetime.
@@ -136,51 +145,73 @@ class GPSDate(dt.datetime):
     @classmethod
     def from_date(cls, date: dt.date | dt.datetime, /) -> "GPSDate":
         """
-        Create a GPSDate instance from an existing Python date or datetime
-        instance.
+        Create a GPSDate instance from an existing date instance.
 
         """
-        if isinstance(date, dt.datetime):
-            return cls(
-                date.year, date.month, date.day, date.hour, date.minute, date.second
-            )
-        # It is a date instance without time, so we use midnight as the time
+        date = asdate(date)
         return cls(date.year, date.month, date.day)
 
     @classmethod
     def from_gps_week(cls, gps_week: int | str, /) -> "GPSDate":
+        """
+        Create a GPSDate instance from a valid GPS week.
+
+        """
         return cls.from_date(date_from_gps_week(gps_week))
 
     @classmethod
     def from_year_doy(cls, year: int | str, doy: int | str, /) -> "GPSDate":
+        """
+        Create a GPSDate instance from a valid day-of-year.
+
+        """
         return cls.from_date(doy2date(int(year), int(doy)))
 
     def date(self) -> dt.date:
-        return dt.date(self.year, self.month, self.day)
+        """
+        Return date as Python date instance.
 
-    def datetime(self) -> dt.datetime:
-        return dt.datetime(
-            self.year, self.month, self.day, self.hour, self.minute, self.second
-        )
+        """
+        return dt.date(self.year, self.month, self.day)
 
     @property
     def gps_week(self) -> int:
+        """
+        Return GPS week number for date.
+
+        """
         return gps_week(self)
 
     @property
     def gps_weekday(self) -> int:
+        """
+        Return weekday index for GPS week (Sunday is 0).
+
+        """
         return gps_weekday(self)
 
     @property
     def doy(self) -> int:
+        """
+        Return day-of-year count of the date's year.
+
+        """
         return doy(self)
 
     @property
     def y(self) -> int:
+        """
+        Return two-digit year as integer.
+
+        """
         return int(self.strftime("%y"))
 
     @property
     def info(self) -> dict[str, Any]:
+        """
+        Return instance information in serialisable form.
+
+        """
         gps_week_beg = self.from_gps_week(self.gps_week)
         gps_week_mid = gps_week_beg + dt.timedelta(days=3)
         gps_week_end = gps_week_beg + dt.timedelta(days=6)

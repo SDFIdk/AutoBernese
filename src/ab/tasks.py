@@ -3,10 +3,7 @@ Define tasks and run them
 
 """
 
-from typing import (
-    Any,
-    Protocol,
-)
+from typing import Any
 import itertools as it
 from functools import partial
 from collections.abc import (
