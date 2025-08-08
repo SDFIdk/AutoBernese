@@ -78,16 +78,6 @@ def date_to_gps_date_constructor(
         # And build the single instance to return
         return GPSDate.from_date(date)
 
-    # Idea, but risks adding complexity for users
-    # if isinstance(node, yaml.MappingNode):
-    #     keyword_arguments = loader.construct_mapping(node, deep=True)
-    #     if not "date" in keyword_arguments:
-    #         raise ValueError(f"Expected argument `date` to be set. Got {keyword_arguments!r} ...")
-    #     date = keyword_arguments.get("date")
-    #     if not isinstance(date, (dt.date, dt.datetime)):
-    #         raise ValueError(f"Expected date keyword argument to be either date or datetime instance ...")
-    #     return GPSDate.from_date(date)
-
 
 def date_range_constructor(
     loader: yaml.Loader, node: yaml.MappingNode
