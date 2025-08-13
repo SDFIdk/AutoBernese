@@ -25,6 +25,7 @@ from ab.cli import (
     _filter,
     _arguments,
     _options,
+    _actions,
     about,
 )
 from ab import (
@@ -203,7 +204,9 @@ def sources(
         formatted = (f"{source}" for source in sources)
 
     else:
-        join_pairs = lambda pairs: "\n".join(
+        from collections.abc import Callable
+
+        join_pairs: Callable[[list[RemoteLocalPair]], str] = lambda pairs: "\n".join(
             f"{p.path_remote} -> {p.path_local}/{p.fname}" for p in pairs
         )
         formatted = (
@@ -243,7 +246,7 @@ def tasks(
 
     # Resolve permutations of defined task arguments and view them, a kind of
     # dry-run showing the input, before running anything.
-    print(list(it.chain(*(task_def.tasks() for task_def in task_defs))))
+    print(list(it.chain(*(task_def.tasks for task_def in task_defs))))
 
 
 @campaign.command
@@ -276,53 +279,35 @@ def run(
     # Create all combinations and group by task definition
     task_defs = _tasks.load_all(raw_task_defs)
 
-    # For display purposes
-    # Resolve and pre-process arguments and instantiate the tasks
-    hierarchy = {task_def.identifier: task_def.tasks() for task_def in task_defs}
-
-    print("Running the following tasks in the campaign configuration file")
-    sz = max(len(task_def_id) for task_def_id in hierarchy)
-    print(
-        "\n".join(
-            f"{task_def_id: >{sz}s}: {len(tasks): >3d} unique combinations"
-            for (task_def_id, tasks) in hierarchy.items()
-        )
-    )
-    proceed = _input.prompt_proceed()
-    if not proceed:
+    # Display execution plan and ask to continue or not
+    shorts = [(td.identifier, len(td.tasks)) for td in task_defs]
+    sz = max(len(short[0]) for short in shorts)
+    fstr = "{: >{sz}s}: {: >3d} tasks"
+    print(_output.title_divide("Execution plan"))
+    print("\n".join(fstr.format(*short, sz=sz) for short in shorts))
+    if not _input.prompt_proceed():
         raise SystemExit
 
-    # At this point, we are only concerned with the tasks that are now made
-    # ready to run
+    print()
 
-    # Combine all the tasks
-    all_tasks = it.chain(*hierarchy.values())
-    # TODO: Loop differently, so that taskdefinition descriptions can be written to the terminal/log
-    for task in all_tasks:
-        msg = f"Running task {task.identifier} ..."
-        log.info(msg)
-        print(msg, end=" ")
+    # Run tasks
+    print(_output.title_divide("Task runner"))
+    for td in task_defs:
         try:
-            task.run()
-            result = task.result
-            log.info(f"Task {task.identifier} returned: {result.return_value!r} ...")
-            if result.finished and result.exception is None:
-                postfix = "[green][ done ][/]"
-            else:
-                postfix = "[red][ error ][/]"
-                log.info(
-                    f"Task {task.identifier} failed with exception ({result.exception}) ..."
-                )
-            print(postfix)
-            if result.return_value:
-                print(_output.title_divide("Task return value"))
-                print(result.return_value)
-                print(_output.divide())
-
+            run_tasks = _actions.get_task_runner(td.asynchronous)
+            run_tasks(td.tasks)
         except KeyboardInterrupt:
-            log.info(f"Task {task.identifier} interrupted by user ...")
+            msg = "Execution stopped by user ..."
+            log.info(msg)
             log.info(f"Stopping the rest of the task execution. ...")
-            break
+            raise SystemExit(msg)
+    else:
+        print()
+
+    # Display result details
+    steps = (td.tasks for td in task_defs)
+    all_tasks = it.chain(*steps)
+    _output.print_task_result_and_exception(all_tasks)
 
 
 @campaign.command
