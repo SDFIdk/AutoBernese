@@ -450,6 +450,136 @@ campaign. The sequence is generated at runtime, when the YAML aliases `*beg` and
 `*end` are sent to a custom constructor in AutoBernese by using the custom YAML
 tag `!DateRange` in front of the mapping.
 
+#### Execution order
+
+In general, task definitions can be seen as separate steps, and the tasks they
+define are sub-steps. The order in which task definitions are written in the
+configuration file, is the order in which they will be executed. The obvious
+reason for this is the need for imposing the logical structure of the workflow
+to the system performing the tasks.
+
+The task-definition tasks are essentially running the same function with
+different arguments. As mentioned, tasks are executed sequentially, in the order
+they are defined. A task thus has a fixed thing to run, with only the actual
+arguments being varied. The argument permutations are generated so that the
+top-most parameter being used changes the slowest, as it is only going through
+its possible values once. The next parameter goes through its values twice, and
+so on to the bottom-most parameter which goes through all its values as many
+times as there are parameters above it plus one.
+
+In practise this means that one should consider the order of parameters, when
+writing a task definition.
+
+!!! tip "Example"
+
+    In the tasks below, the only difference is in the order of entries in the
+    parameter section.
+
+    The two examples may do the same thing, but the order of the parameter
+    permutations will be different, and thus the order in which each call to to the
+    underlying API function.
+
+    ```yaml
+    tasks:
+
+    - identifier: EXAMPLE_1
+      description: Non-existing dummy task
+      run: SomeExample
+      arguments:
+        arg1: '{date.year}'
+        arg2: '{station}'
+      parameters:
+        date: [1990-01-01, 2000-01-01]
+        station: [aaaa, bbbb, cccc]
+
+    - identifier: EXAMPLE_2
+      description: Non-existing dummy task
+      run: SomeExample
+      arguments:
+        arg1: '{date.year}'
+        arg2: '{station}'
+      parameters:
+        station: [aaaa, bbbb, cccc]
+        date: [1990-01-01, 2000-01-01]
+    ```
+
+    For the task `EXAMPLE_1`, the permutations will be:
+
+    ```yaml title="Permutation order for EXAMPLE_1"
+    [
+      {"arg1": "1990", "arg2": "aaaa"},
+      {"arg1": "1990", "arg2": "bbbb"},
+      {"arg1": "1990", "arg2": "cccc"},
+      {"arg1": "2000", "arg2": "aaaa"},
+      {"arg1": "2000", "arg2": "bbbb"},
+      {"arg1": "2000", "arg2": "cccc"},
+    ]
+    ```
+
+    And for the task `EXAMPLE_2`, the permutations come in this order:
+
+    ```yaml title="Permutation order for EXAMPLE_2"
+    [
+      {"arg1": "1990", "arg2": "aaaa"},
+      {"arg1": "2000", "arg2": "aaaa"},
+      {"arg1": "1990", "arg2": "bbbb"},
+      {"arg1": "2000", "arg2": "bbbb"},
+      {"arg1": "1990", "arg2": "cccc"},
+      {"arg1": "2000", "arg2": "cccc"},
+    ]
+    ```
+
+    The ordering in the permutation lists above is just to show, what is held
+    fixed first, second, and so on, when the permutations are build by the
+    system.
+
+If the order of execution for a task definition's tasks does not matter, it is
+possible to have them run, asynchronously, by adding the keyword `asynchronous:
+True` (the default is `False`).
+
+This option is aimed at computationally inexpensive tasks that mostly perform
+(rather, wait for) input/output during execution. If using this option to speed
+up execution, care should be taken, when certain tasks still need to be
+performed in a determined order.
+
+When set to true, tasks resolved by a given task definition are not guaranteed
+to run in the order defined by the task definition parameters. However, note
+that the order of task definitions is always kept the same as defined in the
+configuration.
+
+!!! tip "Example"
+
+    Task definitions must be organised, carefully, if the order of certain tasks
+    are important.
+
+    For example, it might be tempting to combine all BPE tasks in the following
+    manner:
+
+    ```yaml title="Example of a task definition"
+    tasks:
+
+    - identifier: BPE
+    description: Run all PCF files
+    run: RunBPE
+    arguments:
+        pcf_file: '{pcf_file}'
+        campaign: *campaign
+        year: '{date.year}'
+        session: '{date.doy:0>3d}0'
+        sysout: '{pcf_file}_{date.doy:0>3d}0'
+        status: '{pcf_file}_{date.doy:0>3d}0.RUN'
+        taskid: '{pcf_file}'
+    parameters:
+        date: !DateRange {beg: *beg, end: *end}
+        pcf_file: [PRODUCE_RESULTS, CONSUME_RESULTS]
+    asynchronous: True
+    ```
+
+    But, since all tasks in this task definition are executed, asynchronously, the
+    event loop running the tasks does not know the necessary order. To obtain this
+    order, while still running, asynchronously, one would need to have two
+    asynchronous task definitions in the supposed order.
+
 
 #### The task definition
 
@@ -495,6 +625,10 @@ Requirements:
     name in the `parameters` section. The value must be a sequence or iterable
     of values that the parameter may take inside any of the argument string
     template formats.
+
+*   `asynchronous` is not needed, but when set it must be either `True` or
+    `False` (the latter being the default). It determines the scheduling of
+    tasks at the task-definition level.
 
 [PYDOC-FORMAT-STRINGS]: https://docs.python.org/3/library/string.html#formatstrings
 

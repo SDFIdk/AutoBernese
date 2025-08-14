@@ -32,7 +32,7 @@ class TaskResult:
 @dataclass
 class Task:
     identifier: str
-    function: Callable = field(repr=False)
+    function: Callable[[Any], Any] = field(repr=False)
     arguments: ArgumentsType
     result: TaskResult = field(repr=False, default_factory=TaskResult)
 
@@ -84,10 +84,15 @@ class TaskDefinition:
 
     identifier: str
     description: str
-    run: Callable = field(repr=False)
+    run: Callable[[Any], Any] = field(repr=False)
     dispatch_with: Callable = field(repr=False, default_factory=lambda: untouched)
     arguments: ArgumentsType = field(default_factory=dict)
     parameters: ParametersType = field(default_factory=dict)
+    asynchronous: bool = False
+
+    _tasks: list[Task] | None = field(
+        init=False, repr=False, default_factory=lambda: None
+    )
 
     _task_id: it.count = field(
         init=False, repr=False, default_factory=partial(it.count, start=1)
@@ -98,9 +103,18 @@ class TaskDefinition:
         minor = next(self._task_id)
         return f"{self.identifier}.{minor:d}"
 
+    @property
     def tasks(self) -> list[Task]:
-        return [
-            Task(self.task_id, self.run, arguments)
-            for permutation in resolve(self.arguments, self.parameters)
-            for arguments in self.dispatch_with(permutation)
-        ]
+        """
+        Return Task instances for Task Definition instance.
+
+        These are created once, and can thus be referred to several times.
+
+        """
+        if self._tasks is None:
+            self._tasks = [
+                Task(self.task_id, self.run, arguments)
+                for permutation in resolve(self.arguments, self.parameters)
+                for arguments in self.dispatch_with(permutation)
+            ]
+        return self._tasks
