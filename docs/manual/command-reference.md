@@ -288,40 +288,7 @@ The built-in configuration contains no sources, so running the command without a
 user-supplied configuration file in the AutoBernese runtime directory, one will
 see the following.
 
-**Example 1**
-
-=== "Configuration file segment"
-
-    ```yaml  linenums="103"
-    # (...)
-
-    --8<-- "src/ab/configuration/core.yaml:103:"
-    ```
-
-=== "Rendered configuration"
-
-    ```sh title="Command"
-    ab config sources
-    ```
-
-    ```python title="Output"
-    []
-    ```
-
-=== "Command output"
-
-    ```sh title="Command"
-    ab download
-    ```
-
-    ``` title="Output"
-    Finished downloading sources ...
-    Overall status:
-    Downloaded: 0
-    Existing: 0
-    ```
-
-**Example 2**
+**Example**
 
 This example illustrates the case, where a manually adding the AutoBernese
 configuration file `autobernese.yaml` with some entries in the `source` section
