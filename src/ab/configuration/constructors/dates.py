@@ -5,6 +5,8 @@ Date constructors
 
 import datetime as dt
 import functools
+from typing import Any
+from collections.abc import Callable
 
 import yaml
 
@@ -99,7 +101,9 @@ def date_range_constructor(
     return dates_to_gps_date(date_range(beg, end, extend_end_by=extend_end_by))
 
 
-def timestamp2GPSDate(func):
+def timestamp2GPSDate(
+    func: Callable[[Any], dt.datetime | dt.date],
+) -> Callable[[Any], GPSDate]:
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return GPSDate.from_date(func(*args, **kwargs))

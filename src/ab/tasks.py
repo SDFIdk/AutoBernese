@@ -85,7 +85,9 @@ class TaskDefinition:
     identifier: str
     description: str
     run: Callable[[Any], Any] = field(repr=False)
-    dispatch_with: Callable = field(repr=False, default_factory=lambda: untouched)
+    dispatch_with: Callable[[Any], Any] = field(
+        repr=False, default_factory=lambda: untouched
+    )
     arguments: ArgumentsType = field(default_factory=dict)
     parameters: ParametersType = field(default_factory=dict)
     asynchronous: bool = False

@@ -52,7 +52,7 @@ def run_bpe(
     for key, value in bpe_env.items():
         log.info(f"{key: <{sz}s}: {value}")
 
-    process: sub.Popen | None = None
+    process: sub.Popen | None = None  # type: ignore
     try:
         log.debug(f"Run BPE runner ...")
         process = sub.Popen(

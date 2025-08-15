@@ -115,7 +115,7 @@ Extract sitelog data from each section
 """
 
 
-def compile(s: str, flags=re.M) -> re.Pattern:
+def compile(s: str, flags: re.RegexFlag = re.M) -> re.Pattern:
     return re.compile(s, flags=flags)
 
 

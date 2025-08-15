@@ -159,7 +159,7 @@ class Source:
     parameters: dict[str, Iterable[Any]] | None = None
     max_age: int | float = math.inf
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Path version for path joining
         self.destination = Path(self.destination)
 

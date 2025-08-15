@@ -26,7 +26,7 @@ from ab import vmf
 _MODULE: Final = sys.modules[__name__]
 "This module"
 
-_SHORTCUTS: dict[str, Callable[[Any], Any]] = {
+_SHORTCUTS: dict[str, Callable[[Any], ...]] = {
     # Use as value for `run` key
     "RunBPE": bpe.run_bpe,
     "Compress": compress.gzip,

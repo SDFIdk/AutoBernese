@@ -5,7 +5,7 @@ Path constructors
 
 from pathlib import Path
 
-import yaml
+import yaml  # type: ignore
 
 from ab.paths import resolve_wildcards
 

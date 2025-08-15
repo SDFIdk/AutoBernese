@@ -45,6 +45,9 @@ log = logging.getLogger(__name__)
 """Transform sitelog data"""
 
 
+Date = dt.datetime | dt.date
+
+
 def create_receiver_and_antenna_change_records(
     receivers: list[dict[Any, Any]], antennae: list[dict[Any, Any]]
 ) -> list[dict[Any, Any]]:
@@ -85,8 +88,8 @@ def create_receiver_and_antenna_change_records(
         next_receiver = receivers[ix_r + 1]
         next_antenna = antennae[ix_a + 1]
 
-        next_receiver_installed = next_receiver.get("date_installed")
-        next_antenna_installed = next_antenna.get("date_installed")
+        next_receiver_installed: Date = next_receiver.get("date_installed")
+        next_antenna_installed: Date = next_antenna.get("date_installed")
 
         # Case: next receiver installed before next antenna
         if next_receiver_installed < next_antenna_installed:

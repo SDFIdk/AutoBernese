@@ -22,7 +22,7 @@ FORMAT: Final = f"Format: {_input.DATE_FORMAT}"
 "Date-format help string"
 
 
-def set_yes(ctx: Context, param: Argument | Option, value: bool):
+def set_yes(ctx: Context, param: Argument | Option, value: bool) -> None:
     if value is True:
         _input.set_prompt_proceed_yes()
 

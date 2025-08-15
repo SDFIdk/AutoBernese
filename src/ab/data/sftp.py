@@ -13,7 +13,7 @@ from dataclasses import (
 )
 import itertools as it
 from pathlib import Path
-import subprocess as sub
+import subprocess as sub  # type: ignore
 import logging
 
 from ab.paths import (

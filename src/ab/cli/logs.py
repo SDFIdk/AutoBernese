@@ -7,7 +7,7 @@ import logging
 import subprocess as sub
 
 import click
-from click_aliases import ClickAliasedGroup  # type: ignore
+from click_aliases import ClickAliasedGroup
 from rich import print
 
 from ab import configuration

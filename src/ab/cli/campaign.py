@@ -15,7 +15,7 @@ from dataclasses import (
 from typing import Any
 
 import click
-from click_aliases import ClickAliasedGroup  # type: ignore
+from click_aliases import ClickAliasedGroup
 from rich import print
 import humanize
 
@@ -38,6 +38,7 @@ from ab.configuration import (
 )
 from ab.bsw import campaign as _campaign
 from ab.dates import gps_week_limits
+from ab.data.source import RemoteLocalPair
 
 
 log = logging.getLogger(__name__)
@@ -294,6 +295,9 @@ def run(
     print(_output.title_divide("Task runner"))
     for td in task_defs:
         try:
+            msg = f"Running {td.identifier} ({len(td.tasks)} tasks) ..."
+            print(msg)
+            log.info(msg)
             run_tasks = _actions.get_task_runner(td.asynchronous)
             run_tasks(td.tasks)
         except KeyboardInterrupt:

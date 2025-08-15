@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 import click
-from click_aliases import ClickAliasedGroup  # type: ignore
+from click_aliases import ClickAliasedGroup
 from rich import print
 
 from ab import (
