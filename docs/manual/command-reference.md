@@ -718,9 +718,9 @@ input.
 ```yaml title="`campaign.yaml`"
 station:
   sitelogs:
-  - !Path [*D, sitelogs, 'sta1*.log'
-  - !Path [*D, sitelogs, 'sta2*.log'
-  - !Path [*D, sitelogs, 'sta3*.log'
+  - !Path [*D, sitelogs, 'sta1*.log']
+  - !Path [*D, sitelogs, 'sta2*.log']
+  - !Path [*D, sitelogs, 'sta3*.log']
   individually_calibrated: [sta1]
   output_sta_file: !Path [*P, *campaign*, STA, campaign.STA]
   preferred_station_id_length: four
