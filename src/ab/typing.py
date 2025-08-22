@@ -3,12 +3,10 @@ Common typing annotation for AutopBernese
 
 """
 
-from collections.abc import Callable
-from typing import (
-    Any,
-    TypeVar,
-)
+import typing as t
 
 
-DecoratedFunction = TypeVar("DecoratedFunction", bound=Callable[..., Any])
-"Match any function, when creating a decorator"
+P = t.ParamSpec("P")
+T = t.TypeVar("T")
+
+type AnyFunction = t.Callable[P, T]

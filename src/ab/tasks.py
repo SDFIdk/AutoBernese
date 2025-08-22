@@ -3,13 +3,10 @@ Define tasks and run them
 
 """
 
-from typing import Any
+import typing as t
+from collections.abc import Iterable
 import itertools as it
 from functools import partial
-from collections.abc import (
-    Iterable,
-    Callable,
-)
 from dataclasses import (
     dataclass,
     field,
@@ -20,6 +17,7 @@ from ab.parameters import (
     ParametersType,
     resolve,
 )
+from ab.typing import AnyFunction
 
 
 @dataclass
@@ -32,7 +30,7 @@ class TaskResult:
 @dataclass
 class Task:
     identifier: str
-    function: Callable[[Any], Any] = field(repr=False)
+    function: AnyFunction = field(repr=False)
     arguments: ArgumentsType
     result: TaskResult = field(repr=False, default_factory=TaskResult)
 
@@ -50,8 +48,17 @@ class Task:
         self.result = TaskResult(finished, return_value, exception)
 
 
-def untouched(permutation: ArgumentsType) -> Iterable[ArgumentsType]:
-    return [permutation]
+def untouched(arguments: ArgumentsType) -> Iterable[ArgumentsType]:
+    """
+    This is the default `dispatch_with` function to call for each permutation of
+    the input arguments.
+
+    The point of putting the input in a list is to mimmick a situation where a
+    dispatch function creates further possible arguments from the values of the
+    input arguments.
+
+    """
+    return [arguments]
 
 
 @dataclass
@@ -84,10 +91,8 @@ class TaskDefinition:
 
     identifier: str
     description: str
-    run: Callable[[Any], Any] = field(repr=False)
-    dispatch_with: Callable[[Any], Any] = field(
-        repr=False, default_factory=lambda: untouched
-    )
+    run: AnyFunction = field(repr=False)
+    dispatch_with: AnyFunction = field(repr=False, default_factory=lambda: untouched)
     arguments: ArgumentsType = field(default_factory=dict)
     parameters: ParametersType = field(default_factory=dict)
     asynchronous: bool = False
@@ -96,7 +101,7 @@ class TaskDefinition:
         init=False, repr=False, default_factory=lambda: None
     )
 
-    _task_id: it.count = field(
+    _task_id: AnyFunction = field(
         init=False, repr=False, default_factory=partial(it.count, start=1)
     )
 

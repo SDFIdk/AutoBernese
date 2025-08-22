@@ -29,7 +29,7 @@ def logs() -> None:
     if filename is None:
         raise SystemExit(f"No log-file name entry found in logging configuration.")
 
-    process: sub.Popen | None = None
+    process: sub.Popen | None = None  # type: ignore
     try:
         log.debug(f"Show log tail ...")
         process = sub.Popen(["/usr/bin/tail", "-f", f"{filename}"])

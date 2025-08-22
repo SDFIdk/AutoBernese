@@ -3,10 +3,7 @@ Common command-line options
 
 """
 
-from typing import (
-    Any,
-    Final,
-)
+import typing as t
 
 import click
 from click.core import (
@@ -18,7 +15,7 @@ from click.core import (
 from ab.cli import _input
 
 
-FORMAT: Final = f"Format: {_input.DATE_FORMAT}"
+FORMAT: t.Final = f"Format: {_input.DATE_FORMAT}"
 "Date-format help string"
 
 

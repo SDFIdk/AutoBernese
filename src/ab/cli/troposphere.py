@@ -10,8 +10,7 @@ from functools import (
     partial,
     wraps,
 )
-from typing import Final
-from collections.abc import Callable
+import typing as t
 from dataclasses import dataclass
 import logging
 import multiprocessing as mp
@@ -26,12 +25,15 @@ from ab import (
     vmf,
 )
 from ab.dates import gps_week_limits
-from ab.typing import DecoratedFunction
+from ab.typing import (
+    P,
+    T,
+)
 
 
 log = logging.getLogger(__name__)
 
-N_CPUS: Final = len(os.sched_getaffinity(0))
+N_CPUS: t.Final = len(os.sched_getaffinity(0))
 
 
 @click.group(cls=ClickAliasedGroup)
@@ -100,7 +102,7 @@ def parse_args(
     return raw
 
 
-def common_options(func: DecoratedFunction) -> Callable:
+def common_options(func: t.Callable[P, T]) -> t.Callable[P, T]:
     """
     A single decorator for common options
 
@@ -115,8 +117,8 @@ def common_options(func: DecoratedFunction) -> Callable:
     @_options.end
     @_options.hour_file_format
     @_options.day_file_format
-    @wraps(func)
-    def wrapper_common_options(*args, **kwargs):
+    # @wraps(func)
+    def wrapper_common_options(*args: P.args, **kwargs: P.kwargs) -> t.Any:
         return func(*args, **kwargs)
 
     return wrapper_common_options

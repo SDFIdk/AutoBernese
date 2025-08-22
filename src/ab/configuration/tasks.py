@@ -3,11 +3,7 @@ Configuration tools to build TaskDefinition instances
 
 """
 
-from typing import (
-    Any,
-    Final,
-)
-from collections.abc import Callable
+import typing as t
 import sys
 
 from ab.configuration import (
@@ -23,10 +19,11 @@ from ab.station import sta
 from ab import vmf
 
 
-_MODULE: Final = sys.modules[__name__]
+_MODULE: t.Final = sys.modules[__name__]
 "This module"
 
-_SHORTCUTS: dict[str, Callable[[Any], ...]] = {
+
+_SHORTCUTS: dict[str, t.Callable[..., t.Any]] = {
     # Use as value for `run` key
     "RunBPE": bpe.run_bpe,
     "Compress": compress.gzip,
@@ -45,11 +42,13 @@ _SHORTCUTS: dict[str, Callable[[Any], ...]] = {
 "Shortcut names for API-level functions or pre-processing functions [dispatchers]."
 
 
-def get_func(name: str) -> Callable[[Any], Any]:
+def get_func(name: str) -> t.Any:
     if name in _SHORTCUTS:
         return _SHORTCUTS[name]
     elif name in dir(_MODULE):
-        return getattr(_MODULE, name)
+        candidate = getattr(_MODULE, name)
+        assert callable(candidate)
+        return candidate
     elif "." in name:
         return import_function(name)
     else:
