@@ -37,11 +37,11 @@ def main(ctx: click.Context, show_version: bool, bsw_release: bool) -> None:
 
     1.  Create Bernese campaigns using its built-in template system.
 
-    2.  Download and organise data for general or campaign-specific use.
+    2.  Download and organise data for common or campaign use.
 
-    3.  Run campaign-specific tasks like the Bernese Processing Engine.
+    3.  Run GNSS-related tasks such as the Bernese Processing Engine and more.
 
-    4.  Do other things related to Bernese and GNSS-data processing.
+    4.  Perform various stand-alone operations needed for a complete workflow.
 
     """
 
