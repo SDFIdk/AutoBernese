@@ -48,7 +48,7 @@ log = logging.getLogger(__name__)
 @click.pass_context
 def campaign(ctx: click.Context) -> None:
     """
-    Create campaigns and manage campaign-specific sources and run BPE tasks.
+    Create, run and manage Bernese campaigns.
 
     """
     _campaign.init_template_dir()
