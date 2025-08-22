@@ -297,7 +297,7 @@ def load(
     return clean(updated, keys_spared)
 
 
-def set_up_runtime_environment():
+def set_up_runtime_environment() -> None:
     """
     For the command-line application, but might also be needed if using the
     package API directly.

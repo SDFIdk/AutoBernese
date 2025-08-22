@@ -6,7 +6,7 @@ Command-line interface for quality assurance and quality control
 import logging
 
 import click
-from click_aliases import ClickAliasedGroup  # type: ignore
+from click_aliases import ClickAliasedGroup
 from rich import print
 
 from ab.qaqc import check_example

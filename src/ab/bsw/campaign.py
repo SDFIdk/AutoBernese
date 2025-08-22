@@ -48,7 +48,7 @@ def bsw_env() -> dict[str, str | Path]:
     to AutoBernese.
 
     """
-    return configuration.load().get("bsw_env", {})
+    return configuration.load().get("bsw_env", {})  # type: ignore
 
 
 def project_dir() -> Path:

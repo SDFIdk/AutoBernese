@@ -28,7 +28,7 @@ _tag_constructor_map = (
 )
 
 
-def add():
+def add() -> None:
     for tag, constructor in _tag_constructor_map:
         SafeLoader.add_constructor(tag, constructor)
 

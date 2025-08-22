@@ -8,7 +8,7 @@ from types import ModuleType
 from dataclasses import asdict
 
 import click
-from click_aliases import ClickAliasedGroup  # type: ignore
+from click_aliases import ClickAliasedGroup
 from rich import print
 from rich.console import Console
 from rich.table import Table

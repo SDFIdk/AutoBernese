@@ -17,7 +17,7 @@ class TransferStatus:
     not_found: int = 0
     exceptions: list[Exception] = field(repr=False, default_factory=list)
 
-    def __add__(self, other) -> "TransferStatus":
+    def __add__(self, other: "TransferStatus") -> "TransferStatus":
         self.existing += other.existing
         self.success += other.success
         self.failed += other.failed

@@ -5,23 +5,26 @@ Command-line helper for filtering list items
 
 import logging
 
-from ab import configuration
+from ab.configuration import (
+    ConfigurationType,
+    SectionListItemType,
+)
 
 
 log = logging.getLogger(__name__)
 
 
 def get_raw(
-    config: configuration.ConfigurationType,
+    config: ConfigurationType,
     section: str,
     identifiers: list[str] | None = None,
     exclude: list[str] | None = None,
-) -> list[configuration.SectionListItemType]:
+) -> list[SectionListItemType]:
     """
     Get items in sections `sources` or `tasks` and take all or selected.
 
     """
-    raw = config.get(section, [])
+    raw: list[SectionListItemType] = config.get(section, [])
     if not raw:
         msg = f"No {section} found ..."
         print(msg)

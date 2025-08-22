@@ -10,11 +10,11 @@ import yaml
 from ab import pkg
 
 
-_COUNTRY_CODES: dict[str, str] = None
+_COUNTRY_CODES: dict[str, str] | None = None
 
 
 @functools.cache
-def get(country_name: str) -> str:
+def get(country_name: str) -> str | None:
     """
     Get three-letter country code for given country name if it exists in the
     package-version of the ISO 3166 standard.
@@ -27,4 +27,7 @@ def get(country_name: str) -> str:
     global _COUNTRY_CODES
     if _COUNTRY_CODES is None:
         _COUNTRY_CODES = yaml.safe_load(pkg.country_codes.read_text())
-    return _COUNTRY_CODES.get(country_name.strip())
+    found = _COUNTRY_CODES.get(country_name.strip())
+    if found is not None:
+        return str(found)
+    return found

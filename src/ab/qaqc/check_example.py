@@ -46,6 +46,7 @@ from typing import (
     Protocol,
     TypeVar,
 )
+from collections.abc import Callable
 
 from ab import configuration
 
@@ -56,7 +57,7 @@ C = TypeVar("C", bound="Comparable")
 class Comparable(Protocol):
     def __sub__(self, other: C) -> C: ...
 
-    __rsub__ = __sub__
+    __rsub__: Callable[[C, C], C] = __sub__
 
 
 @dataclass

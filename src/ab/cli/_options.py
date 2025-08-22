@@ -3,10 +3,7 @@ Common command-line options
 
 """
 
-from typing import (
-    Any,
-    Final,
-)
+import typing as t
 
 import click
 from click.core import (
@@ -18,11 +15,11 @@ from click.core import (
 from ab.cli import _input
 
 
-FORMAT: Final = f"Format: {_input.DATE_FORMAT}"
+FORMAT: t.Final = f"Format: {_input.DATE_FORMAT}"
 "Date-format help string"
 
 
-def set_yes(ctx: Context, param: Argument | Option, value: bool):
+def set_yes(ctx: Context, param: Argument | Option, value: bool) -> None:
     if value is True:
         _input.set_prompt_proceed_yes()
 

@@ -14,7 +14,7 @@ END_INCLUDED: Final = 1
 "Add this to `range` in `date_range` to include both start and end date in range."
 
 
-def asdate(date: dt.datetime) -> dt.date:
+def asdate(date: dt.datetime | dt.date) -> dt.date:
     """
     Return a date instance from a datetime instance or the date itself, if the
     input is actually a date instance.

@@ -10,13 +10,13 @@ from functools import (
     partial,
     wraps,
 )
+import typing as t
 from dataclasses import dataclass
 import logging
-from typing import Final
 import multiprocessing as mp
 
 import click
-from click_aliases import ClickAliasedGroup  # type: ignore
+from click_aliases import ClickAliasedGroup
 from rich import print
 
 from ab.cli import _options
@@ -25,12 +25,15 @@ from ab import (
     vmf,
 )
 from ab.dates import gps_week_limits
+from ab.typing import (
+    P,
+    T,
+)
 
 
 log = logging.getLogger(__name__)
 
-
-N_CPUS: Final = len(os.sched_getaffinity(0))
+N_CPUS: t.Final = len(os.sched_getaffinity(0))
 
 
 @click.group(cls=ClickAliasedGroup)
@@ -99,7 +102,7 @@ def parse_args(
     return raw
 
 
-def common_options(func):
+def common_options(func: t.Callable[P, T]) -> t.Callable[P, T]:
     """
     A single decorator for common options
 
@@ -114,8 +117,8 @@ def common_options(func):
     @_options.end
     @_options.hour_file_format
     @_options.day_file_format
-    @wraps(func)
-    def wrapper_common_options(*args, **kwargs):
+    # @wraps(func)
+    def wrapper_common_options(*args: P.args, **kwargs: P.kwargs) -> t.Any:
         return func(*args, **kwargs)
 
     return wrapper_common_options

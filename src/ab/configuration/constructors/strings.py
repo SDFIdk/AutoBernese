@@ -59,7 +59,8 @@ def string_transform_constructor(loader: yaml.Loader, node: yaml.Node) -> list[s
     """
     if not isinstance(node, yaml.MappingNode):
         raise TypeError(f"Node type {node!r} not supported for tag ...")
-    operator_arguments = OperatorArguments(**loader.construct_mapping(node, deep=True))
+    instance_arguments: dict[str, str] = loader.construct_mapping(node, deep=True)
+    operator_arguments = OperatorArguments(**instance_arguments)
     sequence, method, arguments = asdict(operator_arguments).values()
     if not all(isinstance(s, str) for s in sequence):
         raise ValueError(f"Sequence items must be strings. Got {sequence!r} ...")
