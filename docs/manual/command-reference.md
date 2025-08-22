@@ -723,6 +723,7 @@ station:
   - !Path [*D, sitelogs, 'sta3*.log'
   individually_calibrated: [sta1]
   output_sta_file: !Path [*P, *campaign*, STA, campaign.STA]
+  preferred_station_id_length: four
 ```
 
 This has the implications that one may use the YAML aliases available in the
@@ -751,6 +752,7 @@ station:
   - BLUH00DNK_20220101.log
   individually_calibrated: [BLUH]
   output_sta_file: sitelogs.STA
+  preferred_station_id_length: four
 ```
 
 ```sh title="Command"
@@ -758,13 +760,13 @@ ab station sitelogs2sta -f station.yaml
 ```
 
 
-#### `ab station sitelogs2sta -i <sitelog> -k <station-id> -o <STA-file>`
+#### `ab station sitelogs2sta -i <sitelog> -k <station-id> -o <STA-file> -l <station_id_length>`
 
 Finally, it is also possible to give all the settings to the command as
 command-line arguments:
 
 ```sh title="Command"
-ab station sitelogs2sta -i BLAH00DNK_20230101.log -i BLUH00DNK_20220101.log -k BLUH -o sitelogs.STA
+ab station sitelogs2sta -i BLAH00DNK_20230101.log -i BLUH00DNK_20220101.log -k BLUH -o sitelogs.STA -l four
 ```
 
 The above, gives the same result as with the arguments given in the special

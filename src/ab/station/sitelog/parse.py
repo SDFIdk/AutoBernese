@@ -9,11 +9,16 @@ Parsed:
 """
 
 import re
-import json
 import logging
 import collections as cs
-import pathlib
 from typing import Any
+
+from ab.station.sitelog.models import (
+    SiteIdentificationOfTheGNSSMonument,
+    SiteLocationInformation,
+    GNSSReceiverInformation,
+    GNSSAntennaInformation,
+)
 
 
 log = logging.getLogger(__name__)
@@ -84,7 +89,7 @@ def parse_sections(sitelog: str) -> dict[str, str]:
         }
     }
     """
-    sections: cs.defaultdict = cs.defaultdict(lambda: cs.defaultdict(list))
+    sections: cs.defaultdict[list] = cs.defaultdict(lambda: cs.defaultdict(list))
     for s in slices:
         section_lines = lines[s]
         content = "\n".join(section_lines)
@@ -95,7 +100,7 @@ def parse_sections(sitelog: str) -> dict[str, str]:
 
         # '1  Receiver Type'                => ['1', 'Receiver', 'Type'][0]
         # '   GNSS Receiver Information'    => ['GNSS', 'Receiver', 'Information'][0]
-        subsection_number = post_part.split()[0]  # .strip()
+        subsection_number = post_part.split()[0]
 
         if subsection_number.lower() == "x":
             continue
@@ -116,15 +121,22 @@ Extract sitelog data from each section
 
 
 def compile(s: str, flags: re.RegexFlag = re.M) -> re.Pattern:
+    """
+    Compile pattern with *default* or specified flags
+
+    """
     return re.compile(s, flags=flags)
 
 
 # Section 1
 IERS_DOMES_NUMBER = compile(r"IERS DOMES Number\s*:\s*(\S*)$")
 SITE_NAME = compile(r"Site Name\s*:\s+(.*)")
-FOUR_CHARACTER_ID = compile(
-    r"(?:Four|Nine) Character ID\s+:\s+([A-Z0-9]{9}|[A-Z0-9]{4}?)"
-)
+
+FOUR_CHARACTER_ID = compile(r"Four Character ID\s+:\s+([A-Z0-9]{4}?)")
+"Sitelog version 1"
+
+NINE_CHARACTER_ID = compile(r"Nine Character ID\s+:\s+([A-Z0-9]{9})?")
+"Sitelog version 2"
 
 # Section 2
 CITY_OR_TOWN = compile(r"City or Town\s+:\s+(.*)")
@@ -186,95 +198,52 @@ def search_and_expand(
     return post(expanded)
 
 
-def parse_section_1(s: str) -> dict[str, str]:
-    return dict(
-        site_name=SITE_NAME.search(s)[1],
-        four_character_id=FOUR_CHARACTER_ID.search(s)[1],
-        domes=IERS_DOMES_NUMBER.search(s)[1],
-        date_installed=search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
+def value_or_default(result: re.Match | None) -> str | None:
+    if result is None:
+        return None
+    else:
+        return result[1]
+
+
+def parse_section_1(s: str) -> SiteIdentificationOfTheGNSSMonument:
+    return SiteIdentificationOfTheGNSSMonument(
+        SITE_NAME.search(s)[1],
+        value_or_default(FOUR_CHARACTER_ID.search(s)),
+        value_or_default(NINE_CHARACTER_ID.search(s)),
+        IERS_DOMES_NUMBER.search(s)[1],
+        search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
     )
 
 
-def parse_section_2(s: str) -> dict[str, str]:
-    return dict(
-        city_or_town=CITY_OR_TOWN.search(s)[1],
-        country=COUNTRY.search(s)[1],
+def parse_section_2(s: str) -> SiteLocationInformation:
+    return SiteLocationInformation(
+        CITY_OR_TOWN.search(s)[1],
+        COUNTRY.search(s)[1],
     )
 
 
-def parse_subsection_3(s: str) -> dict[str, str]:
-    return dict(
-        receiver_type=RECEIVER_TYPE.search(s)[1],
-        receiver_serial_number=RECEIVER_SERIAL_NUMBER.search(s)[1],
-        firmware=FIRMWARE_VERSION.search(s)[1],
-        date_installed=search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
-        date_removed=search_and_expand(DATE_REMOVED, s, EXPAND_DATE),
+def parse_subsection_3(s: str) -> GNSSReceiverInformation:
+    return GNSSReceiverInformation(
+        RECEIVER_TYPE.search(s)[1],
+        RECEIVER_SERIAL_NUMBER.search(s)[1],
+        FIRMWARE_VERSION.search(s)[1],
+        search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
+        search_and_expand(DATE_REMOVED, s, EXPAND_DATE),
     )
 
 
-def parse_subsection_4(s: str) -> dict[str, str]:
-    return dict(
-        antenna_type=ANTENNA_TYPE.search(s)[1],
-        antenna_serial_number=ANTENNA_SERIAL_NUMBER.search(s)[1],
-        marker_up=search_and_expand(
+def parse_subsection_4(s: str) -> GNSSAntennaInformation:
+    return GNSSAntennaInformation(
+        ANTENNA_TYPE.search(s)[1],
+        ANTENNA_SERIAL_NUMBER.search(s)[1],
+        search_and_expand(
             MARKER_UP,
             s,
             default=DEFAULT_MARKER,
             post=post_process_marker,
         ),
-        marker_north=search_and_expand(MARKER_NORTH, s, post=post_process_marker),
-        marker_east=search_and_expand(MARKER_EAST, s, post=post_process_marker),
-        date_installed=search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
-        date_removed=search_and_expand(DATE_REMOVED, s, EXPAND_DATE),
+        search_and_expand(MARKER_NORTH, s, post=post_process_marker),
+        search_and_expand(MARKER_EAST, s, post=post_process_marker),
+        search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
+        search_and_expand(DATE_REMOVED, s, EXPAND_DATE),
     )
-
-
-class Sitelog:
-    def __init__(
-        self, filename: pathlib.Path | str, individual_calibration: bool = False
-    ) -> None:
-        filename = pathlib.Path(filename)
-        try:
-            sitelog_content = filename.read_text()
-        except:
-            sitelog_content = filename.read_text(encoding="cp1252")
-
-        # Extract
-        sections = parse_sections(sitelog_content)
-
-        self.section_1 = parse_section_1(sections["1"]["content"])
-        self.section_2 = parse_section_2(sections["2"]["content"])
-        self.receivers = [
-            parse_subsection_3(subsection)
-            for subsection in sections["3"]["subsections"]
-        ]
-        self.antennae = [
-            parse_subsection_4(subsection)
-            for subsection in sections["4"]["subsections"]
-        ]
-
-        # Derived
-        self.station_id = self.section_1.get("four_character_id").upper()
-
-        # Store the rest on the instance
-        self.sections = sections
-        self.filename = filename
-
-    def save_sections_raw(self, filename: pathlib.Path | str) -> None:
-        filename = pathlib.Path(filename)
-        with open(filename, "w+") as f:
-            json.dump(self.sections, f, indent=2)
-
-    @property
-    def sections_extracted(self) -> dict[Any, Any]:
-        return dict(
-            sec1=self.section_1,
-            sec2=self.section_2,
-            sec3=self.receivers,
-            sec4=self.antennae,
-        )
-
-    def save_sections_extracted(self, filename: pathlib.Path | str) -> None:
-        filename = pathlib.Path(filename)
-        with open(filename, "w+") as f:
-            json.dump(self.sections_extracted, f, indent=2)

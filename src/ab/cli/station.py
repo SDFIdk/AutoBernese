@@ -63,12 +63,20 @@ def station() -> None:
     type=Path,
     help="Path to optional output path and filename for the STA file.",
 )
+@click.option(
+    "-l",
+    "preferred_station_id_length",
+    required=False,
+    type=str,
+    help="Preferred station-ID length. Choose between values `four` and `nine`. Default is to use available length in each given file.",
+)
 def sitelogs2sta(
-    campaign: str,
+    name: str,
     config: Path,
     sitelogs: tuple[Path],
     individually_calibrated: tuple[str],
     output_filename: Path,
+    preferred_station_id_length: str | None = None,
 ) -> None:
     """
     Create a STA file from sitelogs and optional station information.
@@ -85,15 +93,14 @@ def sitelogs2sta(
     2.  Use the flag `-f` to supply a path to a custom path to a YAML file with
         arguments.
 
-    4.  Use flags `-i`, `-k` and `-o` to supply needed and optional arguments on
+    4.  Use flags `-i`, `-k`, `-o` and `-l` to supply needed and optional arguments on
         the command line.
-
 
     The following arguments are possible:
 
     \b
     *   Site-log filenames are required.
-    *   Four-letter IDs for individually-calibrated stations are optional.
+    *   Station IDs for individually-calibrated stations are optional.
     *   The path to the output STA file is optional. (Default: `sitelogs.STA`)
 
     These arguments can be provided in a configuration file which has the
@@ -145,7 +152,6 @@ def sitelogs2sta(
         log.info(msg)
         print(msg)
         arguments = configuration.load(ifname).get("station")
-        print(arguments)
 
     elif sitelogs:
         log.info(f"Create STA file from given arguments ...")
@@ -155,11 +161,11 @@ def sitelogs2sta(
             output_sta_file=output_filename,
         )
 
-    elif campaign is not None:
-        msg = f"Create STA file from arguments in configuration for campaing {campaign} ..."
+    elif name is not None:
+        msg = f"Create STA file from arguments in configuration for campaing {name} ..."
         log.info(msg)
         print(msg)
-        arguments = _campaign.load(campaign).get("station")
+        arguments = _campaign.load(name).get("station")
 
     elif configuration.load().get("station") is not None:
         msg = f"Create STA file from arguments in the common user configuration `autobernese.yaml` ..."
@@ -173,7 +179,4 @@ def sitelogs2sta(
         log.info(msg)
         return
 
-    msg = f"Creating STA file from arguments {arguments!r} ..."
-    log.info(msg)
-    print(msg)
     sta.create_sta_file_from_sitelogs(**arguments)

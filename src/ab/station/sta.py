@@ -24,7 +24,7 @@ Assumptions:
 
 import re
 import logging
-from typing import Any
+import typing as t
 import datetime as dt
 from pathlib import Path
 from dataclasses import (
@@ -37,20 +37,26 @@ from ab import (
     country_code,
 )
 from ab.station.sitelog import Sitelog
-
+from ab.station.sitelog.models import (
+    SiteIdentificationOfTheGNSSMonument,
+    SiteLocationInformation,
+    GNSSReceiverInformation,
+    GNSSAntennaInformation,
+)
 
 log = logging.getLogger(__name__)
 
 
 """Transform sitelog data"""
 
-
-Date = dt.datetime | dt.date
+type ReceiverOrAntennaChangeRecord = dict[str, str]
+"Alias for a simple dict for semantics"
 
 
 def create_receiver_and_antenna_change_records(
-    receivers: list[dict[Any, Any]], antennae: list[dict[Any, Any]]
-) -> list[dict[Any, Any]]:
+    receivers: list[GNSSReceiverInformation],
+    antennae: list[GNSSAntennaInformation],
+) -> list[ReceiverOrAntennaChangeRecord]:
     """
     Build timeline of changes in either receiver or antenna.
 
@@ -61,7 +67,7 @@ def create_receiver_and_antenna_change_records(
 
     # Note: date_installed and date_removed in the antenna section
     # overrides key-value pairs in the receiver section.
-    r = [{**receivers[0], **antennae[0]}]
+    r = [{**asdict(receivers[0]), **asdict(antennae[0])}]
 
     # Create the timeline, looking at the installation dates for each instrument
     # (receiver or antenna)
@@ -88,8 +94,8 @@ def create_receiver_and_antenna_change_records(
         next_receiver = receivers[ix_r + 1]
         next_antenna = antennae[ix_a + 1]
 
-        next_receiver_installed: Date = next_receiver.get("date_installed")
-        next_antenna_installed: Date = next_antenna.get("date_installed")
+        next_receiver_installed = next_receiver.date_installed
+        next_antenna_installed = next_antenna.date_installed
 
         # Case: next receiver installed before next antenna
         if next_receiver_installed < next_antenna_installed:
@@ -131,7 +137,7 @@ def create_receiver_and_antenna_change_records(
             ix_a += 1
 
         # Add a change record with the next change in either receiver, antenna or both
-        r.append({**receiver, **antenna, **dict(date_installed=date)})
+        r.append({**asdict(receiver), **asdict(antenna), **dict(date_installed=date)})
 
         # Set end date on previous change record
         r[-2]["date_removed"] = date
@@ -154,7 +160,7 @@ def create_receiver_and_antenna_change_records(
         ix_r += 1
         receiver = receivers[ix_r]
         antenna = antennae[ix_a]
-        r.append({**antenna, **receiver})
+        r.append({**asdict(antenna), **asdict(receiver)})
         # Set date removed on previous change to that of current change
         r[-2]["date_removed"] = r[-1]["date_installed"]
 
@@ -164,14 +170,19 @@ def create_receiver_and_antenna_change_records(
         antenna = antennae[ix_a]
         # Note that the order is different here, since the change is in the
         # antenna, and data from this change must update the dict last.
-        r.append({**receiver, **antenna})
+        r.append({**asdict(receiver), **asdict(antenna)})
         # Set date removed on previous change to that of current change
         r[-2]["date_removed"] = r[-1]["date_installed"]
 
     return r
 
 
-def __repr__(self) -> str:
+@dataclass
+class Representable(t.Protocol):
+    _fstr: str
+
+
+def __repr__[T: Representable](self: T) -> str:
     """
     Common __repr__ for dataclasses created for each STA Type 00X row.
 
@@ -212,16 +223,16 @@ class Type001Row:
     __repr__ = __repr__
 
 
-def station_name(four_character_id: str, domes: str) -> str:
-    return f"{four_character_id:4s} {domes:s}"
+def station_name(station_id: str, domes: str) -> str:
+    return f"{station_id:s} {domes:s}"
 
 
 def map_to_type_1_row(
-    four_character_id: str,
+    station_id: str,
     domes: str,
     date_installed: str,
     fname: Path | str,
-    **_,
+    **_: t.Any,
 ) -> dict[str, str]:
     """
     Build a record for section Type 001 in a STA file.
@@ -231,9 +242,9 @@ def map_to_type_1_row(
 
     """
     return dict(
-        station_name=station_name(four_character_id, domes),
+        station_name=station_name(station_id, domes),
         date_installed=date_installed,
-        name_old=f"{four_character_id}*",
+        name_old=f"{station_id}*",
         filename=Path(fname).name,
     )
 
@@ -348,7 +359,7 @@ def build_receiver_no(receiver_serial_number: str) -> str:
 
 def map_to_type_2_row(
     # Section 1
-    four_character_id: str,
+    station_id: str,
     domes: str,
     # Section 2
     city_or_town: str,
@@ -366,8 +377,8 @@ def map_to_type_2_row(
     marker_up: str,
     marker_north: str,
     marker_east: str,
-    **_,
-) -> dict[str, str]:
+    **_: t.Any,
+) -> dict[str, str | float]:
     """
     Build a record for section Type 002 in a STA file.
 
@@ -400,7 +411,7 @@ def map_to_type_2_row(
         description = f"{description}, {country_abbr}"
 
     return dict(
-        station_name=station_name(four_character_id, domes),
+        station_name=station_name(station_id, domes),
         date_installed=date_installed,
         date_removed=date_removed,
         receiver_type=receiver_type,
@@ -419,7 +430,7 @@ def map_to_type_2_row(
     )
 
 
-def STA_created_timestamp(d: dt.datetime | dt.date = None) -> str:
+def STA_created_timestamp(d: dt.datetime | None = None) -> str:
     if d is None:
         d = dt.datetime.now()
     return d.strftime("%d-%b-%y %H:%M").upper()
@@ -427,27 +438,39 @@ def STA_created_timestamp(d: dt.datetime | dt.date = None) -> str:
 
 def transform_sitelog_records_to_STA_lines(
     sitelog: Sitelog, type_calibration: bool = True
-) -> dict[Any, Any]:
+) -> tuple[t.Any, t.Any]:
     """
     Create lines for STA file out of given Sitelog instance.
 
     """
     log.info(f"Build Type-001 line for {sitelog.filename.name}")
-    prepared = {**sitelog.section_1, **dict(fname=sitelog.filename)}
+
+    section_1 = asdict(sitelog.section_1)
+    section_2 = asdict(sitelog.section_2)
+
+    prepared = {
+        **section_1,
+        **dict(fname=sitelog.filename, station_id=sitelog.station_id),
+    }
     type_1_lines = [Type001Row(**map_to_type_1_row(**prepared))]
 
     log.info(f"Build Type-002 lines for {sitelog.filename.name}")
-    type_2_data = create_receiver_and_antenna_change_records(
+    type_2_data: list[dict[str, str]] = create_receiver_and_antenna_change_records(
         sitelog.receivers, sitelog.antennae
     )
 
     calibration = dict(type_calibration=type_calibration)
-    constants = {**sitelog.section_1, **sitelog.section_2, **calibration}
+    constants = {
+        **section_1,
+        **section_2,
+        **calibration,
+        **dict(station_id=sitelog.station_id),
+    }
     type_2_rows = [
         map_to_type_2_row(**{**constants, **change_record})
         for change_record in type_2_data
     ]
-    type_2_lines = [Type002Row(**parameters) for parameters in type_2_rows]
+    type_2_lines = [Type002Row(**parameters) for parameters in type_2_rows]  # type: ignore
 
     return type_1_lines, type_2_lines
 
@@ -456,6 +479,7 @@ def create_sta_file_from_sitelogs(
     sitelogs: list[Path | str],
     individually_calibrated: list[str] | None = None,
     output_sta_file: Path | str | None = None,
+    preferred_station_id_length: str | None = None,
 ) -> None:
     """
     Combine data from given sitelog files into a STA-file.
@@ -482,13 +506,11 @@ def create_sta_file_from_sitelogs(
 
     # Handle each site-log file
     for fname in sorted(_sitelogs):
-        # Extract sitelog data
-        log.info(f"Read {fname.name} ...")
+        log.info(f"Reading file {fname.name} ...")
         try:
-            sitelog = Sitelog(fname)
-            log.debug(f"{fname.name} read ...")
+            sitelog = Sitelog(fname, preferred_station_id_length)
         except Exception as e:
-            log.warn(f"{fname.name} could not be read: {e!r} ...")
+            log.warn(f"Failed to read file {fname.name}: Got {e!r} ...")
             continue
 
         # Transform sitelog data
