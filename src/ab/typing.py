@@ -1,12 +1,9 @@
 """
-Common typing annotation for AutopBernese
+Common typing annotation for AutoBernese
 
 """
 
-import typing as t
+from collections import abc
 
 
-P = t.ParamSpec("P")
-T = t.TypeVar("T")
-
-type AnyFunction = t.Callable[P, T]
+type AnyFunction[T, **P] = abc.Callable[P, T]

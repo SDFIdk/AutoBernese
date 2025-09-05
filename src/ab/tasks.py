@@ -101,7 +101,7 @@ class TaskDefinition:
         init=False, repr=False, default_factory=lambda: None
     )
 
-    _task_id: AnyFunction = field(
+    _task_id: it.count = field(
         init=False, repr=False, default_factory=partial(it.count, start=1)
     )
 
