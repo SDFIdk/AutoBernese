@@ -3,13 +3,12 @@ This is the documentation website for AutoBernese, a command-line application
 that automates and generalises common workflows with the [Bernese GNSS
 Software](http://www.bernese.unibe.ch/) [*Bernese* or *BSW*].
 
-AutoBernese is written i Python and the package is built and maintained by the
-geodetic software developers at the [Danish Agency for Climate
-Data](https://eng.kds.dk/)
+AutoBernese is written in Python and the package is maintained by the [Danish
+Agency for Climate Data](https://eng.kds.dk/)
 
-The software was created for our internal use, but as it may have some general
-application, it is published for a larger audience with the hope that it may be
-useful for other users of Bernese.
+The software was created for our internal use cases, but as it may have some
+general application, it is published for a larger audience with the hope that it
+may be useful for other users of Bernese.
 
 Please note that:
 
@@ -119,9 +118,6 @@ A campaign-configuration template lets you do the following:
 
 
 **The rest of the processes in the overall workflow diagram**
-
-<!-- This section will not go into much detail about the processes following the
-configuration of AutoBernese. -->
 
 With the general settings configured in the general AutoBernese configuration
 file, and at least one campaign-configuration template added to the templates

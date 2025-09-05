@@ -8,9 +8,10 @@ import datetime as dt
 from pathlib import Path
 from functools import (
     partial,
-    wraps,
+    update_wrapper,
 )
 import typing as t
+from collections import abc
 from dataclasses import dataclass
 import logging
 import multiprocessing as mp
@@ -25,10 +26,7 @@ from ab import (
     vmf,
 )
 from ab.dates import gps_week_limits
-from ab.typing import (
-    P,
-    T,
-)
+from ab.typing import AnyFunction
 
 
 log = logging.getLogger(__name__)
@@ -102,7 +100,7 @@ def parse_args(
     return raw
 
 
-def common_options(func: t.Callable[P, T]) -> t.Callable[P, T]:
+def common_options[T, **P](func: abc.Callable[P, T]) -> abc.Callable[P, T]:
     """
     A single decorator for common options
 
@@ -117,11 +115,10 @@ def common_options(func: t.Callable[P, T]) -> t.Callable[P, T]:
     @_options.end
     @_options.hour_file_format
     @_options.day_file_format
-    # @wraps(func)
     def wrapper_common_options(*args: P.args, **kwargs: P.kwargs) -> t.Any:
         return func(*args, **kwargs)
 
-    return wrapper_common_options
+    return update_wrapper(wrapper_common_options, func)
 
 
 def cli_wrapper(builder: vmf.DayFileBuilder, method: str, action: str) -> None:

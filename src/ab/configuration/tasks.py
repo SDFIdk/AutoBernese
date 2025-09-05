@@ -6,6 +6,7 @@ Configuration tools to build TaskDefinition instances
 import typing as t
 import sys
 
+from ab.typing import AnyFunction
 from ab.configuration import (
     SectionListItemType,
     dispatchers,
@@ -23,7 +24,7 @@ _MODULE: t.Final = sys.modules[__name__]
 "This module"
 
 
-_SHORTCUTS: dict[str, t.Callable[..., t.Any]] = {
+_SHORTCUTS: dict[str, AnyFunction] = {
     # Use as value for `run` key
     "RunBPE": bpe.run_bpe,
     "Compress": compress.gzip,
@@ -42,11 +43,11 @@ _SHORTCUTS: dict[str, t.Callable[..., t.Any]] = {
 "Shortcut names for API-level functions or pre-processing functions [dispatchers]."
 
 
-def get_func(name: str) -> t.Any:
+def get_func(name: str) -> AnyFunction:
     if name in _SHORTCUTS:
         return _SHORTCUTS[name]
     elif name in dir(_MODULE):
-        candidate = getattr(_MODULE, name)
+        candidate: AnyFunction | None = getattr(_MODULE, name)
         assert callable(candidate)
         return candidate
     elif "." in name:

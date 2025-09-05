@@ -471,3 +471,22 @@ def remove_campaign_from_bsw_menu(name: str) -> None:
 
     # Write the formatted updates to the original campaign-menu file
     campaign_menu.write_text(build_campaign_menu(updated))
+
+
+def renew_campaign_configuration_file(name: str) -> None:
+    """
+    Replace existing campaign configuration file
+
+    """
+    pass
+    # TODO:
+    # Check that the campaign exists
+    # Check that the campaign has a configuration file
+    # Read in the raw file content
+    # Assume that the metadata section is as the top (maybe trip entire cintent, before splitting)
+    # Get the metadata section of the raw content.
+    # Check if the existing configuration file is different from the old? Can not be done...
+    # Read the line with the template name, if it exists (it should)
+    # Load the content of the template file, if it exists, it might not.
+    # Create the new file content
+    # Write the file content to the campaign configuration file path.

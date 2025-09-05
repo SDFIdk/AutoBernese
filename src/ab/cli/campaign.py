@@ -390,3 +390,22 @@ def unregister(names: tuple[str]) -> None:
         log.info(msg)
         print(msg)
         _campaign.remove_campaign_from_bsw_menu(name)
+
+
+# @campaign.command
+# @_arguments.names
+# def renew(names: tuple[str]) -> None:
+#     """
+#     Renew campaign configuration file.
+
+#     Replaces existing configuration with current template, keeping the metadata.
+
+#     """
+#     if not names:
+#         return
+
+#     for name in names:
+#         msg = f"Renewing configuration file for campaign {name}"
+#         log.info(msg)
+#         print(msg)
+#         _campaign.renew_campaign_configuration_file(name)
