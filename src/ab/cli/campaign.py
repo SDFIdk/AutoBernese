@@ -13,6 +13,7 @@ from dataclasses import (
     asdict,
 )
 from typing import Any
+from collections.abc import Iterable
 
 import click
 from click_aliases import ClickAliasedGroup
@@ -37,7 +38,10 @@ from ab.configuration import (
     tasks as _tasks,
 )
 from ab.bsw import campaign as _campaign
-from ab.dates import gps_week_limits
+from ab.dates import (
+    gps_week_limits,
+    dates_to_gps_date,
+)
 from ab.data.source import RemoteLocalPair
 
 
@@ -56,25 +60,23 @@ def campaign(ctx: click.Context) -> None:
         click.echo(ctx.get_help())
 
 
-# @campaign.command
-# @_arguments.name
-# def info(name: str) -> None:
-#     """
-#     Show campaign info
+@campaign.command
+@_arguments.name
+def info(name: str) -> None:
+    """
+    Show campaign metadata and date range
 
-#     """
-#     from ab.dates import date_range
+    """
+    from ab.dates import date_range
 
-#     config = _campaign.load(name)
-#     metadata = _campaign.MetaData(**config.get("metadata", {}))
-#     print(metadata)
-#     epoch = metadata.beg + dt.timedelta((metadata.end - metadata.beg).days // 2)
-#     print(f"Dates:")
-#     for date in date_range(metadata.beg, metadata.end):
-#         is_epoch = "*" if date.date() == epoch else ""
-#         print(
-#             f"{is_epoch:1s} {date.isoformat()[:10]} {date.doy:0>3d} {date.gps_week:0>4d} {date.gps_weekday:1d}"
-#         )
+    config = _campaign.just_load(name)
+    metadata = _campaign.MetaData(**config.get("metadata", {}))
+    print(metadata)
+    print(f"Dates:")
+    for date in dates_to_gps_date(date_range(metadata.beg, metadata.end)):
+        print(
+            f" {date.isoformat()[:10]} {date.doy:0>3d} {date.gps_week:0>4d} {date.gps_weekday:1d}"
+        )
 
 
 @campaign.command
@@ -143,10 +145,10 @@ def templates(template: str | None) -> None:
 @_options.end
 def create(
     name: str,
-    template: str,
-    gps_week: int | None = None,
-    beg: dt.date | None = None,
-    end: dt.date | None = None,
+    template: str | None,
+    gps_week: int | None,
+    beg: dt.date | None,
+    end: dt.date | None,
 ) -> None:
     """
     Create a Bernese campaign with directory content based on the specified
@@ -184,9 +186,9 @@ def create(
 @_options.verbose
 def sources(
     name: str,
-    identifiers: list[str] | None = None,
-    exclude: list[str] | None = None,
-    verbose: bool = False,
+    identifiers: list[str] | None,
+    exclude: list[str] | None,
+    verbose: bool,
 ) -> None:
     """
     Print the campaign-specific sources.
@@ -202,20 +204,21 @@ def sources(
     sources = _sources.load_all(raw_sources)
 
     if not verbose:
-        formatted = (f"{source}" for source in sources)
+        print([asdict(source) for source in sources])
+        return
 
-    else:
-        from collections.abc import Callable
+    fstr = "{p.path_remote} -> {p.path_local}/{p.fname}"
+    join_pairs = lambda pairs: "\n".join(fstr.format(p=p) for p in pairs)
+    for source in sources:
+        print("{source.identifier}:".format(source=source))
+        print(join_pairs(source.resolve()))
+        print()
 
-        join_pairs: Callable[[list[RemoteLocalPair]], str] = lambda pairs: "\n".join(
-            f"{p.path_remote} -> {p.path_local}/{p.fname}" for p in pairs
-        )
-        formatted = (
-            f"{info}{join_pairs(source.resolve())}\n"
-            for (source, info) in zip(sources, formatted)
-        )
 
-    print("\n".join(formatted))
+def _exclude_keys(d: dict, keys: Iterable[str]) -> dict:
+    for key in keys:
+        d.pop(key)
+    return d
 
 
 @campaign.command
@@ -225,9 +228,9 @@ def sources(
 @_options.verbose
 def tasks(
     name: str,
-    identifiers: list[str] | None = None,
-    exclude: list[str] | None = None,
-    verbose: bool = False,
+    identifiers: list[str] | None,
+    exclude: list[str] | None,
+    verbose: bool,
 ) -> None:
     """
     Show tasks for a campaign.
@@ -239,10 +242,9 @@ def tasks(
 
     task_defs = _tasks.load_all(raw_task_defs)
 
+    keys = ("_tasks", "_task_id")
     if not verbose:
-        for task_def in task_defs:
-            print(task_def)
-            print()
+        print([_exclude_keys(asdict(task_def), keys) for task_def in task_defs])
         return
 
     # Resolve permutations of defined task arguments and view them, a kind of
@@ -257,9 +259,9 @@ def tasks(
 @_options.yes
 def run(
     name: str,
-    identifiers: list[str] | None = None,
-    exclude: list[str] | None = None,
-    yes: bool = False,
+    identifiers: list[str] | None,
+    exclude: list[str] | None,
+    yes: None,
 ) -> None:
     """
     Resolve and run all or specified campaign tasks.
@@ -317,7 +319,7 @@ def run(
 @campaign.command
 @_arguments.name
 @_options.yes
-def clean(name: str, yes: bool = False) -> None:
+def clean(name: str, yes: None) -> None:
     """
     Delete content in specified campaign directories.
 
@@ -392,20 +394,28 @@ def unregister(names: tuple[str]) -> None:
         _campaign.remove_campaign_from_bsw_menu(name)
 
 
-# @campaign.command
-# @_arguments.names
-# def renew(names: tuple[str]) -> None:
-#     """
-#     Renew campaign configuration file.
+@campaign.command
+@_arguments.names
+@_options.template
+@_options.yes
+def renew(names: tuple[str], template: str | None, yes: None) -> None:
+    """
+    Renew campaign configuration file.
 
-#     Replaces existing configuration with current template, keeping the metadata.
+    Replaces existing configuration with current template, keeping the metadata.
 
-#     """
-#     if not names:
-#         return
+    """
+    if not names:
+        return
 
-#     for name in names:
-#         msg = f"Renewing configuration file for campaign {name}"
-#         log.info(msg)
-#         print(msg)
-#         _campaign.renew_campaign_configuration_file(name)
+    print("Updating campaign.yaml for the following campaigns:")
+    print("\n".join(names))
+
+    if not _input.prompt_proceed():
+        return
+
+    for name in names:
+        msg = f"Renewing configuration file for campaign {name}"
+        log.info(msg)
+        print(msg)
+        _campaign.renew_campaign_configuration_file(name, template)

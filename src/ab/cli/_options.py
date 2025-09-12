@@ -15,7 +15,7 @@ from click.core import (
 from ab.cli import _input
 
 
-FORMAT: t.Final = f"Format: {_input.DATE_FORMAT}"
+FORMAT_HELP: t.Final = f"Format: {_input.DATE_FORMAT}"
 "Date-format help string"
 
 
@@ -40,8 +40,8 @@ force = click.option(
 # General input
 ipath = click.option("-i", "--ipath", type=str)
 opath = click.option("-o", "--opath", type=str)
-beg = click.option("-b", "--beg", type=_input.date, help=f"Start date. {FORMAT}")
-end = click.option("-e", "--end", type=_input.date, help=f"End date. {FORMAT}")
+beg = click.option("-b", "--beg", type=_input.date, help=f"Start date. {FORMAT_HELP}")
+end = click.option("-e", "--end", type=_input.date, help=f"End date. {FORMAT_HELP}")
 
 # Campaign
 campaign = click.option(
@@ -55,9 +55,8 @@ template = click.option(
     "-t",
     "--template",
     type=str,
-    default="default",
     required=False,
-    help="Template for campaign configuration If not given, the default configuration is used.",
+    help="Template for campaign configuration. If not given, the default configuration is used.",
 )
 gps_week = click.option(
     "-g", "--gps-week", type=int, required=False, help=f"GPS-week number"
