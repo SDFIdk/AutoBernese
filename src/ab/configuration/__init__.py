@@ -144,7 +144,7 @@ def _core() -> ConfigurationType:
     return loads(pkg.core.read_text())
 
 
-def _runtime() -> dict[str, Any]:
+def _runtime() -> dict[str, str | dict[str, str | Path]]:
     runtime = _core().get("runtime")
     if runtime is None:
         raise RuntimeError("No `runtime` section found ...")
@@ -317,6 +317,6 @@ def set_up_runtime_environment() -> None:
 
     # Add current username to log format string
     parameters = dict(user=getpass.getuser())
-    template = log_settings.get("format")
+    template = log_settings.get("format", {})
     log_settings["format"] = template.format(**parameters)
     logging.basicConfig(**log_settings)

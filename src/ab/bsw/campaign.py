@@ -14,11 +14,14 @@ from dataclasses import (
     dataclass,
     asdict,
     field,
+    fields,
 )
 from pathlib import Path
 from string import Template
 import shutil
 import logging
+
+import yaml
 
 import ab
 from ab import (
@@ -31,6 +34,7 @@ from ab.data.stats import dir_size
 log = logging.getLogger(__name__)
 
 
+TEMPLATE_DEFAULT: Final = "default"
 CONFIG_NAME: Final = "campaign.yaml"
 
 
@@ -128,11 +132,15 @@ def available_templates() -> list[str]:
     return [fname.stem for fname in template_dir().glob("*.yaml")]
 
 
+def template_fname(name: str) -> Path:
+    return (template_dir() / name).with_suffix(".yaml")
+
+
 def read_template(name: Path | str) -> str:
-    if not name in available_templates():
+    fname = template_fname(name)
+    if not fname.is_file():
         raise ValueError(f"Template {name!r} does not exist ...")
-    ifname = (template_dir() / name).with_suffix(".yaml")
-    return ifname.read_text()
+    return fname.read_text()
 
 
 def _extract_campaign_list(raw: str) -> list[str]:
@@ -187,7 +195,7 @@ def ls(verbose: bool = False) -> list[CampaignInfo]:
         ifname = Path(campaign_info.directory) / CONFIG_NAME
         if not ifname.is_file():
             continue
-        meta = configuration.load(ifname).get("metadata", {})
+        meta = configuration.just_load(ifname).get("metadata", {})
         for key, value in meta.items():
             setattr(campaign_info, key, value)
 
@@ -380,7 +388,7 @@ def dir_exists(name: str) -> bool:
     return campaign_dir(name).is_dir()
 
 
-def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
+def create(name: str, template: str | None, beg: dt.date, end: dt.date) -> None:
     """
     Create a campaign.
 
@@ -391,8 +399,12 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
         log.warn(msg)
         return
 
+    # Is a specific template chosen?
+    if template is None:
+        template = TEMPLATE_DEFAULT
+
     # Is the template available?
-    if template not in available_templates():
+    if not template_fname(template):
         msg = f"Template {template} does not exist ..."
         log.warn(msg)
         return
@@ -405,7 +417,6 @@ def create(name: str, template: str, beg: dt.date, end: dt.date) -> None:
     log.info(f"{end=}")
 
     # Create
-
     path = campaign_dir(name)
     log.info(f"Creating campaign directory {path} ...")
     path.mkdir(parents=True)
@@ -473,20 +484,64 @@ def remove_campaign_from_bsw_menu(name: str) -> None:
     campaign_menu.write_text(build_campaign_menu(updated))
 
 
-def renew_campaign_configuration_file(name: str) -> None:
+def n_lines(dataclass_or_instance: object) -> int:
+    return len(fields(dataclass_or_instance)) + 1
+
+
+def ensure_newline_at_end(s: str) -> str:
+    return f"{s.rstrip()}\n"
+
+
+def read_raw_metadata(name: str) -> str:
+    # Assume that the metadata section is as the top
+
+    # Get the metadata section of the raw content. How many lines to expect?
+    # (Will depend on version of metadata-section format, if it ever changes)
+    # Here, we assume that it is the same as we have in the model `MetaData`:
+    fname = _campaign_config(name)
+    assert fname.is_file()
+    assembled = "\n".join(fname.read_text().strip().splitlines()[: n_lines(MetaData)])
+    return ensure_newline_at_end(assembled)
+
+
+def renew_campaign_configuration_file(name: str, template: str | None) -> None:
     """
     Replace existing campaign configuration file
 
     """
-    pass
-    # TODO:
     # Check that the campaign exists
+    if not dir_exists(name):
+        log.warning(f"Campaign {name=} does not exist ...")
+        return
+
     # Check that the campaign has a configuration file
-    # Read in the raw file content
-    # Assume that the metadata section is as the top (maybe trip entire cintent, before splitting)
-    # Get the metadata section of the raw content.
-    # Check if the existing configuration file is different from the old? Can not be done...
-    # Read the line with the template name, if it exists (it should)
-    # Load the content of the template file, if it exists, it might not.
-    # Create the new file content
-    # Write the file content to the campaign configuration file path.
+    fname_config = _campaign_config(name)
+    if not fname_config.is_file():
+        log.warning(f"Campaign has no configuration file ...")
+        return
+
+    # Load metadata
+    raw_metadata = yaml.safe_load(read_raw_metadata(name)).get("metadata")
+
+    # Use given template or existing campaign's template name?
+    if template is None:
+        template = raw_metadata.get("template")
+        log.info(
+            f"Using template name {template!r} in existing campaign configuration ..."
+        )
+
+    if template is None:
+        log.error(
+            f"Overriding template name not given and existing template name not found in campaign configuration ..."
+        )
+
+    # Create new metadata instance
+    metadata = MetaData(
+        campaign=name,
+        template=template,
+        beg=raw_metadata.get("beg"),
+        end=raw_metadata.get("end"),
+    )
+
+    # Re-create campaign configuration
+    create_campaign_configuration_file(metadata)
