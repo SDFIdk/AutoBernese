@@ -7,6 +7,9 @@ from pathlib import Path
 import shutil
 import logging
 from collections.abc import Iterable
+import re
+
+RINEX2_PATTERN = r"\w{4}\d{3}\w\.\d{1,2}[oOdDnNgG]\.[zZ]"
 
 from ab import configuration
 from ab.paths import resolve_wildcards
@@ -31,7 +34,12 @@ def download(source: Source) -> TransferStatus:
 
         # Loop over each file resolved
         for ifname in resolve_wildcards(pair.uri):
-            ofname = destination / ifname.name
+            # dirty workaround to fix naming of RINEX2 files (Bernese stumbles
+            # a bit when station names are lower case).
+            if re.match(RINEX2_PATTERN, ifname.name):
+                ofname = destination / ifname.name.upper()
+            else:
+                ofname = destination / ifname.name
 
             if not ifname.is_file():
                 log.warning(f"File {ifname!r} not found ...")
