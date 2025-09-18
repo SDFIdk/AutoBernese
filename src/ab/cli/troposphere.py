@@ -171,7 +171,7 @@ def build(
 
     """
     args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
-    dispatch(args, "build", "Build", timeout=10)
+    dispatch(args, "build", "Build", timeout=60)
 
 
 @troposphere.command
@@ -190,7 +190,7 @@ def check(
 
     """
     args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
-    dispatch(args, "check", "Check", timeout=10)
+    dispatch(args, "check", "Check", timeout=30)
 
 
 @troposphere.command
