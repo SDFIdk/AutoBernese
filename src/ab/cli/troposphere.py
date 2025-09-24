@@ -151,7 +151,10 @@ def dispatch(
         msg = f"{action} interrupted by user ..."
         log.info(msg)
         print(msg)
-
+    except mp.context.TimeoutError:
+        msg = f"{action} took more than {timeout} seconds to complete, stopping process."
+        log.error(msg)
+        print(msg)
 
 @troposphere.command
 @common_options
@@ -171,7 +174,7 @@ def build(
 
     """
     args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
-    dispatch(args, "build", "Build", timeout=60)
+    dispatch(args, "build", "Build", timeout=600)
 
 
 @troposphere.command
@@ -190,7 +193,7 @@ def check(
 
     """
     args = parse_args(ipath, opath, gps_week, beg, end, ifname, ofname)
-    dispatch(args, "check", "Check", timeout=30)
+    dispatch(args, "check", "Check", timeout=600)
 
 
 @troposphere.command
