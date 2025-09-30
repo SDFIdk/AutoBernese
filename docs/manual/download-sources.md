@@ -5,7 +5,7 @@ AutoBernese can transfer external data from sources via FTP, HTTP and the
 filesystem. Sources can be defined in either [the common or the campaign
 configuration file](configuration-files.md). The source definition is meant to
 be both concrete and abstract, so that is is possible to define a concrete path
-or use paramaters to download one or more files that match a given pattern or
+or use parameters to download one or more files that match a given pattern or
 set of parameters by using the Python string format syntax.
 
 

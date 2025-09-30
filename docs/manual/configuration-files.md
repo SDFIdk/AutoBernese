@@ -686,6 +686,10 @@ Requirements:
 
         The remote directory tree is created, before the files are transferred.
 
+        AutoBernese uses the `sftp` command line application in batch mode ("`-b`"), which
+        requires non-interactive authentication. As a user of AutoBernese you are
+        responsible for the correct SSH configuration.
+
         ```yaml title="Example of a task definition"
         tasks:
 

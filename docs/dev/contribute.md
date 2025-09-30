@@ -31,6 +31,15 @@ application using the current revision state of the archive:
 (ab-dev) $ python -m pip install -e .
 ```
 
+### Tests
+
+AutoBernese uses pytest as unit testing framework. Run the test suite from
+the root of the repo:
+
+```sh
+(ab-dev) $ pytest
+```
+
 ### Contribution guidelines
 
 Code changes must be made from any branch on your own fork of the official

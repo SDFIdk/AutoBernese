@@ -96,7 +96,7 @@ ab --version
 ```
 
 ``` title="Output"
-0.3.0
+1.0.1
 ```
 
 ### `ab --bsw-release`
@@ -109,10 +109,7 @@ ab --bsw-release
 ```
 
 ``` title="Output"
-{
-  "version": "5.4",
-  "release": "2023-10-16"
-}
+Bernese 5.4 (2024-11-11)
 ```
 
 
@@ -249,8 +246,8 @@ ab config runtime
         'level': 'DEBUG'
     },
     'campaign_templates': PosixPath('/home/bsw/prod/autobernese/templates'),
-    'user_config': PosixPath('/home/bsw/prod/autobernese/autobernese.yaml'),
-    'user_sections': ['station', 'campaign', 'sources']
+    'common_config': PosixPath('/home/bsw/prod/autobernese/autobernese.yaml'),
+    'sections_to_override': ['metadata', 'environment', 'sources', 'tasks', 'station', 'clean', 'troposphere', 'campaign']
 }
 ```
 
@@ -393,7 +390,7 @@ the specified download dirctory.
 
 The difference between specifying the sources in the common configuration file
 and a campaign-specific is that the sources in the campaign-configuration file
-has access to campaign metadata. suh as beginning and end dates for the Bernese
+has access to campaign metadata. such as beginning and end dates for the Bernese
 campaign. This is explained in more detail in the section [Download sources][DOCS-DL-SRC].
 
 [DOCS-DL-SRC]: download-sources.md
@@ -488,18 +485,23 @@ ab campaign
 ``` title="Output"
 Usage: ab campaign [OPTIONS] COMMAND [ARGS]...
 
-  Create campaigns and manage campaign-specific sources and run BPE tasks.
+    Create, run and manage Bernese campaigns.
 
 Options:
   --help  Show this message and exit.
 
 Commands:
-  create     Create a Bernese campaign with directory content based on...
-  ls         List existing campaigns
-  run        Resolve campaign tasks and run them all.
-  sources    Print the campaign-specific sources.
-  tasks      Show tasks for a campaign.
-  templates  List available campaign templates or show content of given...
+  clean       Delete content in specified campaign directories.
+  create      Create a Bernese campaign with directory content based on...
+  info        Show campaign metadata and date range
+  ls          List existing campaigns
+  register    Register existing campaign directory in Bernese-campaign menu.
+  renew       Renew campaign configuration file.
+  run         Resolve and run all or specified campaign tasks.
+  sources     Print the campaign-specific sources.
+  tasks       Show tasks for a campaign.
+  templates   List available campaign templates or show content of given...
+  unregister  Unregister campaign in Bernese-campaign menu.
 ```
 
 
@@ -695,17 +697,9 @@ ab station sitelogs2sta
 creates a STA file with the settings obtained from the `station` section of the
 rendered AutoBernese configuration file.
 
-The default settings in the built-in configuration file are:
+See [station configuration documentation][STA_CONFIG] for further details.
 
-
-```yaml title="station section of the built-in configuration file"
---8<-- "src/ab/configuration/core.yaml:107:117"
-```
-
-In this case, the sitelogs to use will be all the `.log` files in `$D/sitelogs`,
-with no individually-calibrated instrumentation, and the output file
-`sitelogs.STA` is placed in the directory `$D/station`.
-
+[STA_CONFIG]: configuration-files.md#station-site-log-files-to-use-for-sta-file-creation
 
 #### `ab station sitelogs2sta -c <campaign-name>`
 
