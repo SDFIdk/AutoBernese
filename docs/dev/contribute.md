@@ -31,6 +31,18 @@ application using the current revision state of the archive:
 (ab-dev) $ python -m pip install -e .
 ```
 
+### Pre-commit
+
+Before making your first commit pre-commit needs to be configures. Simply
+run
+
+```sh
+(ab-dev) $ pre-commit install
+```
+
+After this the pre-commit checks are run before changes are committed to
+the repo.
+
 ### Tests
 
 AutoBernese uses pytest as unit testing framework. Run the test suite from
