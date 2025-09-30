@@ -152,9 +152,12 @@ def dispatch(
         log.info(msg)
         print(msg)
     except mp.context.TimeoutError:
-        msg = f"{action} took more than {timeout} seconds to complete, stopping process."
+        msg = (
+            f"{action} took more than {timeout} seconds to complete, stopping process."
+        )
         log.error(msg)
         print(msg)
+
 
 @troposphere.command
 @common_options
