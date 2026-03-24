@@ -143,12 +143,12 @@ COUNTRY = compile(r"Country\s+(?:or Region)?\s+:\s+(.*)")
 
 # Section 3
 RECEIVER_TYPE = compile(r"Receiver Type\s+:\s(.*)")
-RECEIVER_SERIAL_NUMBER = compile(r"Serial Number\s+:\s(.*)")
+RECEIVER_SERIAL_NUMBER = compile(r"^\s+Serial Number\s+:[^\S\n]*(.{0,20}).*$")
 FIRMWARE_VERSION = compile(r"Firmware Version\s+:\s(.*)")
 
 # Section 4
 ANTENNA_TYPE = compile(r"Antenna Type\s+:\s+(.*)")
-ANTENNA_SERIAL_NUMBER = compile(r"Serial Number\s+:\s+(.*)\s?[\r\n]")
+ANTENNA_SERIAL_NUMBER = compile(r"^\s+Serial Number\s+:[^\S\n]*(\S*).*$")
 MARKER_UP = compile(r"Marker->ARP Up.*\s+:\s+([\.\d]*)")
 MARKER_NORTH = compile(r"Marker->ARP North.*\s+:\s+(-?[\.\d]*)")
 MARKER_EAST = compile(r"Marker->ARP East.*\s+:\s+(-?[\.\d]*)")
