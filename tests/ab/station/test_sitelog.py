@@ -78,7 +78,7 @@ def test_sitelog_no_receiver_serial_number():
             "3062184",
             "",
             "3013899",
-            "(A20, but note the f",
+            "",
         ]
         receiver_serial_numbers = [
             receiver.receiver_serial_number for receiver in sitelog.receivers
