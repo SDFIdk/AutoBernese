@@ -11,7 +11,6 @@ from rich import print
 
 from ab.qaqc import check_example
 
-
 log = logging.getLogger(__name__)
 
 

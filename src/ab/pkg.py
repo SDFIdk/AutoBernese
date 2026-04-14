@@ -7,7 +7,6 @@ from importlib import resources
 
 import ab
 
-
 # Package root
 module = resources.files(ab)
 

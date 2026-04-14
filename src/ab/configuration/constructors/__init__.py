@@ -12,7 +12,6 @@ from ab.configuration.constructors import (
     strings,
 )
 
-
 _tag_constructor_map = (
     # Read environment variables
     ("!ENV", construct_env_tag),

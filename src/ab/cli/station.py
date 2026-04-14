@@ -19,7 +19,6 @@ from ab.cli import _options
 from ab.bsw import campaign as _campaign
 from ab.station import sta
 
-
 log = logging.getLogger(__name__)
 
 

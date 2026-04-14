@@ -12,7 +12,6 @@ from rich import print
 
 from ab.tasks import Task
 
-
 log = logging.getLogger(__name__)
 
 TERM_WIDTH: Final = os.get_terminal_size().columns

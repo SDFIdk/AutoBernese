@@ -9,7 +9,6 @@ from typing import (
     Final,
 )
 
-
 END_INCLUDED: Final = 1
 "Add this to `range` in `date_range` to include both start and end date in range."
 

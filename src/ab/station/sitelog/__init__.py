@@ -10,7 +10,6 @@ from ab.station.sitelog.parse import (
     parse_subsection_4,
 )
 
-
 log = logging.getLogger(__name__)
 
 

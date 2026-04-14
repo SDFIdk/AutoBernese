@@ -12,7 +12,6 @@ from rich import print
 
 from ab import configuration
 
-
 log = logging.getLogger(__name__)
 
 

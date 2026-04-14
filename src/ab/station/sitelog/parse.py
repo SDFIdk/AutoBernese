@@ -20,7 +20,6 @@ from ab.station.sitelog.models import (
     GNSSAntennaInformation,
 )
 
-
 log = logging.getLogger(__name__)
 
 # META

@@ -28,7 +28,6 @@ from ab.parameters import (
     PermutationType,
 )
 
-
 log = logging.getLogger(__name__)
 
 

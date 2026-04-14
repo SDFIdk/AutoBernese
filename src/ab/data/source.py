@@ -17,7 +17,6 @@ import logging
 
 from ab.parameters import permutations
 
-
 log = logging.getLogger(__name__)
 
 

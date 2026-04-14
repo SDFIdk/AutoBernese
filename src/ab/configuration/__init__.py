@@ -98,7 +98,6 @@ import yaml
 from ab.configuration import constructors
 from ab import pkg
 
-
 constructors.add()
 
 type ConfigurationType = dict[str, Any]

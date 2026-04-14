@@ -28,7 +28,6 @@ from ab import (
 from ab.dates import gps_week_limits
 from ab.typing import AnyFunction
 
-
 log = logging.getLogger(__name__)
 
 N_CPUS: t.Final = len(os.sched_getaffinity(0))

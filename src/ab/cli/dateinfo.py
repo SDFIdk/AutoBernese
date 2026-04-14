@@ -25,7 +25,6 @@ from ab.cli import (
     _arguments,
 )
 
-
 log = logging.getLogger(__name__)
 
 

@@ -22,7 +22,6 @@ from ab.paths import (
 )
 from ab.data import TransferStatus
 
-
 log = logging.getLogger(__name__)
 
 type LocalRemoteType = dict[str, Path | str]

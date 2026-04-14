@@ -12,7 +12,6 @@ from ab.data import TransferStatus
 from ab.data.source import Source
 from ab.data.stats import already_updated
 
-
 log = logging.getLogger(__name__)
 
 

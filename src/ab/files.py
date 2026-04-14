@@ -7,7 +7,6 @@ from pathlib import Path
 import shutil
 import logging
 
-
 log = logging.getLogger(__name__)
 
 

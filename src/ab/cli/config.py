@@ -16,7 +16,6 @@ from ab.cli import (
 )
 from ab.bsw import campaign as _campaign
 
-
 log = logging.getLogger(__name__)
 
 

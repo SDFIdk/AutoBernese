@@ -9,7 +9,6 @@ import yaml
 
 from ab import pkg
 
-
 _COUNTRY_CODES: dict[str, str] | None = None
 
 

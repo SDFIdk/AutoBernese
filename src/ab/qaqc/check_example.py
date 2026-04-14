@@ -50,7 +50,6 @@ from collections.abc import Callable
 
 from ab import configuration
 
-
 C = TypeVar("C", bound="Comparable")
 
 

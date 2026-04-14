@@ -17,7 +17,6 @@ import yaml
 
 from ab.strings import Operator
 
-
 METHODS_SUPPORTED: Final = (
     "upper",
     "lower",

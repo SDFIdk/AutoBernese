@@ -7,7 +7,6 @@ import click
 
 from ab.cli import _input
 
-
 # Configuration
 section = click.argument("section", default=None, type=str, required=False)
 
