@@ -19,7 +19,6 @@ from ab.data import sftp
 from ab.station import sta
 from ab import vmf
 
-
 _MODULE: t.Final = sys.modules[__name__]
 "This module"
 

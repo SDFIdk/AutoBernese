@@ -10,7 +10,6 @@ from ab.configuration import (
     SectionListItemType,
 )
 
-
 log = logging.getLogger(__name__)
 
 

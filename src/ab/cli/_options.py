@@ -14,7 +14,6 @@ from click.core import (
 
 from ab.cli import _input
 
-
 FORMAT_HELP: t.Final = f"Format: {_input.DATE_FORMAT}"
 "Date-format help string"
 

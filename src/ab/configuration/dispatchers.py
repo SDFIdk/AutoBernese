@@ -19,7 +19,6 @@ from ab.vmf import (
     day_file_builders,
 )
 
-
 type GZipCompressArgumentType = dict[str, Any]
 type VMFBuildArgumentType = dict[str, Any]
 

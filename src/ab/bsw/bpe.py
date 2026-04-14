@@ -10,7 +10,6 @@ import subprocess as sub
 from ab import pkg
 from ab.bsw.bpe_terminal_output import parse_bpe_terminal_output
 
-
 log = logging.getLogger(__name__)
 
 

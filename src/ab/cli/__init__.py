@@ -23,7 +23,6 @@ from ab.cli import (
     download,
 )
 
-
 log = logging.getLogger(__name__)
 
 

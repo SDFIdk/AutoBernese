@@ -44,7 +44,6 @@ from ab.dates import (
 )
 from ab.data.source import RemoteLocalPair
 
-
 log = logging.getLogger(__name__)
 
 

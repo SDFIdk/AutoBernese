@@ -7,7 +7,6 @@ from typing import Any
 from collections.abc import Iterable
 import itertools as it
 
-
 type ArgumentsType = dict[str, Any]
 type ParametersType = dict[str, Iterable[Any]]
 type PermutationType = dict[str, Any]
