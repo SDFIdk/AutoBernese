@@ -377,6 +377,7 @@ def map_to_type_2_row(
     marker_up: str,
     marker_north: str,
     marker_east: str,
+    azimuth: str,
     **_: t.Any,
 ) -> dict[str, str | float]:
     """
@@ -401,6 +402,7 @@ def map_to_type_2_row(
     antenna_no = antenna_serial_number[-5:]
     if type_calibration:
         antenna_no = type_calibrated_serial
+        receiver_no = type_calibrated_serial
 
     if date_removed.strip() == "":
         date_removed = "2099 12 31"
@@ -423,7 +425,7 @@ def map_to_type_2_row(
         marker_north=float(marker_north),
         marker_east=float(marker_east),
         marker_up=float(marker_up),
-        azimuth=0.0,
+        azimuth=float(azimuth),
         long_name="",
         description=description,
         remark=firmware,

@@ -138,20 +138,21 @@ NINE_CHARACTER_ID = compile(r"Nine Character ID\s+:\s+([A-Z0-9]{9})?")
 "Sitelog version 2"
 
 # Section 2
-CITY_OR_TOWN = compile(r"City or Town\s+:\s+(.*)")
+CITY_OR_TOWN = compile(r"City or Town\s+:[^\S\n]*(.*)$")
 COUNTRY = compile(r"Country\s+(?:or Region)?\s+:\s+(.*)")
 
 # Section 3
 RECEIVER_TYPE = compile(r"Receiver Type\s+:\s(.*)")
-RECEIVER_SERIAL_NUMBER = compile(r"Serial Number\s+:\s(.*)")
-FIRMWARE_VERSION = compile(r"Firmware Version\s+:\s(.*)")
+RECEIVER_SERIAL_NUMBER = compile(r"^\s+Serial Number\s+:[^\S\n]*(.{0,20}).*$")
+FIRMWARE_VERSION = compile(r"^\s*Firmware Version\s+:[^\S\n]*(.*)$")
 
 # Section 4
 ANTENNA_TYPE = compile(r"Antenna Type\s+:\s+(.*)")
-ANTENNA_SERIAL_NUMBER = compile(r"Serial Number\s+:\s+(.*)\s?[\r\n]")
+ANTENNA_SERIAL_NUMBER = compile(r"^\s+Serial Number\s+:[^\S\n]*(.*)$")
 MARKER_UP = compile(r"Marker->ARP Up.*\s+:\s+([\.\d]*)")
 MARKER_NORTH = compile(r"Marker->ARP North.*\s+:\s+(-?[\.\d]*)")
 MARKER_EAST = compile(r"Marker->ARP East.*\s+:\s+(-?[\.\d]*)")
+AZIMUTH = compile(r"Alignment from True N\s+:[^\S\n]([0-9]*).*$")
 
 # Common for the given sections
 DATE_INSTALLED = compile(r"Date Installed\s+:\s+(\d{4})-(\d{2})-(\d{2})")
@@ -243,6 +244,7 @@ def parse_subsection_4(s: str) -> GNSSAntennaInformation:
         ),
         search_and_expand(MARKER_NORTH, s, post=post_process_marker),
         search_and_expand(MARKER_EAST, s, post=post_process_marker),
+        search_and_expand(AZIMUTH, s, default=0.0, post=post_process_marker),
         search_and_expand(DATE_INSTALLED, s, EXPAND_DATE),
         search_and_expand(DATE_REMOVED, s, EXPAND_DATE),
     )
